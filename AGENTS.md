@@ -18,6 +18,8 @@
    - ใช้ Subagents ในการช่วยรีวิวโค้ดหรือ Security Review 
 4. **Hooks**:
    - โปรเจคนี้รองรับ hooks (ดูใน `.agents/hooks.json`)
+5. **Components & UI**:
+   - เมื่อไหร่ก็ตามที่เพิ่ม Page หรือ Component ใหม่ ให้ทำ Storybook ควบคู่กันไป และใช้งานกับ Vue Flow ด้วยเสมอ
 
 ## 🛠️ Tech Stack
 *(รอการอัปเดต)*
