@@ -1,0 +1,11 @@
+{
+  "hooks": [
+    {
+      "trigger": "pre_command",
+      "command": "git commit",
+      "action": "run_script",
+      "script": "npm run lint",
+      "description": "Ensure code passes linter before committing"
+    }
+  ]
+}
