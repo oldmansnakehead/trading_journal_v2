@@ -42,3 +42,7 @@ out/
 .gemini/
 .claude/
 .cursor/
+
+# Electron Vite
+out
+.eslintcache
