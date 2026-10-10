@@ -2,16 +2,24 @@
 <html>
   <head>
     <meta charset="UTF-8" />
-    <title>Electron</title>
+    <title>Trading Journal v2</title>
     <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
     <meta
       http-equiv="Content-Security-Policy"
-      content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:"
+      content="default-src 'self'; script-src 'self' https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://placehold.co https://images.unsplash.com https://flagcdn.com https://i.pravatar.cc https://upload.wikimedia.org app-img:;"
     />
+
+    <!-- Google Fonts: Bai Jamjuree -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bai+Jamjuree:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Phosphor Icons (Modern line icons) -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
   </head>
 
-  <body>
-    <div id="app"></div>
+  <body class="bg-background text-textPrimary font-sans antialiased h-screen overflow-hidden">
+    <div id="app" class="w-full h-full"></div>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>

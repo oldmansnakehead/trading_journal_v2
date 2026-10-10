@@ -46,3 +46,8 @@ out/
 # Electron Vite
 out
 .eslintcache
+
+base_design.html
+
+*storybook.log
+storybook-static
