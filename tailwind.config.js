@@ -4,6 +4,7 @@ module.exports = {
   content: [
     './src/renderer/index.html',
     './src/renderer/src/**/*.{vue,js,ts,jsx,tsx}',
+    './src/stories/**/*.{js,ts,jsx,tsx,vue,mdx}',
   ],
   theme: {
     extend: {
