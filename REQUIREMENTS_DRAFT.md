@@ -25,6 +25,7 @@
 | Image processing | sharp | ทำ thumbnail / resize (ถ้าจำเป็น) |
 | Zip | archiver (สร้าง) + extract-zip (แตก) | สำหรับ export / import |
 | Packaging | electron-builder | rebuild native module อัตโนมัติ |
+| Testing (E2E) | Playwright | สำหรับรัน Test อัตโนมัติ |
 
 **ห้ามใช้:** Prisma, ORM ที่ต้องใช้ engine binary แยก, database server ใด ๆ (MySQL, Postgres, MongoDB), cloud storage
 

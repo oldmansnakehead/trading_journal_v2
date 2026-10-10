@@ -16,6 +16,7 @@
 | **Image** | `sharp` (จัดการรูปภาพ) |
 | **Export/Import** | `archiver` + `extract-zip` |
 | **Packaging** | `electron-builder` + Auto Update (GitHub Releases) |
+| **Testing** | Playwright (E2E Testing) |
 
 ---
 
