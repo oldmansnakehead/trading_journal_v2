@@ -2,6 +2,7 @@ import { app, shell, BrowserWindow, ipcMain } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
+import { runMigrations } from './db/client'
 
 function createWindow(): void {
   // Create the browser window.
@@ -35,12 +36,20 @@ function createWindow(): void {
   }
 }
 
+import { registerSetupHandlers } from './ipc/setupHandlers'
+
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(() => {
   // Set app user model id for windows
   electronApp.setAppUserModelId('com.electron')
+
+  // Run database migrations
+  runMigrations()
+
+  // Register IPC Handlers
+  registerSetupHandlers()
 
   // Default open or close DevTools by F12 in development
   // and ignore CommandOrControl + R in production.
