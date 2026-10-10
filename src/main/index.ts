@@ -1,10 +1,17 @@
 import { app, shell, BrowserWindow, ipcMain, protocol, net } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
+import { autoUpdater } from 'electron-updater'
 import icon from '../../resources/icon.png?asset'
 import { runMigrations } from './db/client'
 import { registerSetupHandlers } from './ipc/setupHandlers'
 import { registerImageHandlers } from './ipc/imageHandlers'
+import { registerBackupHandlers } from './ipc/backupHandlers'
+import { registerJournalHandlers } from './ipc/journalHandlers'
+import { registerSymbolHandlers } from './ipc/symbolHandlers'
+import { registerCustomColumnHandlers } from './ipc/customColumnHandlers'
+import { registerSetupSessionHandlers } from './ipc/setupSessionHandlers'
+import { autoBackup } from './services/backup'
 import { getPaths } from './paths'
 
 function createWindow(): void {
@@ -42,21 +49,24 @@ function createWindow(): void {
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
+  // Run auto backup once a day when the app starts
+  await autoBackup()
+
   // Register custom protocol for images
   protocol.handle('app-img', (request) => {
     const url = request.url.replace('app-img://', '')
     const { dataDir } = getPaths()
-    
+
     try {
       const decodedUrl = decodeURIComponent(url)
       const filePath = join(dataDir, decodedUrl)
-      
+
       // Prevent path traversal
       if (!filePath.startsWith(dataDir)) {
         return new Response('Access denied', { status: 403 })
       }
-      
+
       return net.fetch('file://' + filePath)
     } catch (err) {
       return new Response('File not found', { status: 404 })
@@ -72,6 +82,16 @@ app.whenReady().then(() => {
   // Register IPC Handlers
   registerSetupHandlers()
   registerImageHandlers()
+  registerBackupHandlers()
+  registerJournalHandlers()
+  registerSymbolHandlers()
+  registerCustomColumnHandlers()
+  registerSetupSessionHandlers()
+
+  // Check for updates
+  if (!is.dev) {
+    autoUpdater.checkForUpdatesAndNotify()
+  }
 
   // Default open or close DevTools by F12 in development
   // and ignore CommandOrControl + R in production.

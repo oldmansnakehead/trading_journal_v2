@@ -76,12 +76,12 @@ const options = {
     </div>
 
     <div class="flex justify-center flex-wrap gap-4 mt-6">
-      <div 
-        v-for="(label, index) in chartData.labels" 
+      <div
+        v-for="(label, index) in chartData.labels"
         :key="label"
         class="flex items-center text-xs font-semibold text-textPrimary"
       >
-        <span 
+        <span
           class="w-3 h-3 rounded-full mr-2"
           :style="{ backgroundColor: chartData.colors[index] }"
         ></span>

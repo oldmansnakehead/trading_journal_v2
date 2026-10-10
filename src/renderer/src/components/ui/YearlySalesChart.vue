@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import BaseSelect from './BaseSelect.vue'
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -13,7 +14,16 @@ import {
 } from 'chart.js'
 import { Line } from 'vue-chartjs'
 
-ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler)
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+  Filler
+)
 
 interface Dataset {
   label: string
@@ -35,28 +45,41 @@ const props = withDefaults(defineProps<Props>(), {
   title: 'Yearly sales',
   subtitle: '(+43%) than last year',
   years: () => ['2023', '2022'],
-  labels: () => ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+  labels: () => [
+    'Jan',
+    'Feb',
+    'Mar',
+    'Apr',
+    'May',
+    'Jun',
+    'Jul',
+    'Aug',
+    'Sep',
+    'Oct',
+    'Nov',
+    'Dec'
+  ],
   datasets: () => [
-    { 
-      label: 'Total income', 
-      data: [40, 30, 50, 40, 80, 70, 90, 110, 70, 90, 80, 70], 
-      borderColor: '#00a76f', 
-      backgroundColor: 'rgba(0, 167, 111, 0.1)', 
-      total: '1.23k' 
+    {
+      label: 'Total income',
+      data: [40, 30, 50, 40, 80, 70, 90, 110, 70, 90, 80, 70],
+      borderColor: '#00a76f',
+      backgroundColor: 'rgba(0, 167, 111, 0.1)',
+      total: '1.23k'
     },
-    { 
-      label: 'Total expenses', 
-      data: [50, 20, 30, 20, 70, 90, 60, 80, 80, 60, 50, 40], 
-      borderColor: '#ffab00', 
-      backgroundColor: 'rgba(255, 171, 0, 0.1)', 
-      total: '6.79k' 
+    {
+      label: 'Total expenses',
+      data: [50, 20, 30, 20, 70, 90, 60, 80, 80, 60, 50, 40],
+      borderColor: '#ffab00',
+      backgroundColor: 'rgba(255, 171, 0, 0.1)',
+      total: '6.79k'
     }
   ]
 })
 
 const data = computed(() => ({
   labels: props.labels,
-  datasets: props.datasets.map(ds => ({
+  datasets: props.datasets.map((ds) => ({
     label: ds.label,
     data: ds.data,
     borderColor: ds.borderColor,
@@ -68,7 +91,7 @@ const data = computed(() => ({
     pointHoverRadius: 6,
     pointBackgroundColor: '#fff',
     pointBorderColor: ds.borderColor,
-    pointBorderWidth: 2,
+    pointBorderWidth: 2
   }))
 }))
 
@@ -108,16 +131,18 @@ const options = {
         <h6 class="text-lg font-bold text-textPrimary">{{ title }}</h6>
         <p class="text-sm text-textSecondary">{{ subtitle }}</p>
       </div>
-      <select class="bg-gray-100 text-sm font-semibold rounded-lg px-3 py-1.5 border-none focus:ring-0 cursor-pointer text-textPrimary">
-        <option v-for="year in years" :key="year">{{ year }}</option>
-      </select>
+      <BaseSelect :modelValue="years[0]" :options="years" />
     </div>
 
     <!-- Custom Legend -->
     <div class="flex flex-wrap gap-6 mb-4 px-4">
       <div v-for="ds in datasets" :key="ds.label">
         <div class="flex items-center text-xs font-semibold text-textSecondary mb-1">
-          <span class="w-3 h-3 rounded-full mr-2" :style="{ backgroundColor: ds.borderColor }"></span>{{ ds.label }}
+          <span
+            class="w-3 h-3 rounded-full mr-2"
+            :style="{ backgroundColor: ds.borderColor }"
+          ></span
+          >{{ ds.label }}
         </div>
         <div class="text-lg font-bold text-textPrimary">{{ ds.total }}</div>
       </div>

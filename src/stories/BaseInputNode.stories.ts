@@ -1,15 +1,15 @@
-import type { Meta, StoryObj } from '@storybook/vue3';
-import { VueFlow } from '@vue-flow/core';
-import '@vue-flow/core/dist/style.css';
-import '@vue-flow/core/dist/theme-default.css';
-import BaseInputNode from '../renderer/src/components/flow/BaseInputNode.vue';
+import type { Meta, StoryObj } from '@storybook/vue3'
+import { VueFlow } from '@vue-flow/core'
+import '@vue-flow/core/dist/style.css'
+import '@vue-flow/core/dist/theme-default.css'
+import BaseInputNode from '../renderer/src/components/flow/BaseInputNode.vue'
 
 const meta = {
   title: 'Flow Nodes/BaseInputNode',
   component: BaseInputNode,
   tags: ['autodocs'],
   parameters: {
-    layout: 'fullscreen',
+    layout: 'fullscreen'
   },
   decorators: [
     (story) => ({
@@ -27,7 +27,7 @@ const meta = {
               }
             }
           ]
-        };
+        }
       },
       template: `
         <div style="height: 100vh; width: 100vw; background: #f9fafb;">
@@ -37,12 +37,12 @@ const meta = {
             </template>
           </VueFlow>
         </div>
-      `,
-    }),
-  ],
-} satisfies Meta<typeof BaseInputNode>;
+      `
+    })
+  ]
+} satisfies Meta<typeof BaseInputNode>
 
-export default meta;
-type Story = StoryObj<typeof meta>;
+export default meta
+type Story = StoryObj<typeof meta>
 
-export const Default: Story = {};
+export const Default: Story = {}

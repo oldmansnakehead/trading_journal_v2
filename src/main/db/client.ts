@@ -12,7 +12,7 @@ export const getDb = () => {
   if (!db) {
     const { dbPath } = getPaths()
     sqliteDb = new Database(dbPath)
-    
+
     // Config recommended by requirements
     sqliteDb.pragma('journal_mode = WAL')
     sqliteDb.pragma('foreign_keys = ON')
@@ -24,10 +24,10 @@ export const getDb = () => {
 
 export const runMigrations = () => {
   const database = getDb()
-  const migrationsFolder = app.isPackaged 
+  const migrationsFolder = app.isPackaged
     ? join(process.resourcesPath, 'app.asar/out/main/db/migrations')
     : join(__dirname, '../../src/main/db/migrations')
-    
+
   migrate(database, { migrationsFolder })
 }
 

@@ -26,7 +26,7 @@ const trendFormatted = computed(() => {
 })
 
 const styles = computed(() => {
-  const map: Record<string, { bg: string, iconBg: string, iconText: string, text: string }> = {
+  const map: Record<string, { bg: string; iconBg: string; iconText: string; text: string }> = {
     success: {
       bg: 'bg-[#e4f8ed]',
       iconBg: 'bg-[#bce6cb]',
@@ -65,7 +65,10 @@ const styles = computed(() => {
 <template>
   <div class="rounded-2xl p-6 shadow-sm" :class="styles.bg">
     <div class="flex justify-between items-start mb-4">
-      <div class="w-10 h-10 rounded-full flex items-center justify-center text-xl" :class="[styles.iconBg, styles.iconText]">
+      <div
+        class="w-10 h-10 rounded-full flex items-center justify-center text-xl"
+        :class="[styles.iconBg, styles.iconText]"
+      >
         <i class="ph-fill" :class="icon"></i>
       </div>
       <div class="flex items-center text-sm font-bold" :class="styles.iconText">

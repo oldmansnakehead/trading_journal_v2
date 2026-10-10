@@ -10,9 +10,9 @@ defineProps<{
 <template>
   <div class="min-w-[280px]">
     <Handle type="target" :position="Position.Top" class="!bg-gray-300" />
-    
-    <PastelStatCard 
-      :title="data?.title || 'Weekly sales'" 
+
+    <PastelStatCard
+      :title="data?.title || 'Weekly sales'"
       :value="data?.value || '714k'"
       :trend="data?.trend ?? 2.6"
       :icon="data?.icon || 'ph-bag'"

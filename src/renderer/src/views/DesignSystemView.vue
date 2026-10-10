@@ -15,7 +15,6 @@ import Badge from '../components/ui/Badge.vue'
     <section>
       <h2 class="text-xl font-bold text-textPrimary mb-6 border-b pb-2">Colors</h2>
       <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
-        
         <div class="space-y-2">
           <div class="h-20 rounded-xl bg-primary shadow-sm"></div>
           <div>
@@ -23,7 +22,7 @@ import Badge from '../components/ui/Badge.vue'
             <div class="text-xs text-textSecondary">#7371f7 / bg-primary</div>
           </div>
         </div>
-        
+
         <div class="space-y-2">
           <div class="h-20 rounded-xl bg-primary-light shadow-sm"></div>
           <div>
@@ -84,7 +83,9 @@ import Badge from '../components/ui/Badge.vue'
 
     <!-- 2. Typography -->
     <section>
-      <h2 class="text-xl font-bold text-textPrimary mb-6 border-b pb-2">Typography (Bai Jamjuree)</h2>
+      <h2 class="text-xl font-bold text-textPrimary mb-6 border-b pb-2">
+        Typography (Bai Jamjuree)
+      </h2>
       <Card class="space-y-6">
         <div>
           <h1 class="text-4xl font-bold text-textPrimary mb-1">Heading 1</h1>
@@ -112,7 +113,7 @@ import Badge from '../components/ui/Badge.vue'
     <!-- 3. Components -->
     <section>
       <h2 class="text-xl font-bold text-textPrimary mb-6 border-b pb-2">Components</h2>
-      
+
       <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
         <!-- Buttons -->
         <Card>
@@ -140,12 +141,24 @@ import Badge from '../components/ui/Badge.vue'
           <h3 class="font-bold text-textPrimary mb-4">Form Inputs</h3>
           <div class="space-y-4">
             <div>
-              <label class="block text-xs font-bold text-textSecondary uppercase tracking-wider mb-1">Input Label</label>
-              <input type="text" placeholder="Type something..." class="w-full bg-white border border-border text-textPrimary rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors">
+              <label
+                class="block text-xs font-bold text-textSecondary uppercase tracking-wider mb-1"
+                >Input Label</label
+              >
+              <input
+                type="text"
+                placeholder="Type something..."
+                class="w-full bg-white border border-border text-textPrimary rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors"
+              />
             </div>
             <div>
-              <label class="block text-xs font-bold text-textSecondary uppercase tracking-wider mb-1">Dropdown</label>
-              <select class="w-full bg-white border border-border text-textPrimary rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors cursor-pointer">
+              <label
+                class="block text-xs font-bold text-textSecondary uppercase tracking-wider mb-1"
+                >Dropdown</label
+              >
+              <select
+                class="w-full bg-white border border-border text-textPrimary rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors cursor-pointer"
+              >
                 <option>Option 1</option>
                 <option>Option 2</option>
               </select>
@@ -156,12 +169,13 @@ import Badge from '../components/ui/Badge.vue'
         <!-- Cards -->
         <Card>
           <h3 class="font-bold text-textPrimary mb-4">Card Layout</h3>
-          <div class="border border-dashed border-gray-200 bg-gray-50 rounded-2xl h-32 flex items-center justify-center">
+          <div
+            class="border border-dashed border-gray-200 bg-gray-50 rounded-2xl h-32 flex items-center justify-center"
+          >
             <span class="text-sm font-medium text-textSecondary">Standard Card Component</span>
           </div>
         </Card>
       </div>
     </section>
-
   </div>
 </template>

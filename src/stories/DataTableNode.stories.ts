@@ -1,15 +1,15 @@
-import type { Meta, StoryObj } from '@storybook/vue3';
-import { VueFlow } from '@vue-flow/core';
-import '@vue-flow/core/dist/style.css';
-import '@vue-flow/core/dist/theme-default.css';
-import DataTableNode from '../renderer/src/components/flow/DataTableNode.vue';
+import type { Meta, StoryObj } from '@storybook/vue3'
+import { VueFlow } from '@vue-flow/core'
+import '@vue-flow/core/dist/style.css'
+import '@vue-flow/core/dist/theme-default.css'
+import DataTableNode from '../renderer/src/components/flow/DataTableNode.vue'
 
 const meta = {
   title: 'Flow Nodes/DataTableNode',
   component: DataTableNode,
   tags: ['autodocs'],
   parameters: {
-    layout: 'fullscreen',
+    layout: 'fullscreen'
   },
   decorators: [
     (story) => ({
@@ -24,7 +24,7 @@ const meta = {
               data: {}
             }
           ]
-        };
+        }
       },
       template: `
         <div style="height: 100vh; width: 100vw;">
@@ -34,12 +34,12 @@ const meta = {
             </template>
           </VueFlow>
         </div>
-      `,
-    }),
-  ],
-} satisfies Meta<typeof DataTableNode>;
+      `
+    })
+  ]
+} satisfies Meta<typeof DataTableNode>
 
-export default meta;
-type Story = StoryObj<typeof meta>;
+export default meta
+type Story = StoryObj<typeof meta>
 
-export const Default: Story = {};
+export const Default: Story = {}

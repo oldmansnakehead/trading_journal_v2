@@ -1,5 +1,5 @@
-appId: com.electron.app
-productName: temp_electron
+appId: com.tradingjournal.v2
+productName: Trading Journal
 directories:
   buildResources: build
 files:
@@ -11,13 +11,17 @@ files:
   - '!{tsconfig.json,tsconfig.node.json,tsconfig.web.json}'
 asarUnpack:
   - resources/**
+  - node_modules/better-sqlite3/**
+  - node_modules/sharp/**
 win:
-  executableName: temp_electron
+  executableName: trading_journal
 nsis:
   artifactName: ${name}-${version}-setup.${ext}
   shortcutName: ${productName}
   uninstallDisplayName: ${productName}
   createDesktopShortcut: always
+  oneClick: false
+  perMachine: false
 mac:
   entitlementsInherit: build/entitlements.mac.plist
   extendInfo:
@@ -39,5 +43,6 @@ appImage:
   artifactName: ${name}-${version}.${ext}
 npmRebuild: false
 publish:
-  provider: generic
-  url: https://example.com/auto-updates
+  provider: github
+  owner: USERNAME
+  repo: trading_journal_v2

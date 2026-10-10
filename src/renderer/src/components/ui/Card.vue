@@ -13,7 +13,7 @@ defineProps<{
         <p v-if="subtitle" class="text-sm text-textSecondary">{{ subtitle }}</p>
       </slot>
     </div>
-    
+
     <div class="flex-1 w-full flex flex-col relative">
       <slot></slot>
     </div>

@@ -8,6 +8,20 @@
       "when": 1791616628222,
       "tag": "0000_nosy_wrecker",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1791640653032,
+      "tag": "0001_cute_typhoid_mary",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1791646534640,
+      "tag": "0002_curvy_the_fury",
+      "breakpoints": true
     }
   ]
 }

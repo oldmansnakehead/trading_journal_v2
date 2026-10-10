@@ -49,12 +49,14 @@ const normalizedChartData = computed(() => {
   if (!props.chartData || props.chartData.length === 0) return []
   const max = Math.max(...props.chartData)
   if (max === 0) return props.chartData.map(() => 0)
-  return props.chartData.map(v => (v / max) * 100)
+  return props.chartData.map((v) => (v / max) * 100)
 })
 </script>
 
 <template>
-  <div class="bg-white rounded-2xl p-6 shadow-card flex items-center justify-between relative overflow-hidden">
+  <div
+    class="bg-white rounded-2xl p-6 shadow-card flex items-center justify-between relative overflow-hidden"
+  >
     <div>
       <h6 class="text-sm font-semibold text-textSecondary mb-2">{{ title }}</h6>
       <h3 class="text-3xl font-bold mb-2 text-textPrimary">{{ value }}</h3>
@@ -65,12 +67,12 @@ const normalizedChartData = computed(() => {
         <span class="text-textSecondary">{{ trendLabel }}</span>
       </div>
     </div>
-    
+
     <!-- Sparkline Chart -->
     <div class="w-16 h-12 opacity-50">
       <div class="flex items-end justify-between h-full w-full gap-1">
-        <div 
-          v-for="(height, index) in normalizedChartData" 
+        <div
+          v-for="(height, index) in normalizedChartData"
           :key="index"
           :class="chartColorClass"
           class="flex-1 rounded-t-sm"

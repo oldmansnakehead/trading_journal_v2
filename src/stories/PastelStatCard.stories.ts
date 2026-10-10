@@ -1,5 +1,5 @@
-import type { Meta, StoryObj } from '@storybook/vue3';
-import PastelStatCard from '../renderer/src/components/ui/PastelStatCard.vue';
+import type { Meta, StoryObj } from '@storybook/vue3'
+import PastelStatCard from '../renderer/src/components/ui/PastelStatCard.vue'
 
 const meta = {
   title: 'UI/PastelStatCard',
@@ -8,19 +8,19 @@ const meta = {
   argTypes: {
     color: {
       control: 'select',
-      options: ['success', 'info', 'warning', 'error', 'primary'],
-    },
+      options: ['success', 'info', 'warning', 'error', 'primary']
+    }
   },
   decorators: [
     (story) => ({
       components: { story },
-      template: '<div class="p-8 bg-white max-w-sm"><story/></div>',
-    }),
-  ],
-} satisfies Meta<typeof PastelStatCard>;
+      template: '<div class="p-8 bg-white max-w-sm"><story/></div>'
+    })
+  ]
+} satisfies Meta<typeof PastelStatCard>
 
-export default meta;
-type Story = StoryObj<typeof meta>;
+export default meta
+type Story = StoryObj<typeof meta>
 
 export const WeeklySales: Story = {
   args: {
@@ -28,9 +28,9 @@ export const WeeklySales: Story = {
     value: '714k',
     trend: 2.6,
     icon: 'ph-bag',
-    color: 'success',
-  },
-};
+    color: 'success'
+  }
+}
 
 export const NewUsers: Story = {
   args: {
@@ -38,9 +38,9 @@ export const NewUsers: Story = {
     value: '1.35m',
     trend: -0.1,
     icon: 'ph-users',
-    color: 'info',
-  },
-};
+    color: 'info'
+  }
+}
 
 export const PurchaseOrders: Story = {
   args: {
@@ -48,9 +48,9 @@ export const PurchaseOrders: Story = {
     value: '1.72m',
     trend: 2.8,
     icon: 'ph-shopping-cart',
-    color: 'warning',
-  },
-};
+    color: 'warning'
+  }
+}
 
 export const Messages: Story = {
   args: {
@@ -58,6 +58,6 @@ export const Messages: Story = {
     value: '234',
     trend: 3.6,
     icon: 'ph-envelope',
-    color: 'error',
-  },
-};
+    color: 'error'
+  }
+}

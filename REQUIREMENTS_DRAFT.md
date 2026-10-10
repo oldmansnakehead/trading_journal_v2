@@ -11,21 +11,21 @@
 
 ## 2. Stack
 
-| ส่วน | เทคโนโลยี | หมายเหตุ |
-|---|---|---|
-| Runtime | Electron | ใช้เวอร์ชัน stable ล่าสุด |
-| Build / Dev | electron-vite | แยก main / preload / renderer |
-| Language | TypeScript | `strict: true` ทุกส่วน |
-| Frontend | Vue 3 (Composition API + `<script setup>`) | |
-| State | Pinia | |
-| Routing | Vue Router (hash mode) | |
-| UI | shadcn-vue | ใช้ร่วมกับ Tailwind CSS |
-| Database | SQLite ผ่าน better-sqlite3 | ใช้ใน main process เท่านั้น |
-| ORM | Drizzle ORM + drizzle-kit | schema และ migration |
-| Image processing | sharp | ทำ thumbnail / resize (ถ้าจำเป็น) |
-| Zip | archiver (สร้าง) + extract-zip (แตก) | สำหรับ export / import |
-| Packaging | electron-builder | rebuild native module อัตโนมัติ |
-| Testing (E2E) | Playwright | สำหรับรัน Test อัตโนมัติ |
+| ส่วน             | เทคโนโลยี                                  | หมายเหตุ                          |
+| ---------------- | ------------------------------------------ | --------------------------------- |
+| Runtime          | Electron                                   | ใช้เวอร์ชัน stable ล่าสุด         |
+| Build / Dev      | electron-vite                              | แยก main / preload / renderer     |
+| Language         | TypeScript                                 | `strict: true` ทุกส่วน            |
+| Frontend         | Vue 3 (Composition API + `<script setup>`) |                                   |
+| State            | Pinia                                      |                                   |
+| Routing          | Vue Router (hash mode)                     |                                   |
+| UI               | shadcn-vue                                 | ใช้ร่วมกับ Tailwind CSS           |
+| Database         | SQLite ผ่าน better-sqlite3                 | ใช้ใน main process เท่านั้น       |
+| ORM              | Drizzle ORM + drizzle-kit                  | schema และ migration              |
+| Image processing | sharp                                      | ทำ thumbnail / resize (ถ้าจำเป็น) |
+| Zip              | archiver (สร้าง) + extract-zip (แตก)       | สำหรับ export / import            |
+| Packaging        | electron-builder                           | rebuild native module อัตโนมัติ   |
+| Testing (E2E)    | Playwright                                 | สำหรับรัน Test อัตโนมัติ          |
 
 **ห้ามใช้:** Prisma, ORM ที่ต้องใช้ engine binary แยก, database server ใด ๆ (MySQL, Postgres, MongoDB), cloud storage
 
@@ -96,12 +96,14 @@ src/
 ## 7. Export / Import
 
 ### Export
+
 1. เรียก `db.backup(tmpPath)` (ห้ามคัดลอกไฟล์ `data.db` ตรง ๆ ขณะแอปเปิดอยู่)
 2. zip รวม `data.db` (จากข้อ 1) + โฟลเดอร์ `images/` + `manifest.json`
 3. ให้ผู้ใช้เลือกที่บันทึกผ่าน `dialog.showSaveDialog`
 4. ชื่อไฟล์ค่าเริ่มต้น: `backup-YYYY-MM-DD-HHmm.zip`
 
 `manifest.json`:
+
 ```json
 {
   "app": "<app-name>",
@@ -112,6 +114,7 @@ src/
 ```
 
 ### Import
+
 1. ให้ผู้ใช้เลือกไฟล์ `.zip` ผ่าน `dialog.showOpenDialog`
 2. แตกไฟล์ไปที่โฟลเดอร์ชั่วคราว
 3. ตรวจสอบ: มี `manifest.json`, `data.db` เปิดได้, `schemaVersion` ไม่ใหม่กว่าแอป
@@ -162,53 +165,49 @@ src/
 
 ### 12.1. ตารางหลัก (Core Tables)
 
-* **Setup**
-  * `name` (String): ชื่อ Setup
-  * `description` (Text): คำอธิบาย
-  * `type` (String): ประเภทของบัญชีหรือการทดสอบ เช่น demo, บัญชีจริง
-* **Setup Session (ตารางเวลา ผูกกับ Setup)**
-  * `setup_id` (FK)
-  * `start_time` (Time): เวลาเริ่มต้น
-  * `end_time` (Time): เวลาสิ้นสุด
-  * `session_name` (Enum): ให้ผู้ใช้เลือกจาก `Asia`, `Tokyo`, `London`, `London Close`, `New York`
-  * *หมายเหตุ:* ผู้ใช้สามารถกำหนดเวลาได้อย่างอิสระ และไม่จำเป็นต้องกรอกเวลาให้ครบทุก session
-* **Setup Playbook (ผูกกับ Setup)**
-  * `setup_id` (FK)
-  * `content` (Text): เป็นฟิลด์ที่ให้ผู้ใช้ระบุข้อความยาวๆ เพื่อจดสมมติฐาน กฎเกณฑ์ และเงื่อนไขต่างๆ ของ Setup นั้นอย่างละเอียด เพื่อให้กลับมาอ่านแล้วไม่ลืม
-* **Strategies (ผูกกับ Setup)**
-  * `setup_id` (FK)
-  * `name` (String): ชื่อกลยุทธ์
-* **Custom Columns (ผูกกับ Setup)**
-  * **จุดเด่น:** ระบบออกแบบมาให้ผู้ใช้สามารถ **เพิ่มคอลัมน์กี่รายการก็ได้ (ไม่จำกัดจำนวน)** เพื่อสร้างฟิลด์ทดสอบของตัวเองได้อย่างอิสระ
-  * `setup_id` (FK)
-  * `name` (String): ชื่อคอลัมน์ที่ผู้ใช้ต้องการตั้ง
-  * `type` (Enum): ชนิดของข้อมูลที่เลือกได้อิสระ ได้แก่ `checkbox`, `multiple_selector`, `single_selector`, `number`, `string`, `boolean`
-  * `report_filter` (Boolean): หากติ๊กเป็น `true` คอลัมน์ที่สร้างขึ้นมาใหม่นี้ จะไปปรากฏเป็นตัวกรอง (Filter) ในหน้ารายงานให้ใช้งานด้วย
-* **Symbols** (ใช้ร่วมกันทุก Setup ไม่ต้องผูก)
-  * `name` (String): เช่น XAUUSD, EURUSD
+- **Setup**
+  - `name` (String): ชื่อ Setup
+  - `description` (Text): คำอธิบาย
+  - `type` (String): ประเภทของบัญชีหรือการทดสอบ เช่น demo, บัญชีจริง
+- **Setup Session (ตารางเวลา ผูกกับ Setup)**
+  - `setup_id` (FK)
+  - `start_time` (Time): เวลาเริ่มต้น
+  - `end_time` (Time): เวลาสิ้นสุด
+  - `session_name` (Enum): ให้ผู้ใช้เลือกจาก `Asia`, `Tokyo`, `London`, `London Close`, `New York`
+  - _หมายเหตุ:_ ผู้ใช้สามารถกำหนดเวลาได้อย่างอิสระ และไม่จำเป็นต้องกรอกเวลาให้ครบทุก session
+- **Setup Playbook (ผูกกับ Setup)**
+  - `setup_id` (FK)
+  - `content` (Text): เป็นฟิลด์ที่ให้ผู้ใช้ระบุข้อความยาวๆ เพื่อจดสมมติฐาน กฎเกณฑ์ และเงื่อนไขต่างๆ ของ Setup นั้นอย่างละเอียด เพื่อให้กลับมาอ่านแล้วไม่ลืม
+- **Custom Columns (ผูกกับ Setup)**
+  - **จุดเด่น:** ระบบออกแบบมาให้ผู้ใช้สามารถ **เพิ่มคอลัมน์กี่รายการก็ได้ (ไม่จำกัดจำนวน)** เพื่อสร้างฟิลด์ทดสอบของตัวเองได้อย่างอิสระ
+  - `setup_id` (FK)
+  - `name` (String): ชื่อคอลัมน์ที่ผู้ใช้ต้องการตั้ง
+  - `type` (Enum): ชนิดของข้อมูลที่เลือกได้อิสระ ได้แก่ `checkbox`, `multiple_selector`, `single_selector`, `number`, `string`, `boolean`
+  - `report_filter` (Boolean): หากติ๊กเป็น `true` คอลัมน์ที่สร้างขึ้นมาใหม่นี้ จะไปปรากฏเป็นตัวกรอง (Filter) ในหน้ารายงานให้ใช้งานด้วย
+- **Symbols** (ใช้ร่วมกันทุก Setup ไม่ต้องผูก)
+  - `name` (String): เช่น XAUUSD, EURUSD
 
 ### 12.2. ตารางบันทึกการเทรด (Journal Entry)
 
-* `setup_id` (FK)
-* `entry_datetime` (DateTime)
-* `exit_datetime` (DateTime)
-* `symbol_id` (FK): เลือกจากตาราง Symbols
-* `session_name` (String): ระบบจะเลือกให้อัตโนมัติโดยอิงจาก `entry_datetime` ไปเทียบกับเวลาใน Setup แต่ถ้าไม่เจอช่วงเวลาที่ตรง ระบบจะอนุญาตให้ผู้ใช้เลือกเองได้
-* `position` (Enum): `Buy`, `Sell`
-* `direction_bias` (Enum): `Bullish`, `Bearish`
-* `entry_timeframe` (String): เลือกจาก Selector ซึ่งอ้างอิงจากข้อมูลที่ตั้งค่าไว้ในหน้า Settings
-* `strategies` (JSON/Array): Selector แบบ Multi-select เลือกจากตาราง Strategies ที่ผูกไว้กับ Setup นี้
-* `news` (Boolean): Checkbox สำหรับระบุว่ามีข่าวหรือไม่
-* `quality` (Enum): ระดับคุณภาพของการเทรด เลือกเป็นสี `Red`, `Orange`, `Yellow`, `Blue`, `Green`
-* `is_test` (Boolean): Checkbox ระบุว่าเป็นรายการทดสอบ (หากติ๊ก รายการนี้อาจถูกกรองออกหรือไม่นำไปนับสถิติในหน้ารายงาน)
-* `images` (JSON/Array): ใส่กี่รูปก็ได้ (เก็บเป็น Image URLs/Relative paths)
-* `notes` (Text): หมายเหตุ (รองรับข้อความยาว)
-* **Risk:Reward (RR) Data:** 
+- `setup_id` (FK)
+- `entry_datetime` (DateTime)
+- `exit_datetime` (DateTime)
+- `symbol_id` (FK): เลือกจากตาราง Symbols
+- `session_name` (String): ระบบจะเลือกให้อัตโนมัติโดยอิงจาก `entry_datetime` ไปเทียบกับเวลาใน Setup แต่ถ้าไม่เจอช่วงเวลาที่ตรง ระบบจะอนุญาตให้ผู้ใช้เลือกเองได้
+- `position` (Enum): `Buy`, `Sell`
+- `direction_bias` (Enum): `Bullish`, `Bearish`
+- `entry_timeframe` (String): เลือกจาก Selector ซึ่งอ้างอิงจากข้อมูลที่ตั้งค่าไว้ในหน้า Settings
+- `news` (Boolean): Checkbox สำหรับระบุว่ามีข่าวหรือไม่
+- `quality` (Enum): ระดับคุณภาพของการเทรด เลือกเป็นสี `Red`, `Orange`, `Yellow`, `Blue`, `Green`
+- `is_test` (Boolean): Checkbox ระบุว่าเป็นรายการทดสอบ (หากติ๊ก รายการนี้อาจถูกกรองออกหรือไม่นำไปนับสถิติในหน้ารายงาน)
+- `images` (JSON/Array): ใส่กี่รูปก็ได้ (เก็บเป็น Image URLs/Relative paths)
+- `notes` (Text): หมายเหตุ (รองรับข้อความยาว)
+- **Risk:Reward (RR) Data:**
   ใน 1 รายการเทรด จะมีให้กรอกผลลัพธ์ 3 แบบพร้อมกัน (หรือจะกรอกแค่อันใดอันหนึ่งก็ได้ เพื่อความยืดหยุ่น) โดยระบบจะคำนวณ `TP points` ให้อัตโนมัติจากค่า `RR` และ `SL points`
   1. **RR ปกติ:** `rr`, `max_rr`, `sl_points`, `tp_points`
   2. **RR Break Even (BE):** `rr`, `max_rr`, `sl_points`, `tp_points`
   3. **RR Trail + Break Even:** `rr`, `max_rr`, `sl_points`, `tp_points`
-  * *หมายเหตุการใช้งานปุ่ม Lose:* แต่ละประเภท RR จะมีปุ่ม `Lose` ให้กด เมื่อกดแล้วระบบจะบันทึกค่านั้นเป็น `-1` ตัวอย่างเช่น ในไม้เดียวกัน RR ปกติอาจจะแพ้ (ผู้ใช้กรอก -1) แต่ถ้านับแบบ BE อาจจะเก็บได้ 1RR (ผู้ใช้กรอก 1) และถ้านับแบบ Trail อาจจะปิดกำไรได้ 0.5RR (ผู้ใช้กรอก 0.5) ทำให้สามารถเก็บสถิติความแตกต่างของแต่ละวิธีจัดการออเดอร์ในไม้เดียวได้
+  - _หมายเหตุการใช้งานปุ่ม Lose:_ แต่ละประเภท RR จะมีปุ่ม `Lose` ให้กด เมื่อกดแล้วระบบจะบันทึกค่านั้นเป็น `-1` ตัวอย่างเช่น ในไม้เดียวกัน RR ปกติอาจจะแพ้ (ผู้ใช้กรอก -1) แต่ถ้านับแบบ BE อาจจะเก็บได้ 1RR (ผู้ใช้กรอก 1) และถ้านับแบบ Trail อาจจะปิดกำไรได้ 0.5RR (ผู้ใช้กรอก 0.5) ทำให้สามารถเก็บสถิติความแตกต่างของแต่ละวิธีจัดการออเดอร์ในไม้เดียวได้
 
 ---
 
@@ -217,27 +216,30 @@ src/
 ระบบรายงานจะต้องสามารถปรับแต่งและจำลองสถิติเพื่อให้เห็นภาพการทดสอบในมุมกว้างได้
 
 ### 13.1. ตัวกรองข้อมูล (Filters & Simulation Settings)
-* มีตัวกรอง (Filter) ให้เลือกใช้งานจาก **ทุกฟิลด์** ของ Journal Entry
-* ส่วนของ `Custom Columns` หากตั้งค่า `report_filter` ไว้เป็น `true` จะปรากฏเป็นตัวกรองในหน้านี้ด้วย
-* **Simulation Inputs:** สำหรับจำลองผลลัพธ์ภาพรวม โดยให้ผู้ใช้กรอก:
-  * `Initial Balance` ($): ทุนเริ่มต้น
-  * `Risk per trade` (%): ความเสี่ยงต่อการเทรด 1 ไม้
-  * `Return Calculation` (Enum): `Simple`, `Log (compounded)`
+
+- มีตัวกรอง (Filter) ให้เลือกใช้งานจาก **ทุกฟิลด์** ของ Journal Entry
+- ส่วนของ `Custom Columns` หากตั้งค่า `report_filter` ไว้เป็น `true` จะปรากฏเป็นตัวกรองในหน้านี้ด้วย
+- **Simulation Inputs:** สำหรับจำลองผลลัพธ์ภาพรวม โดยให้ผู้ใช้กรอก:
+  - `Initial Balance` ($): ทุนเริ่มต้น
+  - `Risk per trade` (%): ความเสี่ยงต่อการเทรด 1 ไม้
+  - `Return Calculation` (Enum): `Simple`, `Log (compounded)`
 
 ### 13.2. การแสดงผลสถิติและตัวเลข (Metrics & KPIs)
-* มีตารางโชว์ข้อมูลการเทรดตามรายการที่ Filter
-* **RR Mode Toggle:** ต้องมีปุ่มให้สลับมุมมองสถิติระหว่าง `Normal`, `BE`, `Trail+BE` ซึ่งเมื่อสลับ ค่าสถิติเฉลี่ยต่างๆ (เช่น AVG RR) จะเปลี่ยนไปตามประเภทที่เลือก
-* **ข้อมูลสถิติที่แสดงด้านบน (อ้างอิงตาม UI):**
-  * ข้อมูลรวม: Total trades (จำนวนที่ค้นหาเจอ), Wins, Losses, Net PnL, Gross Profit, Gross Loss, Profit Factor
-  * ข้อมูล RR: AVG RR, MAX RR, AVG MAX RR, Total RR (RR ที่เก็บได้ทั้งหมด)
-  * ข้อมูลอื่นๆ: AVG Win $, AVG Lose $, Consecutive Wins, Consecutive Losses, Final Balance, Max Drawdown %
-  * Winners and Losers Breakdown อย่างละเอียด
+
+- มีตารางโชว์ข้อมูลการเทรดตามรายการที่ Filter
+- **RR Mode Toggle:** ต้องมีปุ่มให้สลับมุมมองสถิติระหว่าง `Normal`, `BE`, `Trail+BE` ซึ่งเมื่อสลับ ค่าสถิติเฉลี่ยต่างๆ (เช่น AVG RR) จะเปลี่ยนไปตามประเภทที่เลือก
+- **ข้อมูลสถิติที่แสดงด้านบน (อ้างอิงตาม UI):**
+  - ข้อมูลรวม: Total trades (จำนวนที่ค้นหาเจอ), Wins, Losses, Net PnL, Gross Profit, Gross Loss, Profit Factor
+  - ข้อมูล RR: AVG RR, MAX RR, AVG MAX RR, Total RR (RR ที่เก็บได้ทั้งหมด)
+  - ข้อมูลอื่นๆ: AVG Win $, AVG Lose $, Consecutive Wins, Consecutive Losses, Final Balance, Max Drawdown %
+  - Winners and Losers Breakdown อย่างละเอียด
 
 ### 13.3. กราฟและการแสดงผล (Charts & Visualizations)
-* **Equity Curve:** กราฟเส้นแสดงการเติบโตของพอร์ต
-* **Drawdown (%):** กราฟพื้นที่สีแดงแสดงเปอร์เซ็นต์การขาดทุนสะสม
-* **Net PnL Breakdown:** กราฟแท่งแสดงผลกำไร/ขาดทุนรายวัน (จันทร์-ศุกร์)
-* **Performance by Side:** กราฟโดนัท/วงกลมแสดงสัดส่วน Total Trades และ Win Rate แยกระหว่าง Buy และ Sell
-* **Performance by Session:** กราฟเรดาร์ (Radar Chart) แสดงสถิติ Win Rate, Total Trades, Avg RR, และ Profit แยกตาม Session
-* **Performance by Time:** กราฟแท่งกระจายตามช่วงเวลาของวัน
-* **Calendar (ปฏิทินการเทรด):** ปฏิทินแสดงสรุปข้อมูลรายวัน ว่าในวันนั้นๆ ได้กำไรเท่าไหร่ หรือเสียเท่าไหร่ เพื่อดูความต่อเนื่องของการเทรด
+
+- **Equity Curve:** กราฟเส้นแสดงการเติบโตของพอร์ต
+- **Drawdown (%):** กราฟพื้นที่สีแดงแสดงเปอร์เซ็นต์การขาดทุนสะสม
+- **Net PnL Breakdown:** กราฟแท่งแสดงผลกำไร/ขาดทุนรายวัน (จันทร์-ศุกร์)
+- **Performance by Side:** กราฟโดนัท/วงกลมแสดงสัดส่วน Total Trades และ Win Rate แยกระหว่าง Buy และ Sell
+- **Performance by Session:** กราฟเรดาร์ (Radar Chart) แสดงสถิติ Win Rate, Total Trades, Avg RR, และ Profit แยกตาม Session
+- **Performance by Time:** กราฟแท่งกระจายตามช่วงเวลาของวัน
+- **Calendar (ปฏิทินการเทรด):** ปฏิทินแสดงสรุปข้อมูลรายวัน ว่าในวันนั้นๆ ได้กำไรเท่าไหร่ หรือเสียเท่าไหร่ เพื่อดูความต่อเนื่องของการเทรด

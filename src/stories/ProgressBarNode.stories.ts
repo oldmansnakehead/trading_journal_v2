@@ -44,9 +44,7 @@ export const Default: StoryObj = {
         }
       ]
 
-      const edges = [
-        { id: 'e1-2', source: '1', target: '2', animated: true }
-      ]
+      const edges = [{ id: 'e1-2', source: '1', target: '2', animated: true }]
 
       return { nodes, edges }
     },

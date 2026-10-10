@@ -5,11 +5,16 @@ import { RouterView } from 'vue-router'
 <template>
   <div class="flex h-screen overflow-hidden w-full">
     <!-- 1. Layout Elements: Sidebar -->
-    <aside class="w-72 flex-shrink-0 bg-white border-r border-gray-200 border-dashed h-full hidden lg:flex flex-col z-20">
+    <aside
+      class="w-72 flex-shrink-0 bg-white border-r border-gray-200 border-dashed h-full hidden lg:flex flex-col z-20"
+    >
       <!-- Logo Area -->
       <div class="h-20 flex items-center px-6">
         <div class="flex items-center gap-2 cursor-pointer">
-          <div class="w-10 h-10 bg-primary text-white rounded-xl flex items-center justify-center font-bold text-xl">M.
+          <div
+            class="w-10 h-10 bg-primary text-white rounded-xl flex items-center justify-center font-bold text-xl"
+          >
+            M.
           </div>
           <span class="font-bold text-lg tracking-tight">Trading Journal</span>
         </div>
@@ -17,62 +22,92 @@ import { RouterView } from 'vue-router'
 
       <!-- Scrollable Menu -->
       <div class="flex-1 overflow-y-auto no-scrollbar px-4 pb-8">
-
-        <div class="mb-4 mt-2 px-2 text-xs font-bold text-textSecondary uppercase tracking-wider">Overview</div>
+        <div class="mb-4 mt-2 px-2 text-xs font-bold text-textSecondary uppercase tracking-wider">
+          Overview
+        </div>
 
         <nav class="space-y-1">
-          <router-link to="/" active-class="bg-primary/10 text-primary font-semibold"
-            class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-textSecondary hover:bg-gray-100 hover:text-textPrimary font-medium transition-colors">
+          <router-link
+            to="/"
+            active-class="bg-primary/10 text-primary font-semibold"
+            class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-textSecondary hover:bg-gray-100 hover:text-textPrimary font-medium transition-colors"
+          >
             <i class="ph ph-app-window text-xl"></i>
             <span>Dashboard</span>
           </router-link>
-          <a href="#"
-            class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-textSecondary hover:bg-gray-100 hover:text-textPrimary font-medium transition-colors">
-            <i class="ph ph-shopping-cart text-xl"></i>
-            <span>Trades</span>
-          </a>
-          <a href="#"
-            class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-textSecondary hover:bg-gray-100 hover:text-textPrimary font-medium transition-colors">
-            <i class="ph ph-chart-line-up text-xl"></i>
-            <span>Analytics</span>
-          </a>
-          <router-link to="/design" active-class="bg-primary/10 text-primary font-semibold"
-            class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-textSecondary hover:bg-gray-100 hover:text-textPrimary font-medium transition-colors">
-            <i class="ph ph-palette text-xl"></i>
-            <span>Design System</span>
+          <router-link
+            to="/reports"
+            active-class="bg-primary/10 text-primary font-semibold"
+            class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-textSecondary hover:bg-gray-100 hover:text-textPrimary font-medium transition-colors"
+          >
+            <i class="ph ph-chart-pie text-xl"></i>
+            <span>Win/Loss Report</span>
+          </router-link>
+          <router-link
+            to="/calendar"
+            active-class="bg-primary/10 text-primary font-semibold"
+            class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-textSecondary hover:bg-gray-100 hover:text-textPrimary font-medium transition-colors"
+          >
+            <i class="ph ph-calendar text-xl"></i>
+            <span>Calendar</span>
+          </router-link>
+          <router-link
+            to="/journal"
+            active-class="bg-primary/10 text-primary font-semibold"
+            class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-textSecondary hover:bg-gray-100 hover:text-textPrimary font-medium transition-colors"
+          >
+            <i class="ph ph-plus-circle text-xl"></i>
+            <span>New Trade</span>
           </router-link>
         </nav>
 
-        <div class="mt-8 mb-4 px-2 text-xs font-bold text-textSecondary uppercase tracking-wider">Management</div>
+        <div class="mt-8 mb-4 px-2 text-xs font-bold text-textSecondary uppercase tracking-wider">
+          Management
+        </div>
 
         <nav class="space-y-1">
-          <a href="#"
-            class="flex items-center justify-between px-3 py-2.5 rounded-xl text-textSecondary hover:bg-gray-100 hover:text-textPrimary font-medium transition-colors">
-            <div class="flex items-center gap-3">
-              <i class="ph ph-gear text-xl"></i>
-              <span>Settings</span>
-            </div>
-            <i class="ph ph-caret-right text-sm"></i>
-          </a>
+          <router-link
+            to="/data"
+            active-class="bg-primary/10 text-primary font-semibold"
+            class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-textSecondary hover:bg-gray-100 hover:text-textPrimary font-medium transition-colors"
+          >
+            <i class="ph ph-database text-xl"></i>
+            <span>Data Management</span>
+          </router-link>
+          <router-link
+            to="/settings"
+            active-class="bg-primary/10 text-primary font-semibold"
+            class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-textSecondary hover:bg-gray-100 hover:text-textPrimary font-medium transition-colors"
+          >
+            <i class="ph ph-gear text-xl"></i>
+            <span>Settings</span>
+          </router-link>
         </nav>
       </div>
     </aside>
 
     <!-- Main Content Wrapper -->
     <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
-
       <!-- 1. Layout Elements: Top Header -->
       <header
-        class="h-20 bg-white/80 backdrop-blur-md border-b border-gray-200 border-dashed flex items-center justify-between px-4 sm:px-6 lg:px-8 z-10 sticky top-0">
+        class="h-20 bg-white/80 backdrop-blur-md border-b border-gray-200 border-dashed flex items-center justify-between px-4 sm:px-6 lg:px-8 z-10 sticky top-0"
+      >
         <div class="flex items-center gap-4">
           <button class="lg:hidden text-gray-500 hover:text-gray-700">
             <i class="ph ph-list text-2xl"></i>
           </button>
           <div class="hidden sm:flex items-center text-sm font-semibold text-gray-700 gap-2">
             <div class="w-6 h-6 rounded bg-primary/20 flex items-center justify-center">
-              <img src="https://placehold.co/24x24/transparent/00a76f?text=T" class="rounded" alt="Team">
+              <img
+                src="https://placehold.co/24x24/transparent/00a76f?text=T"
+                class="rounded"
+                alt="Team"
+              />
             </div>
-            Team 1 <span class="bg-gray-100 text-gray-500 text-xs px-1.5 py-0.5 rounded ml-1 font-bold">Free</span>
+            Team 1
+            <span class="bg-gray-100 text-gray-500 text-xs px-1.5 py-0.5 rounded ml-1 font-bold"
+              >Free</span
+            >
             <i class="ph ph-caret-up-down text-gray-400"></i>
           </div>
         </div>
@@ -80,21 +115,30 @@ import { RouterView } from 'vue-router'
         <div class="flex items-center gap-3 sm:gap-5">
           <!-- Search -->
           <button
-            class="w-10 h-10 rounded-full flex items-center justify-center text-gray-500 hover:bg-gray-100 transition-colors">
+            class="w-10 h-10 rounded-full flex items-center justify-center text-gray-500 hover:bg-gray-100 transition-colors"
+          >
             <i class="ph ph-magnifying-glass text-xl"></i>
           </button>
 
           <!-- Notifications -->
           <button
-            class="w-10 h-10 rounded-full flex items-center justify-center text-gray-500 hover:bg-gray-100 transition-colors relative">
+            class="w-10 h-10 rounded-full flex items-center justify-center text-gray-500 hover:bg-gray-100 transition-colors relative"
+          >
             <i class="ph ph-bell text-xl"></i>
-            <span class="absolute top-1 right-1 w-2 h-2 bg-error rounded-full border-2 border-white"></span>
+            <span
+              class="absolute top-1 right-1 w-2 h-2 bg-error rounded-full border-2 border-white"
+            ></span>
           </button>
 
           <!-- Avatar -->
           <button
-            class="w-10 h-10 rounded-full overflow-hidden border-2 border-transparent hover:border-gray-200 transition-all p-0.5">
-            <img src="https://i.pravatar.cc/150?img=11" alt="Avatar" class="w-full h-full rounded-full object-cover">
+            class="w-10 h-10 rounded-full overflow-hidden border-2 border-transparent hover:border-gray-200 transition-all p-0.5"
+          >
+            <img
+              src="https://i.pravatar.cc/150?img=11"
+              alt="Avatar"
+              class="w-full h-full rounded-full object-cover"
+            />
           </button>
         </div>
       </header>

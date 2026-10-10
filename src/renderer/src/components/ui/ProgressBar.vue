@@ -36,7 +36,9 @@ const colorClass = computed(() => {
       <span class="text-sm font-semibold text-textSecondary">{{ label }}</span>
       <div v-if="valueText || subValueText" class="text-sm font-bold text-textPrimary">
         {{ valueText }}
-        <span v-if="subValueText" class="text-textSecondary font-medium ml-1">{{ subValueText }}</span>
+        <span v-if="subValueText" class="text-textSecondary font-medium ml-1">{{
+          subValueText
+        }}</span>
       </div>
     </div>
     <div class="w-full h-2 bg-gray-100 rounded-full overflow-hidden">

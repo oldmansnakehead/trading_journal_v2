@@ -46,8 +46,8 @@ const props = withDefaults(defineProps<Props>(), {
   <div class="bg-white rounded-2xl shadow-card p-6 h-full flex flex-col">
     <h6 class="text-lg font-bold text-textPrimary mb-6">{{ title }}</h6>
     <div class="space-y-6">
-      <ProgressBar 
-        v-for="(item, index) in data" 
+      <ProgressBar
+        v-for="(item, index) in data"
         :key="index"
         :label="item.label"
         :valueText="item.valueText"

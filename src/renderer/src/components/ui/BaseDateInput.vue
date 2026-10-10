@@ -20,20 +20,36 @@ const isOpen = ref(false)
 const currentDate = ref(new Date()) // The month currently being viewed
 
 // Parse model to Date
-watch(model, (newVal) => {
-  if (newVal) {
-    const d = new Date(newVal)
-    if (!isNaN(d.getTime())) {
-      currentDate.value = d
+watch(
+  model,
+  (newVal) => {
+    if (newVal) {
+      const d = new Date(newVal)
+      if (!isNaN(d.getTime())) {
+        currentDate.value = d
+      }
     }
-  }
-}, { immediate: true })
+  },
+  { immediate: true }
+)
 
 const currentMonth = computed(() => currentDate.value.getMonth())
 const currentYear = computed(() => currentDate.value.getFullYear())
 
-const monthNames = ["January", "February", "March", "April", "May", "June",
-  "July", "August", "September", "October", "November", "December"]
+const monthNames = [
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December'
+]
 
 const daysInMonth = computed(() => {
   return new Date(currentYear.value, currentMonth.value + 1, 0).getDate()
@@ -68,9 +84,9 @@ const selectDate = (day: number) => {
   const yyyy = d.getFullYear()
   const mm = String(d.getMonth() + 1).padStart(2, '0')
   const dd = String(d.getDate()).padStart(2, '0')
-  
+
   if (props.withTime) {
-    let timePart = "00:00"
+    let timePart = '00:00'
     if (model.value && model.value.includes('T')) {
       timePart = model.value.split('T')[1].substring(0, 5)
     } else {
@@ -81,7 +97,7 @@ const selectDate = (day: number) => {
   } else {
     model.value = `${yyyy}-${mm}-${dd}`
   }
-  
+
   if (!props.withTime) {
     isOpen.value = false
   }
@@ -105,46 +121,54 @@ const onMinutesKeydown = (e: KeyboardEvent) => {
   }
 }
 
-watch(model, (val) => {
-  if (val && val.includes('T')) {
-    const timePart = val.split('T')[1]
-    hoursInput.value = timePart.substring(0, 2)
-    minutesInput.value = timePart.substring(3, 5)
-  } else {
-    const now = new Date()
-    hoursInput.value = String(now.getHours()).padStart(2, '0')
-    minutesInput.value = String(now.getMinutes()).padStart(2, '0')
-  }
-}, { immediate: true })
+watch(
+  model,
+  (val) => {
+    if (val && val.includes('T')) {
+      const timePart = val.split('T')[1]
+      hoursInput.value = timePart.substring(0, 2)
+      minutesInput.value = timePart.substring(3, 5)
+    } else {
+      const now = new Date()
+      hoursInput.value = String(now.getHours()).padStart(2, '0')
+      minutesInput.value = String(now.getMinutes()).padStart(2, '0')
+    }
+  },
+  { immediate: true }
+)
 
 const updateTime = () => {
   let hNum = parseInt(hoursInput.value)
   let mNum = parseInt(minutesInput.value)
-  
+
   if (isNaN(hNum)) hNum = 0
   if (isNaN(mNum)) mNum = 0
-  
+
   if (hNum > 23) hNum = 23
   if (hNum < 0) hNum = 0
   if (mNum > 59) mNum = 59
   if (mNum < 0) mNum = 0
-  
+
   hoursInput.value = String(hNum).padStart(2, '0')
   minutesInput.value = String(mNum).padStart(2, '0')
-  
+
   let datePart = model.value ? model.value.split('T')[0] : ''
   if (!datePart) {
     const d = new Date()
     datePart = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
   }
-  
+
   model.value = `${datePart}T${hoursInput.value}:${minutesInput.value}`
 }
 
 const isSelectedDate = (day: number) => {
   if (!model.value) return false
   const d = new Date(model.value)
-  return d.getFullYear() === currentYear.value && d.getMonth() === currentMonth.value && d.getDate() === day
+  return (
+    d.getFullYear() === currentYear.value &&
+    d.getMonth() === currentMonth.value &&
+    d.getDate() === day
+  )
 }
 
 const displayValue = computed({
@@ -152,11 +176,11 @@ const displayValue = computed({
     if (!model.value) return ''
     const d = new Date(model.value)
     if (isNaN(d.getTime())) return model.value
-    
+
     const yyyy = d.getFullYear()
     const mm = String(d.getMonth() + 1).padStart(2, '0')
     const dd = String(d.getDate()).padStart(2, '0')
-    
+
     if (props.withTime) {
       let timeStr = '00:00'
       if (model.value.includes('T')) timeStr = model.value.split('T')[1].substring(0, 5)
@@ -167,7 +191,9 @@ const displayValue = computed({
   set: () => {}
 })
 
-const closePicker = () => { isOpen.value = false }
+const closePicker = () => {
+  isOpen.value = false
+}
 </script>
 
 <template>
@@ -192,36 +218,57 @@ const closePicker = () => { isOpen.value = false }
     <div v-if="isOpen" class="fixed inset-0 z-40" @click="closePicker"></div>
 
     <!-- Calendar Popup -->
-    <div v-if="isOpen" class="absolute left-0 top-[calc(100%+4px)] z-50 bg-white border border-gray-100 rounded-xl shadow-lg p-4 w-[280px]">
+    <div
+      v-if="isOpen"
+      class="absolute left-0 top-[calc(100%+4px)] z-50 bg-white border border-gray-100 rounded-xl shadow-lg p-4 w-[280px]"
+    >
       <!-- Header -->
       <div class="flex justify-between items-center mb-4">
-        <button type="button" @click.stop="prevMonth" class="p-1 hover:bg-gray-50 rounded text-gray-500">
+        <button
+          type="button"
+          @click.stop="prevMonth"
+          class="p-1 hover:bg-gray-50 rounded text-gray-500"
+        >
           <i class="ph-bold ph-caret-left"></i>
         </button>
-        <span class="font-semibold text-sm text-textPrimary">{{ monthNames[currentMonth] }} {{ currentYear }}</span>
-        <button type="button" @click.stop="nextMonth" class="p-1 hover:bg-gray-50 rounded text-gray-500">
+        <span class="font-semibold text-sm text-textPrimary"
+          >{{ monthNames[currentMonth] }} {{ currentYear }}</span
+        >
+        <button
+          type="button"
+          @click.stop="nextMonth"
+          class="p-1 hover:bg-gray-50 rounded text-gray-500"
+        >
           <i class="ph-bold ph-caret-right"></i>
         </button>
       </div>
 
       <!-- Days Header -->
       <div class="grid grid-cols-7 mb-2">
-        <span v-for="day in ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa']" :key="day" class="text-center text-xs font-semibold text-gray-400">
+        <span
+          v-for="day in ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa']"
+          :key="day"
+          class="text-center text-xs font-semibold text-gray-400"
+        >
           {{ day }}
         </span>
       </div>
 
       <!-- Days Grid -->
       <div class="grid grid-cols-7 gap-y-1 gap-x-1">
-        <div v-for="(day, index) in calendarDays" :key="index" class="h-8 flex items-center justify-center">
+        <div
+          v-for="(day, index) in calendarDays"
+          :key="index"
+          class="h-8 flex items-center justify-center"
+        >
           <button
             v-if="!day.empty"
             type="button"
             @click.stop="selectDate(day.date!)"
             class="w-7 h-7 rounded-full text-sm font-medium transition-colors flex items-center justify-center"
             :class="[
-              isSelectedDate(day.date!) 
-                ? 'bg-primary text-white shadow-sm' 
+              isSelectedDate(day.date!)
+                ? 'bg-primary text-white shadow-sm'
                 : 'text-textPrimary hover:bg-gray-100'
             ]"
           >
@@ -229,15 +276,18 @@ const closePicker = () => { isOpen.value = false }
           </button>
         </div>
       </div>
-      
+
       <!-- Time selection -->
-      <div v-if="withTime" class="mt-4 pt-4 border-t border-gray-100 flex items-center justify-between">
+      <div
+        v-if="withTime"
+        class="mt-4 pt-4 border-t border-gray-100 flex items-center justify-between"
+      >
         <span class="text-sm font-semibold text-textSecondary">Time</span>
         <div class="flex items-center gap-1">
-          <input 
+          <input
             ref="hoursInputRef"
-            type="text" 
-            v-model="hoursInput" 
+            type="text"
+            v-model="hoursInput"
             @input="onHoursInput"
             @blur="updateTime"
             @keyup.enter="updateTime"
@@ -246,10 +296,10 @@ const closePicker = () => { isOpen.value = false }
             placeholder="00"
           />
           <span class="text-textPrimary font-bold mx-1">:</span>
-          <input 
+          <input
             ref="minutesInputRef"
-            type="text" 
-            v-model="minutesInput" 
+            type="text"
+            v-model="minutesInput"
             @keydown="onMinutesKeydown"
             @blur="updateTime"
             @keyup.enter="updateTime"

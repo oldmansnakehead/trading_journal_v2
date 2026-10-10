@@ -17,8 +17,8 @@ defineProps<{
 <template>
   <div class="bg-white rounded-xl shadow-card p-4 min-w-[250px] border border-gray-100">
     <Handle type="target" :position="Position.Top" class="!bg-gray-300" />
-    
-    <ProgressBar 
+
+    <ProgressBar
       :label="data.label"
       :valueText="data.valueText"
       :subValueText="data.subValueText"

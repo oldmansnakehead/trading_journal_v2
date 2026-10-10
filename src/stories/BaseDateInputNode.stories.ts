@@ -1,15 +1,15 @@
-import type { Meta, StoryObj } from '@storybook/vue3';
-import { VueFlow } from '@vue-flow/core';
-import '@vue-flow/core/dist/style.css';
-import '@vue-flow/core/dist/theme-default.css';
-import BaseDateInputNode from '../renderer/src/components/flow/BaseDateInputNode.vue';
+import type { Meta, StoryObj } from '@storybook/vue3'
+import { VueFlow } from '@vue-flow/core'
+import '@vue-flow/core/dist/style.css'
+import '@vue-flow/core/dist/theme-default.css'
+import BaseDateInputNode from '../renderer/src/components/flow/BaseDateInputNode.vue'
 
 const meta = {
   title: 'Flow Nodes/BaseDateInputNode',
   component: BaseDateInputNode,
   tags: ['autodocs'],
   parameters: {
-    layout: 'fullscreen',
+    layout: 'fullscreen'
   },
   decorators: [
     (story) => ({
@@ -26,7 +26,7 @@ const meta = {
               }
             }
           ]
-        };
+        }
       },
       template: `
         <div style="height: 100vh; width: 100vw; background: #f9fafb;">
@@ -36,15 +36,15 @@ const meta = {
             </template>
           </VueFlow>
         </div>
-      `,
-    }),
-  ],
-} satisfies Meta<typeof BaseDateInputNode>;
+      `
+    })
+  ]
+} satisfies Meta<typeof BaseDateInputNode>
 
-export default meta;
-type Story = StoryObj<typeof meta>;
+export default meta
+type Story = StoryObj<typeof meta>
 
-export const Default: Story = {};
+export const Default: Story = {}
 
 export const WithTime: Story = {
   decorators: [
@@ -62,7 +62,7 @@ export const WithTime: Story = {
               }
             }
           ]
-        };
+        }
       },
       template: `
         <div style="height: 100vh; width: 100vw; background: #f9fafb;">
@@ -72,7 +72,7 @@ export const WithTime: Story = {
             </template>
           </VueFlow>
         </div>
-      `,
-    }),
-  ],
-};
+      `
+    })
+  ]
+}

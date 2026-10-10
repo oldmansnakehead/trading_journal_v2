@@ -64,12 +64,8 @@
           "name": "custom_columns_setup_id_setups_id_fk",
           "tableFrom": "custom_columns",
           "tableTo": "setups",
-          "columnsFrom": [
-            "setup_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["setup_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -300,12 +296,8 @@
           "name": "journal_entries_setup_id_setups_id_fk",
           "tableFrom": "journal_entries",
           "tableTo": "setups",
-          "columnsFrom": [
-            "setup_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["setup_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -313,12 +305,8 @@
           "name": "journal_entries_symbol_id_symbols_id_fk",
           "tableFrom": "journal_entries",
           "tableTo": "symbols",
-          "columnsFrom": [
-            "symbol_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["symbol_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -372,12 +360,8 @@
           "name": "setup_playbooks_setup_id_setups_id_fk",
           "tableFrom": "setup_playbooks",
           "tableTo": "setups",
-          "columnsFrom": [
-            "setup_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["setup_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -445,12 +429,8 @@
           "name": "setup_sessions_setup_id_setups_id_fk",
           "tableFrom": "setup_sessions",
           "tableTo": "setups",
-          "columnsFrom": [
-            "setup_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["setup_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -556,12 +536,8 @@
           "name": "strategies_setup_id_setups_id_fk",
           "tableFrom": "strategies",
           "tableTo": "setups",
-          "columnsFrom": [
-            "setup_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["setup_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -605,9 +581,7 @@
       "indexes": {
         "symbols_name_unique": {
           "name": "symbols_name_unique",
-          "columns": [
-            "name"
-          ],
+          "columns": ["name"],
           "isUnique": true
         }
       },
