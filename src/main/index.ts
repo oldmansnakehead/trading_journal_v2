@@ -1,8 +1,11 @@
-import { app, shell, BrowserWindow, ipcMain } from 'electron'
+import { app, shell, BrowserWindow, ipcMain, protocol, net } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 import { runMigrations } from './db/client'
+import { registerSetupHandlers } from './ipc/setupHandlers'
+import { registerImageHandlers } from './ipc/imageHandlers'
+import { getPaths } from './paths'
 
 function createWindow(): void {
   // Create the browser window.
@@ -36,12 +39,30 @@ function createWindow(): void {
   }
 }
 
-import { registerSetupHandlers } from './ipc/setupHandlers'
-
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(() => {
+  // Register custom protocol for images
+  protocol.handle('app-img', (request) => {
+    const url = request.url.replace('app-img://', '')
+    const { dataDir } = getPaths()
+    
+    try {
+      const decodedUrl = decodeURIComponent(url)
+      const filePath = join(dataDir, decodedUrl)
+      
+      // Prevent path traversal
+      if (!filePath.startsWith(dataDir)) {
+        return new Response('Access denied', { status: 403 })
+      }
+      
+      return net.fetch('file://' + filePath)
+    } catch (err) {
+      return new Response('File not found', { status: 404 })
+    }
+  })
+
   // Set app user model id for windows
   electronApp.setAppUserModelId('com.electron')
 
@@ -50,6 +71,7 @@ app.whenReady().then(() => {
 
   // Register IPC Handlers
   registerSetupHandlers()
+  registerImageHandlers()
 
   // Default open or close DevTools by F12 in development
   // and ignore CommandOrControl + R in production.
