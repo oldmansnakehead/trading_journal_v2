@@ -10,7 +10,7 @@
 | **Build / Dev** | electron-vite |
 | **Language** | TypeScript (`strict: true`) |
 | **Frontend** | Vue 3 (Composition API) + Pinia + Vue Router |
-| **UI Framework** | Naive UI |
+| **UI Framework** | shadcn-vue (+ Tailwind CSS) |
 | **Database** | SQLite (`better-sqlite3`) ใช้ใน Main Process เท่านั้น |
 | **ORM** | Drizzle ORM + drizzle-kit |
 | **Image** | `sharp` (จัดการรูปภาพ) |
@@ -23,7 +23,7 @@
 
 ### Phase 1: Project Setup & Infrastructure (โครงสร้างพื้นฐาน)
 - [ ] สร้างโปรเจกต์ด้วย `electron-vite` (แยก main / preload / renderer)
-- [ ] ติดตั้งและตั้งค่า Vue 3, Pinia, Vue Router, และ Naive UI
+- [ ] ติดตั้งและตั้งค่า Vue 3, Pinia, Vue Router, และ shadcn-vue (Tailwind CSS)
 - [ ] ตั้งค่า `better-sqlite3` และ `drizzle-orm` ใน main process
 - [ ] สร้างระบบ IPC พื้นฐานและ `contextBridge` ใน preload
 - [ ] กำหนด Data Folder (`app.getPath('userData')`) สำหรับเก็บไฟล์และฐานข้อมูล

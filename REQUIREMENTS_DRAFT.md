@@ -19,7 +19,7 @@
 | Frontend | Vue 3 (Composition API + `<script setup>`) | |
 | State | Pinia | |
 | Routing | Vue Router (hash mode) | |
-| UI | Naive UI | (เปลี่ยนเป็น PrimeVue / Tailwind ได้ถ้าระบุใน requirement) |
+| UI | shadcn-vue | ใช้ร่วมกับ Tailwind CSS |
 | Database | SQLite ผ่าน better-sqlite3 | ใช้ใน main process เท่านั้น |
 | ORM | Drizzle ORM + drizzle-kit | schema และ migration |
 | Image processing | sharp | ทำ thumbnail / resize (ถ้าจำเป็น) |
