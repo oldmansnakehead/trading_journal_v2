@@ -884,15 +884,15 @@
     </div>
 
     <!-- Charts Row 3: Performance by Session (Multi-Dimensional Radars) -->
-    <div class="mb-8 bg-gray-950 text-white rounded-3xl p-6 border border-gray-800 shadow-xl">
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-6">
-        <div class="flex items-center gap-2.5">
-          <div class="w-8 h-8 rounded-xl bg-sky-500/10 text-sky-400 flex items-center justify-center font-bold border border-sky-500/20">
-            <i class="ph-bold ph-radar text-lg"></i>
+    <div class="mb-8 bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center font-bold border border-sky-100">
+            <i class="ph-bold ph-radar text-xl"></i>
           </div>
           <div>
             <div class="flex items-center gap-2">
-              <h2 class="text-base sm:text-lg font-bold text-white tracking-wide">
+              <h2 class="text-lg font-bold text-gray-900">
                 Performance by session
               </h2>
               <InfoTooltip
@@ -901,21 +901,21 @@
                 formula="เปรียบเทียบสถิติแยกตาม Session"
               />
             </div>
-            <p class="text-xs text-gray-400">
+            <p class="text-xs text-gray-500 font-medium">
               วิเคราะห์หลายมิติ (Win Rate, Total Trades, Avg RR, Profit) ตามโหมด {{ statMode.toUpperCase() }}
             </p>
           </div>
         </div>
 
-        <div class="flex items-center gap-2 text-xs font-semibold text-gray-400">
-          <span class="inline-flex items-center gap-1.5 bg-gray-900 border border-gray-800 px-3 py-1.5 rounded-xl">
-            <span class="w-2 h-2 rounded-full bg-sky-400"></span>
+        <div class="flex items-center gap-2 text-xs font-semibold text-gray-500">
+          <span class="inline-flex items-center gap-1.5 bg-gray-50 border border-gray-200/80 px-3 py-1.5 rounded-xl">
+            <span class="w-2 h-2 rounded-full bg-sky-500"></span>
             Asia · London · New York
           </span>
         </div>
       </div>
 
-      <!-- 4 Radar Cards Grid (Exactly like reference screenshot) -->
+      <!-- 4 Radar Cards Grid -->
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <!-- 1. Win Rate -->
         <SessionRadarCard
@@ -923,6 +923,7 @@
           :labels="sessionMultiMetrics.labels"
           :data="sessionMultiMetrics.winRateData"
           unit="%"
+          accentColor="#0284c7"
           infoTitle="Win Rate by Session"
           infoDescription="อัตราการชนะ (Win Rate %) ของแต่ละช่วงเวลาตลาด ช่วยวิเคราะห์ว่าระบบเทรดได้เปรียบที่สุดในเซสชันใด"
           infoFormula="(ไม้ชนะใน Session ÷ ไม้ทั้งหมดใน Session) × 100%"
@@ -934,6 +935,7 @@
           :labels="sessionMultiMetrics.labels"
           :data="sessionMultiMetrics.totalTradesData"
           unit="trades"
+          accentColor="#6366f1"
           infoTitle="Total Trades by Session"
           infoDescription="จำนวนครั้งที่เข้าเทรดทั้งหมดในแต่ละช่วงเวลาตลาด ช่วยดูว่าเราออกออเดอร์ในเซสชันไหนบ่อยที่สุด"
           infoFormula="นับจำนวนไม้ที่เปิดใน Session นั้นๆ"
@@ -945,6 +947,7 @@
           :labels="sessionMultiMetrics.labels"
           :data="sessionMultiMetrics.avgRrData"
           unit="R"
+          accentColor="#0d9488"
           infoTitle="Average RR by Session"
           infoDescription="ผลตอบแทนต่อความเสี่ยงเฉลี่ย (Average RR) ต่อไม้ในแต่ละช่วงเวลาตลาด บอกว่าเซสชันไหนให้กำไรเฉลี่ยต่อความเสี่ยงคุ้มค่าที่สุด"
           infoFormula="ผลรวม RR ใน Session ÷ จำนวนไม้ใน Session"
@@ -956,6 +959,7 @@
           :labels="sessionMultiMetrics.labels"
           :data="sessionMultiMetrics.profitData"
           unit="$"
+          accentColor="#10b981"
           infoTitle="Net Profit by Session"
           infoDescription="กำไรสุทธิ ($) รวมในแต่ละช่วงเวลาตลาด แสดงว่าเงินกำไรของพอร์ตมาจากเซสชันไหนเป็นหลัก"
           infoFormula="ผลรวม PnL ($) ของทุกออเดอร์ใน Session นั้น"

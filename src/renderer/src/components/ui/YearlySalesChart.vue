@@ -160,25 +160,13 @@ const options = computed(() => ({
         <p class="text-sm text-textSecondary">{{ subtitle }}</p>
       </div>
 
-      <!-- Timeframe Toggle Buttons (Per Trade, Hourly, Daily, Monthly, Yearly) -->
-      <div
-        v-if="timeframeOptions && timeframeOptions.length"
-        class="inline-flex items-center bg-gray-100 p-1 rounded-xl text-xs font-semibold border border-gray-200/80 shrink-0"
-      >
-        <button
-          v-for="opt in timeframeOptions"
-          :key="opt.value"
-          type="button"
-          @click="$emit('update:timeframe', opt.value)"
-          :class="[
-            'px-2.5 py-1 rounded-lg transition-all duration-150 cursor-pointer',
-            timeframe === opt.value
-              ? 'bg-white text-gray-900 shadow-xs font-bold'
-              : 'text-gray-500 hover:text-gray-800'
-          ]"
-        >
-          {{ opt.label }}
-        </button>
+      <!-- Timeframe Selector -->
+      <div v-if="timeframeOptions && timeframeOptions.length" class="w-48 sm:w-56 shrink-0">
+        <BaseSelect
+          :modelValue="timeframe || (timeframeOptions[0] ? timeframeOptions[0].value : '')"
+          :options="timeframeOptions"
+          @update:modelValue="$emit('update:timeframe', String($event))"
+        />
       </div>
       <BaseSelect v-else-if="years && years.length > 1" :modelValue="years[0]" :options="years" />
     </div>
