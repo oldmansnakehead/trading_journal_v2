@@ -1,9 +1,233 @@
 <template>
   <div class="p-8 w-full max-w-5xl mx-auto bg-gray-50/50 min-h-screen pb-24">
-    <div class="flex justify-between items-center mb-8">
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
       <div>
         <h1 class="text-3xl font-bold text-gray-900 mb-1">New Journal Entry</h1>
-        <p class="text-gray-500 text-sm">Log your latest trade details.</p>
+        <p class="text-gray-500 text-sm">
+          Log trade details or draft multiple setups simultaneously using tabs.
+        </p>
+      </div>
+
+      <!-- Header Quick Actions -->
+      <div class="flex items-center gap-2">
+        <button
+          v-if="tradeTabsStore.tabs.length > 1"
+          type="button"
+          @click="handleSaveAllTabs"
+          :disabled="isSavingAll"
+          class="px-4 py-2.5 rounded-xl text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 transition-colors shadow-sm flex items-center gap-1.5 disabled:opacity-50"
+          title="Save all filled and unsaved tabs"
+        >
+          <svg
+            v-if="!isSavingAll"
+            xmlns="http://www.w3.org/2000/svg"
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
+            <polyline points="17 21 17 13 7 13 7 21" />
+            <polyline points="7 3 7 8 15 8" />
+          </svg>
+          <span
+            v-else
+            class="animate-spin inline-block w-3 h-3 border-2 border-white border-t-transparent rounded-full"
+          ></span>
+          <span>Save All ({{ unsavedTabsCount }})</span>
+        </button>
+
+        <button
+          type="button"
+          @click="tradeTabsStore.addTab()"
+          class="px-3.5 py-2.5 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 text-gray-700 text-xs font-bold shadow-sm transition-colors flex items-center gap-1.5"
+          title="Add a new trade tab"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <line x1="12" y1="5" x2="12" y2="19" />
+            <line x1="5" y1="12" x2="19" y2="12" />
+          </svg>
+          <span>New Tab</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Tabs Navigation Bar -->
+    <div class="mb-6 flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none select-none">
+      <div
+        v-for="(tab, index) in tradeTabsStore.tabs"
+        :key="tab.id"
+        @click="tradeTabsStore.setActiveTab(tab.id)"
+        :class="[
+          'group relative flex items-center gap-2.5 px-4 py-2.5 rounded-xl border text-sm font-semibold cursor-pointer transition-all whitespace-nowrap shadow-sm',
+          tradeTabsStore.activeTabId === tab.id
+            ? 'bg-white border-blue-500 text-blue-600 ring-2 ring-blue-500/10 shadow-md font-bold'
+            : 'bg-white/80 border-gray-200 text-gray-600 hover:bg-white hover:text-gray-900'
+        ]"
+      >
+        <!-- Saved indicator or dot -->
+        <span
+          v-if="tab.isSaved"
+          class="flex items-center justify-center w-4 h-4 rounded-full bg-green-100 text-green-600"
+          title="Saved successfully"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="10"
+            height="10"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="3"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <polyline points="20 6 9 17 4 12" />
+          </svg>
+        </span>
+        <span
+          v-else-if="tradeTabsStore.hasTabData(tab)"
+          class="w-2.5 h-2.5 rounded-full bg-blue-500"
+          title="Draft has entries"
+        ></span>
+        <span
+          v-else
+          class="w-2.5 h-2.5 rounded-full bg-gray-300"
+          title="Empty draft"
+        ></span>
+
+        <!-- Tab Title -->
+        <span class="max-w-[170px] truncate">
+          {{ tradeTabsStore.getTabDisplayTitle(tab, index) }}
+        </span>
+
+        <!-- Quick actions inside Tab -->
+        <div class="flex items-center gap-0.5 ml-1">
+          <!-- Duplicate Button -->
+          <button
+            type="button"
+            @click.stop="tradeTabsStore.duplicateTab(tab.id)"
+            class="p-1 rounded-md text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-colors"
+            title="Duplicate this trade setup to a new tab"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="13"
+              height="13"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <rect width="14" height="14" x="8" y="8" rx="2" ry="2" />
+              <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" />
+            </svg>
+          </button>
+
+          <!-- Close / Reset Button -->
+          <button
+            type="button"
+            @click.stop="handleRequestCloseTab(tab)"
+            class="p-1 rounded-md text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors"
+            :title="tradeTabsStore.tabs.length > 1 ? 'Close tab' : 'Reset tab'"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="13"
+              height="13"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Add New Tab Pill -->
+      <button
+        type="button"
+        @click="tradeTabsStore.addTab()"
+        class="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl border border-dashed border-gray-300 text-gray-600 hover:text-blue-600 hover:border-blue-400 hover:bg-blue-50/50 text-sm font-semibold transition-all whitespace-nowrap bg-white/40"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="15"
+          height="15"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <line x1="12" y1="5" x2="12" y2="19" />
+          <line x1="5" y1="12" x2="19" y2="12" />
+        </svg>
+        <span>New Trade</span>
+      </button>
+    </div>
+
+    <!-- Active Tab Saved Notice -->
+    <div
+      v-if="tradeTabsStore.activeTab.isSaved"
+      class="mb-6 bg-green-50 border border-green-200 rounded-xl p-4 flex items-center justify-between text-green-800 text-sm font-medium"
+    >
+      <div class="flex items-center gap-2">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="18"
+          height="18"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          class="text-green-600"
+        >
+          <polyline points="20 6 9 17 4 12" />
+        </svg>
+        <span>This trade entry has been saved successfully!</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <button
+          type="button"
+          @click="tradeTabsStore.resetTab(tradeTabsStore.activeTab.id)"
+          class="text-xs font-bold px-3 py-1.5 bg-white border border-green-300 rounded-lg hover:bg-green-100 transition-colors"
+        >
+          Start New Entry in This Tab
+        </button>
+        <button
+          v-if="tradeTabsStore.tabs.length > 1"
+          type="button"
+          @click="tradeTabsStore.closeTab(tradeTabsStore.activeTab.id)"
+          class="text-xs font-bold px-3 py-1.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+        >
+          Close Tab
+        </button>
       </div>
     </div>
 
@@ -128,7 +352,6 @@
                 placeholder="Select Timeframe"
               />
             </div>
-
           </div>
         </div>
 
@@ -168,18 +391,23 @@
               <BaseDateInput v-model="form.exitDatetime" :withTime="true" />
             </div>
           </div>
-          
+
           <div class="pt-5 border-t border-gray-50">
             <!-- Session -->
             <div>
               <label class="block text-sm font-semibold text-gray-700 mb-1.5">Session</label>
               <BaseSelect
                 v-model="form.sessionName"
-                :options="setupSessions.map(s => ({ label: s.sessionName, value: s.sessionName }))"
+                :options="setupSessions.map((s) => ({ label: s.sessionName, value: s.sessionName }))"
                 placeholder="Select Session"
                 :disabled="setupSessions.length === 0"
               />
-              <p v-if="setupSessions.length === 0 && form.setupId" class="text-xs text-orange-500 mt-1 font-medium">No sessions defined for this setup.</p>
+              <p
+                v-if="setupSessions.length === 0 && form.setupId"
+                class="text-xs text-orange-500 mt-1 font-medium"
+              >
+                No sessions defined for this setup.
+              </p>
             </div>
           </div>
         </div>
@@ -406,27 +634,21 @@
                 v-model="customData[col.id]"
                 class="w-full bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl p-2.5 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
               />
-              <div
-                v-else-if="col.type === 'checkbox'"
-                class="flex items-center mt-2"
-              >
+              <div v-else-if="col.type === 'checkbox'" class="flex items-center mt-2">
                 <input
                   type="checkbox"
                   v-model="customData[col.id]"
                   class="w-5 h-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                 />
               </div>
-              <div
-                v-else-if="col.type === 'switch'"
-                class="flex items-center mt-2"
-              >
+              <div v-else-if="col.type === 'switch'" class="flex items-center mt-2">
                 <label class="flex items-center cursor-pointer relative">
                   <input type="checkbox" class="sr-only" v-model="customData[col.id]" />
-                  <div 
+                  <div
                     class="w-10 h-5 rounded-full transition-colors"
                     :class="customData[col.id] ? 'bg-blue-600' : 'bg-gray-300'"
                   ></div>
-                  <div 
+                  <div
                     class="absolute left-[3px] top-[3px] w-3.5 h-3.5 bg-white rounded-full transition-all"
                     :class="customData[col.id] ? 'translate-x-[19px]' : 'translate-x-0'"
                   ></div>
@@ -435,13 +657,13 @@
               <BaseSelect
                 v-else-if="col.type === 'single_selector'"
                 v-model="customData[col.id]"
-                :options="col.options ? col.options.map(o => ({ label: o, value: o })) : []"
+                :options="col.options ? col.options.map((o: any) => ({ label: o, value: o })) : []"
                 placeholder="Select an option"
               />
               <BaseMultiSelect
                 v-else-if="col.type === 'multiple_selector'"
                 v-model="customData[col.id]"
-                :options="col.options ? col.options.map(o => ({ label: o, value: o })) : []"
+                :options="col.options ? col.options.map((o: any) => ({ label: o, value: o })) : []"
                 placeholder="Select options..."
               />
               <input
@@ -655,44 +877,159 @@
         </div>
       </div>
 
-      <!-- Bottom Save Action -->
-      <div class="lg:col-span-3 mt-4 pt-6 border-t border-gray-200 flex justify-end gap-3">
-        <button
-          type="button"
-          @click="resetForm"
-          class="px-6 py-3 rounded-xl font-bold text-sm text-gray-600 bg-white border border-gray-200 hover:bg-gray-50 hover:text-gray-900 transition-colors shadow-sm"
-        >
-          Cancel / Reset
-        </button>
-        <button
-          type="submit"
-          :disabled="isSaving"
-          class="px-6 py-3 rounded-xl font-bold text-sm text-white bg-gray-900 hover:bg-gray-800 transition-colors shadow-sm flex items-center gap-2 disabled:opacity-50"
+      <!-- Bottom Save Action Bar -->
+      <div
+        class="lg:col-span-3 mt-4 pt-6 border-t border-gray-200 flex flex-wrap justify-between items-center gap-3"
+      >
+        <div class="flex items-center gap-2">
+          <button
+            v-if="tradeTabsStore.tabs.length > 1"
+            type="button"
+            @click="handleRequestCloseTab(tradeTabsStore.activeTab)"
+            class="px-4 py-3 rounded-xl font-bold text-sm text-red-600 bg-red-50 hover:bg-red-100 transition-colors"
+          >
+            Close This Tab
+          </button>
+          <button
+            type="button"
+            @click="tradeTabsStore.duplicateTab(tradeTabsStore.activeTab.id)"
+            class="px-4 py-3 rounded-xl font-bold text-sm text-gray-700 bg-white border border-gray-200 hover:bg-gray-50 transition-colors flex items-center gap-1.5 shadow-sm"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="15"
+              height="15"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <rect width="14" height="14" x="8" y="8" rx="2" ry="2" />
+              <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" />
+            </svg>
+            Duplicate Tab
+          </button>
+        </div>
+
+        <div class="flex items-center gap-3">
+          <button
+            type="button"
+            @click="tradeTabsStore.resetTab(tradeTabsStore.activeTab.id)"
+            class="px-6 py-3 rounded-xl font-bold text-sm text-gray-600 bg-white border border-gray-200 hover:bg-gray-50 hover:text-gray-900 transition-colors shadow-sm"
+          >
+            Reset Tab
+          </button>
+
+          <button
+            v-if="tradeTabsStore.tabs.length > 1"
+            type="button"
+            @click="handleSaveAllTabs"
+            :disabled="isSavingAll"
+            class="px-6 py-3 rounded-xl font-bold text-sm text-blue-600 bg-blue-50 border border-blue-200 hover:bg-blue-100 transition-colors shadow-sm flex items-center gap-2 disabled:opacity-50"
+          >
+            <svg
+              v-if="!isSavingAll"
+              xmlns="http://www.w3.org/2000/svg"
+              width="15"
+              height="15"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
+              <polyline points="17 21 17 13 7 13 7 21" />
+              <polyline points="7 3 7 8 15 8" />
+            </svg>
+            <span
+              v-else
+              class="animate-spin inline-block w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full"
+            ></span>
+            Save All Tabs
+          </button>
+
+          <button
+            type="submit"
+            :disabled="tradeTabsStore.activeTab.isSaving"
+            class="px-6 py-3 rounded-xl font-bold text-sm text-white bg-gray-900 hover:bg-gray-800 transition-colors shadow-sm flex items-center gap-2 disabled:opacity-50"
+          >
+            <svg
+              v-if="!tradeTabsStore.activeTab.isSaving"
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
+              <polyline points="17 21 17 13 7 13 7 21" />
+              <polyline points="7 3 7 8 15 8" />
+            </svg>
+            <span
+              v-else
+              class="animate-spin inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full"
+            ></span>
+            {{ tradeTabsStore.activeTab.isSaving ? 'Saving...' : 'Save Entry' }}
+          </button>
+        </div>
+      </div>
+    </form>
+
+    <!-- Confirm Discard / Close Modal -->
+    <div
+      v-if="confirmCloseDialog.isOpen"
+      class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4"
+    >
+      <div class="bg-white rounded-2xl max-w-sm w-full p-6 shadow-xl border border-gray-100">
+        <div
+          class="w-12 h-12 rounded-full bg-red-50 text-red-600 flex items-center justify-center mb-4"
         >
           <svg
-            v-if="!isSaving"
             xmlns="http://www.w3.org/2000/svg"
-            width="16"
-            height="16"
+            width="22"
+            height="22"
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
-            stroke-width="2.5"
+            stroke-width="2"
             stroke-linecap="round"
             stroke-linejoin="round"
           >
-            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
-            <polyline points="17 21 17 13 7 13 7 21" />
-            <polyline points="7 3 7 8 15 8" />
+            <path d="M18 6 6 18" />
+            <path d="m6 6 12 12" />
           </svg>
-          <span
-            v-else
-            class="animate-spin inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full"
-          ></span>
-          {{ isSaving ? 'Saving...' : 'Save Entry' }}
-        </button>
+        </div>
+        <h3 class="text-lg font-bold text-gray-900 mb-2">Close this tab?</h3>
+        <p class="text-sm text-gray-600 mb-6">
+          "{{ confirmCloseDialog.tabTitle }}" contains unsaved trade information. Are you sure you
+          want to discard it?
+        </p>
+        <div class="flex justify-end gap-3">
+          <button
+            type="button"
+            @click="confirmCloseDialog.isOpen = false"
+            class="px-4 py-2.5 rounded-xl text-sm font-semibold text-gray-600 hover:bg-gray-100 transition-colors"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            @click="confirmCloseTab"
+            class="px-4 py-2.5 rounded-xl text-sm font-bold text-white bg-red-600 hover:bg-red-700 transition-colors shadow-sm"
+          >
+            Discard & Close
+          </button>
+        </div>
       </div>
-    </form>
+    </div>
 
     <!-- Alert Modal (Toast) -->
     <BaseAlertDialog
@@ -707,204 +1044,164 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import BaseDateInput from '../ui/BaseDateInput.vue'
 import BaseSelect from '../ui/BaseSelect.vue'
 import BaseMultiSelect from '../ui/BaseMultiSelect.vue'
 import BaseAlertDialog from '../ui/BaseAlertDialog.vue'
+import { useTradeTabsStore, TradeTab } from '../../stores/tradeTabs'
 
-const setups = ref<{ id: number; name: string }[]>([])
-const symbols = ref<{ id: number; name: string }[]>([])
-const isSaving = ref(false)
-const customColumns = ref<any[]>([])
-const customData = ref<Record<string, any>>({})
+const tradeTabsStore = useTradeTabsStore()
 
-const getInitialForm = () => ({
-  setupId: '' as number | '',
-  symbolId: '' as number | '',
-  position: 'Buy' as 'Buy' | 'Sell',
-  directionBias: 'Bullish' as 'Bullish' | 'Bearish',
-  entryTimeframe: 'M15',
-  sessionName: 'New York',
-  entryDatetime: '',
-  exitDatetime: '',
-  quality: 'Green' as 'Green' | 'Blue' | 'Yellow' | 'Orange' | 'Red',
-  news: false,
-  isTest: false,
-  notes: '',
+// Bind reactive form references to active tab
+const form = computed(() => tradeTabsStore.activeTab.form)
+const imageUrls = computed(() => tradeTabsStore.activeTab.imageUrls)
+const customColumns = computed(() => tradeTabsStore.activeTab.customColumns)
+const customData = computed(() => tradeTabsStore.activeTab.customData)
+const setupSessions = computed(() => tradeTabsStore.activeTab.setupSessions)
+const setups = computed(() => tradeTabsStore.setups)
+const symbols = computed(() => tradeTabsStore.symbols)
 
-  normalRr: null as number | null,
-  normalMaxRr: null as number | null,
-  normalSlPoints: null as number | null,
-
-  beRr: null as number | null,
-  beMaxRr: null as number | null,
-  beSlPoints: null as number | null,
-
-  trailRr: null as number | null,
-  trailMaxRr: null as number | null,
-  trailSlPoints: null as number | null
+const unsavedTabsCount = computed(() => {
+  return tradeTabsStore.tabs.filter((t) => tradeTabsStore.hasTabData(t) && !t.isSaved).length
 })
 
-const form = ref(getInitialForm())
-const imageUrls = ref<string[]>([''])
-
-const setupSessions = ref<any[]>([])
-
+// Watch entryDatetime on active tab for auto session matching
 watch(
-  () => form.value.entryDatetime,
-  (newVal) => {
-    if (newVal) {
-      form.value.exitDatetime = newVal;
-      
-      if (setupSessions.value && setupSessions.value.length > 0) {
-        const timePart = newVal.includes('T') ? newVal.split('T')[1] : newVal.split(' ')[1];
-        if (timePart) {
-          const [hours, mins] = timePart.split(':').map(Number);
-          const currentMins = hours * 60 + mins;
-          
-          let foundSession = '';
-          for (const s of setupSessions.value) {
-            if (!s.startTime || !s.endTime) continue;
-            const [sHours, sMins] = s.startTime.split(':').map(Number);
-            const [eHours, eMins] = s.endTime.split(':').map(Number);
-            const startMins = sHours * 60 + sMins;
-            const endMins = eHours * 60 + eMins;
-            
-            if (startMins <= endMins) {
-              if (currentMins >= startMins && currentMins <= endMins) {
-                foundSession = s.sessionName;
-                break;
-              }
-            } else {
-              if (currentMins >= startMins || currentMins <= endMins) {
-                foundSession = s.sessionName;
-                break;
-              }
-            }
-          }
-          if (foundSession) {
-            form.value.sessionName = foundSession;
-          }
-        }
+  () => [tradeTabsStore.activeTab.id, form.value?.entryDatetime] as const,
+  ([currentTabId, currentDatetime], [oldTabId, oldDatetime]) => {
+    if (currentTabId !== oldTabId) return
+    if (currentDatetime && currentDatetime !== oldDatetime) {
+      tradeTabsStore.onEntryDatetimeChange(currentTabId, currentDatetime)
+    }
+  }
+)
+
+// Watch normalSlPoints for auto-propagating to BE and Trail if empty
+watch(
+  () => [tradeTabsStore.activeTab.id, form.value?.normalSlPoints] as const,
+  ([currentTabId, currentSl], [oldTabId, oldSl]) => {
+    if (currentTabId !== oldTabId) return
+    if (
+      currentSl !== null &&
+      currentSl !== undefined &&
+      (currentSl as any) !== '' &&
+      currentSl !== oldSl
+    ) {
+      if (
+        form.value.beSlPoints === null ||
+        form.value.beSlPoints === undefined ||
+        (form.value.beSlPoints as any) === ''
+      ) {
+        form.value.beSlPoints = currentSl
+      }
+      if (
+        form.value.trailSlPoints === null ||
+        form.value.trailSlPoints === undefined ||
+        (form.value.trailSlPoints as any) === ''
+      ) {
+        form.value.trailSlPoints = currentSl
       }
     }
   }
 )
 
+// Watch setupId change to fetch custom columns and sessions
 watch(
-  () => form.value.normalSlPoints,
-  (newVal) => {
-    if (newVal !== null && newVal !== undefined && (newVal as any) !== '') {
-      form.value.beSlPoints = newVal;
-      form.value.trailSlPoints = newVal;
-    }
-  }
-)
-
-watch(
-  () => form.value.setupId,
-  async (newSetupId) => {
-    if (!newSetupId) {
-      customColumns.value = []
-      customData.value = {}
-      setupSessions.value = []
+  () => [tradeTabsStore.activeTab.id, form.value?.setupId] as const,
+  async ([currentTabId, currentSetupId], [oldTabId, oldSetupId]) => {
+    if (currentTabId !== oldTabId) {
+      // Switching tabs: if newly active tab has setupId and no custom columns loaded, fetch them
+      if (currentSetupId && tradeTabsStore.activeTab.customColumns.length === 0) {
+        await tradeTabsStore.onSetupChange(currentTabId, currentSetupId)
+      }
       return
     }
-    try {
-      const res = await window.api.setups.getDetails(newSetupId)
-      if (res.success) {
-        customColumns.value = res.data.customColumns || []
-        setupSessions.value = res.data.sessions || []
-        
-        const newData: Record<string, any> = {}
-        if (res.data.customColumns) {
-          res.data.customColumns.forEach((col: any) => {
-            if (col.type === 'switch' || col.type === 'checkbox') newData[col.id] = false
-            else if (col.type === 'number') newData[col.id] = null
-            else if (col.type === 'multiple_selector') newData[col.id] = []
-            else newData[col.id] = ''
-          })
-        }
-        customData.value = newData
-        form.value.sessionName = ''
-      }
-    } catch (e) {
-      console.error('Failed to load custom columns', e)
+
+    if (currentSetupId !== oldSetupId) {
+      await tradeTabsStore.onSetupChange(currentTabId, currentSetupId)
     }
   }
 )
 
 onMounted(async () => {
-  try {
-    const [setupsRes, symbolsRes] = await Promise.all([
-      window.api.setups.list(),
-      window.api.symbols.list()
-    ])
-    if (setupsRes.success) setups.value = setupsRes.data
-    if (symbolsRes.success) symbols.value = symbolsRes.data
-  } catch (error) {
-    console.error('Failed to load setups/symbols:', error)
+  await tradeTabsStore.loadMetadata()
+  if (tradeTabsStore.activeTab.form.setupId && tradeTabsStore.activeTab.customColumns.length === 0) {
+    await tradeTabsStore.onSetupChange(
+      tradeTabsStore.activeTab.id,
+      tradeTabsStore.activeTab.form.setupId
+    )
   }
 })
 
 const addImageUrl = () => {
-  imageUrls.value.push('')
+  tradeTabsStore.activeTab.imageUrls.push('')
 }
 
 const removeImageUrl = (index: number) => {
-  imageUrls.value.splice(index, 1)
-  if (imageUrls.value.length === 0) {
-    imageUrls.value.push('')
+  tradeTabsStore.activeTab.imageUrls.splice(index, 1)
+  if (tradeTabsStore.activeTab.imageUrls.length === 0) {
+    tradeTabsStore.activeTab.imageUrls.push('')
   }
 }
 
+// Confirmation Dialog for Discarding / Closing a tab
+const confirmCloseDialog = ref({
+  isOpen: false,
+  tabId: '',
+  tabTitle: ''
+})
 
-const resetFormKeepCore = () => {
-  form.value.quality = 'Green';
-  form.value.news = false;
-  form.value.isTest = false;
-  form.value.notes = '';
-  
-  form.value.normalRr = null;
-  form.value.normalMaxRr = null;
-  form.value.normalSlPoints = null;
-  
-  form.value.beRr = null;
-  form.value.beMaxRr = null;
-  form.value.beSlPoints = null;
-  
-  form.value.trailRr = null;
-  form.value.trailMaxRr = null;
-  form.value.trailSlPoints = null;
-  
-  imageUrls.value = [''];
+const handleRequestCloseTab = (tab: TradeTab) => {
+  const index = tradeTabsStore.tabs.findIndex((t) => t.id === tab.id)
+  const tabTitle = tradeTabsStore.getTabDisplayTitle(tab, Math.max(0, index))
 
-  if (customColumns.value) {
-    customColumns.value.forEach((col: any) => {
-      if (col.type === 'switch' || col.type === 'checkbox') customData.value[col.id] = false
-      else if (col.type === 'number') customData.value[col.id] = null
-      else if (col.type === 'multiple_selector') customData.value[col.id] = []
-      else customData.value[col.id] = ''
-    })
+  if (tradeTabsStore.tabs.length === 1) {
+    if (tradeTabsStore.hasTabData(tab) && !tab.isSaved) {
+      confirmCloseDialog.value = {
+        isOpen: true,
+        tabId: tab.id,
+        tabTitle
+      }
+    } else {
+      tradeTabsStore.resetTab(tab.id)
+    }
+    return
+  }
+
+  if (tradeTabsStore.hasTabData(tab) && !tab.isSaved) {
+    confirmCloseDialog.value = {
+      isOpen: true,
+      tabId: tab.id,
+      tabTitle
+    }
+  } else {
+    tradeTabsStore.closeTab(tab.id)
   }
 }
 
-const resetForm = () => {
-  form.value = getInitialForm()
-  imageUrls.value = ['']
+const confirmCloseTab = () => {
+  if (confirmCloseDialog.value.tabId) {
+    tradeTabsStore.closeTab(confirmCloseDialog.value.tabId)
+  }
+  confirmCloseDialog.value.isOpen = false
 }
 
-// Alert Modal State
+// Alert Toast State
 const alertModal = ref({
   isOpen: false,
   title: '',
   message: '',
   variant: 'success' as 'success' | 'error' | 'info',
-  duration: 3000
+  duration: 3500
 })
 
-const showAlert = (title: string, message: string, variant: 'success' | 'error' | 'info' = 'success', duration = 3000) => {
+const showAlert = (
+  title: string,
+  message: string,
+  variant: 'success' | 'error' | 'info' = 'success',
+  duration = 3500
+) => {
   alertModal.value = {
     isOpen: true,
     title,
@@ -915,76 +1212,39 @@ const showAlert = (title: string, message: string, variant: 'success' | 'error' 
 }
 
 const saveEntry = async () => {
-  if (isSaving.value) return
-
-  if (!form.value.entryDatetime) {
-    showAlert('Error', 'Entry Date & Time is required', 'error')
-    return
+  const tab = tradeTabsStore.activeTab
+  const res = await tradeTabsStore.saveTab(tab.id)
+  if (res.success) {
+    showAlert('Success', 'Entry saved successfully!', 'success')
+  } else {
+    showAlert('Error', res.error || 'Failed to save entry', 'error')
   }
-  if (!form.value.setupId) {
-    showAlert('Error', 'Trading Setup is required', 'error')
-    return
-  }
-  
-  if (!form.value.symbolId) {
-    showAlert('Error', 'Symbol is required', 'error')
-    return
-  }
+}
 
-  const hasRR = (form.value.normalRr !== null && (form.value.normalRr as any) !== '') || 
-                (form.value.beRr !== null && (form.value.beRr as any) !== '') || 
-                (form.value.trailRr !== null && (form.value.trailRr as any) !== '');
-  if (!hasRR) {
-    showAlert('Error', 'At least one RR value is required (Normal, BE, or Trail)', 'error')
-    return
-  }
-
-
-  isSaving.value = true
-
+const isSavingAll = ref(false)
+const handleSaveAllTabs = async () => {
+  if (isSavingAll.value) return
+  isSavingAll.value = true
   try {
-    const validImages = imageUrls.value.filter((url) => url.trim().length > 0)
-
-    const entryData = {
-      ...form.value,
-      setupId: Number(form.value.setupId),
-      symbolId: Number(form.value.symbolId),
-      exitDatetime: form.value.exitDatetime || null,
-      sessionName: form.value.sessionName || null,
-
-      // Calculate TPs automatically based on the view logic
-      normalTpPoints:
-        form.value.normalRr && form.value.normalSlPoints
-          ? Number((form.value.normalRr * form.value.normalSlPoints).toFixed(2))
-          : null,
-      beTpPoints:
-        form.value.beRr && form.value.beSlPoints
-          ? Number((form.value.beRr * form.value.beSlPoints).toFixed(2))
-          : null,
-      trailTpPoints:
-        form.value.trailRr && form.value.trailSlPoints
-          ? Number((form.value.trailRr * form.value.trailSlPoints).toFixed(2))
-          : null,
-
-      images: validImages.length > 0 ? validImages : null,
-      customData: Object.keys(customData.value).length > 0 ? customData.value : null
-    }
-
-    const plainEntryData = JSON.parse(JSON.stringify(entryData))
-    const res = await window.api.journal.create(plainEntryData)
-    
-    if (res.success) {
-      showAlert('Success', 'Entry saved successfully!', 'success')
-      resetFormKeepCore()
+    const res = await tradeTabsStore.saveAllTabs()
+    if (res.succeeded > 0 && res.failed === 0) {
+      showAlert('Success', `All ${res.succeeded} trade entries saved successfully!`, 'success')
+    } else if (res.succeeded > 0 && res.failed > 0) {
+      showAlert(
+        'Warning',
+        `Saved ${res.succeeded} entries, but ${res.failed} failed:\n${res.errors.join('\n')}`,
+        'error',
+        6000
+      )
+    } else if (res.failed > 0) {
+      showAlert('Error', `Failed to save entries:\n${res.errors.join('\n')}`, 'error', 5000)
     } else {
-      console.error('Failed to save entry:', res.error)
-      showAlert('Error', 'Failed to save entry: ' + res.error, 'error')
+      showAlert('Info', res.errors[0] || 'No unsaved trade tabs with data found', 'info')
     }
-  } catch (error: any) {
-    console.error('Failed to save entry:', error)
-    showAlert('Error', 'Failed to save entry: ' + (error.message || String(error)), 'error')
+  } catch (err: any) {
+    showAlert('Error', err.message || 'Error occurred while saving all entries', 'error')
   } finally {
-    isSaving.value = false
+    isSavingAll.value = false
   }
 }
 </script>

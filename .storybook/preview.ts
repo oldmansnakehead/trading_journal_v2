@@ -1,5 +1,12 @@
 import type { Preview } from '@storybook/vue3-vite'
+import { setup } from '@storybook/vue3-vite'
+import { createPinia } from 'pinia'
 import '../src/renderer/src/assets/main.css'
+
+const pinia = createPinia()
+setup((app) => {
+  app.use(pinia)
+})
 
 const preview: Preview = {
   parameters: {

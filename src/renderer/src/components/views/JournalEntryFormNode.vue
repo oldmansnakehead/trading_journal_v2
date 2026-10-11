@@ -19,12 +19,11 @@
       JournalEntryForm View
     </div>
     <div class="text-xs text-gray-600 mb-2">
-      Form for creating or editing a trading journal entry. Includes trade info, timing, RR data,
-      images, and notes.
+      Form for logging trading entries with multi-tab support for logging multiple setups simultaneously, batch save, duplicate tab, and draft management.
     </div>
     <div class="flex flex-col gap-1 text-[10px] text-gray-500 bg-gray-50 p-2 rounded">
       <div>Props: None</div>
-      <div>State: Form Data</div>
+      <div>State: Multi-Tab Trade Store (Pinia)</div>
     </div>
   </div>
 </template>
