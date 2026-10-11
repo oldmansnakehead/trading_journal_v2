@@ -6,6 +6,7 @@ import InfoTooltip from './InfoTooltip.vue'
 import { calculateTradeDuration } from '../../utils/duration'
 
 interface Props {
+  embedded?: boolean
   embeddedTrades?: any[]
   initialStatMode?: 'normal' | 'be' | 'trail'
   initialCapital?: number
@@ -13,15 +14,20 @@ interface Props {
   initialReturnCalculation?: 'simple' | 'log'
   initialTradeType?: 'all' | 'real' | 'test' | string
   initialSetup?: string
+  initialSymbol?: string
+  initialSession?: string
 }
 
 const props = withDefaults(defineProps<Props>(), {
+  embedded: false,
   initialStatMode: 'normal',
   initialCapital: 10000,
   initialRiskPercent: 1,
   initialReturnCalculation: 'simple',
   initialTradeType: 'all',
-  initialSetup: 'all'
+  initialSetup: 'all',
+  initialSymbol: 'all',
+  initialSession: 'all'
 })
 
 const currentDate = ref(new Date())
@@ -126,6 +132,16 @@ const filteredTrades = computed(() => {
     // Trade Type filter
     if (tradeType.value === 'real' && t.isTest) return false
     if (tradeType.value === 'test' && !t.isTest) return false
+
+    // Symbol filter
+    if (props.initialSymbol && props.initialSymbol !== 'all' && t.symbolId?.toString() !== String(props.initialSymbol)) {
+      return false
+    }
+
+    // Session filter
+    if (props.initialSession && props.initialSession !== 'all' && (!t.sessionName || t.sessionName.toLowerCase() !== props.initialSession.toLowerCase())) {
+      return false
+    }
 
     return true
   })
@@ -333,8 +349,66 @@ onMounted(() => {
 
 <template>
   <div class="w-full flex flex-col bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-    <!-- Header Controls -->
-    <div class="p-6 border-b border-gray-100 flex flex-col gap-4">
+    <!-- Compact Header when Embedded (No duplicate state inputs or KPI cards) -->
+    <div v-if="embedded" class="p-5 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-xl shrink-0">
+          <i class="ph-bold ph-calendar"></i>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h2 class="text-lg font-bold text-gray-900">Trading Calendar</h2>
+            <span
+              v-if="monthlySummary.totalTrades > 0"
+              class="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-gray-50 border border-gray-200"
+            >
+              <span :class="monthlySummary.netPnl >= 0 ? 'text-emerald-600 font-bold' : 'text-rose-600 font-bold'">
+                {{ monthlySummary.netPnl >= 0 ? '+' : '' }}${{ monthlySummary.netPnl.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
+              </span>
+              <span class="text-gray-300">·</span>
+              <span class="text-gray-600">{{ monthlySummary.winRate }}% WR</span>
+              <span class="text-gray-300">·</span>
+              <span class="text-gray-500">{{ monthlySummary.totalTrades }} trades</span>
+            </span>
+          </div>
+          <p class="text-xs text-gray-500">Daily performance & trading outcomes</p>
+        </div>
+      </div>
+
+      <!-- Month Navigation & Today -->
+      <div class="flex items-center gap-2 self-start sm:self-center">
+        <button
+          @click="prevMonth"
+          class="p-2 text-gray-500 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors cursor-pointer"
+          title="Previous Month"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="15 18 9 12 15 6"></polyline>
+          </svg>
+        </button>
+        <span class="text-sm sm:text-base font-bold text-gray-900 min-w-[140px] text-center select-none">
+          {{ currentDate.toLocaleString('default', { month: 'long', year: 'numeric' }) }}
+        </span>
+        <button
+          @click="nextMonth"
+          class="p-2 text-gray-500 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors cursor-pointer"
+          title="Next Month"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="9 18 15 12 9 6"></polyline>
+          </svg>
+        </button>
+        <button
+          @click="setToday"
+          class="ml-1 bg-blue-50 text-blue-600 hover:bg-blue-100 px-3 py-1.5 rounded-lg font-bold text-xs transition-colors cursor-pointer"
+        >
+          Today
+        </button>
+      </div>
+    </div>
+
+    <!-- Full Header Controls when NOT Embedded (Dedicated /calendar page) -->
+    <div v-else class="p-6 border-b border-gray-100 flex flex-col gap-4">
       <!-- Top Row: Title & Month Navigation -->
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>

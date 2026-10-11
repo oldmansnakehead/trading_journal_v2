@@ -1212,6 +1212,7 @@
     <!-- Calendar View Section -->
     <div class="mt-8">
       <CalendarView
+        :embedded="true"
         :embedded-trades="allTrades"
         :initial-stat-mode="statMode"
         :initial-capital="simulation.initialBalance"
@@ -1219,6 +1220,8 @@
         :initial-return-calculation="simulation.returnCalculation"
         :initial-trade-type="filters.tradeType"
         :initial-setup="filters.setup"
+        :initial-symbol="filters.symbol"
+        :initial-session="filters.session"
       />
     </div>
     
