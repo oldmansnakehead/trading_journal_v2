@@ -649,12 +649,19 @@
         </div>
         
         <div class="p-6 flex flex-col gap-5 overflow-y-auto">
-          <BaseInput
-            id="session-name"
-            label="Session Name"
-            v-model="newSession.sessionName"
-            placeholder="e.g. New York, London"
-          />
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-1.5">Session Name</label>
+            <BaseSelect
+              id="session-name"
+              v-model="newSession.sessionName"
+              :options="availableSessionOptions"
+              placeholder="Select Standard Session..."
+              :disabled="availableSessionOptions.length === 0"
+            />
+            <p v-if="availableSessionOptions.length === 0" class="text-xs text-amber-600 mt-1 font-medium">
+              เพิ่มครบทุก Session มาตรฐาน (London, New York, London Close, Asia, Tokyo) สำหรับ Setup นี้แล้ว
+            </p>
+          </div>
           
           <div class="grid grid-cols-2 gap-4">
             <div>
@@ -672,7 +679,7 @@
           <BaseButton variant="outline" @click="closeAddSessionModal">
             Cancel
           </BaseButton>
-          <BaseButton variant="primary" @click="saveSession" :disabled="!newSession.sessionName || !newSession.startTime || !newSession.endTime">
+          <BaseButton variant="primary" @click="saveSession" :disabled="!newSession.sessionName || !newSession.startTime || !newSession.endTime || availableSessionOptions.length === 0">
             Save Session
           </BaseButton>
         </div>
@@ -702,13 +709,14 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import BaseButton from '../ui/BaseButton.vue'
 import BaseInput from '../ui/BaseInput.vue'
 import BaseSelect from '../ui/BaseSelect.vue'
 import BaseTimeInput from '../ui/BaseTimeInput.vue'
 import BaseConfirmModal from '../ui/BaseConfirmModal.vue'
 import BaseAlertDialog from '../ui/BaseAlertDialog.vue'
+import { STANDARD_SESSIONS } from '../../utils/sessions'
 
 // Alert Modal State
 const alertModal = ref({
@@ -915,6 +923,8 @@ const columnTypeOptions = [
   { value: 'multiple_selector', label: 'Multiple Selector' }
 ]
 
+
+
 const setupSessionsList = ref<any[]>([])
 const isAddSessionModalOpen = ref(false)
 const newSession = ref({
@@ -922,6 +932,28 @@ const newSession = ref({
   startTime: '',
   endTime: ''
 })
+
+// Only allow standard sessions that have not already been added to the current setup
+const availableSessionOptions = computed(() => {
+  const existingNames = new Set(setupSessionsList.value.map((s) => s.sessionName))
+  return STANDARD_SESSIONS.filter((s) => !existingNames.has(s.value)).map((s) => ({
+    value: s.value,
+    label: s.label
+  }))
+})
+
+// Auto-fill default session hours when selecting a session
+watch(
+  () => newSession.value.sessionName,
+  (name) => {
+    if (!name) return
+    const std = STANDARD_SESSIONS.find((s) => s.value === name)
+    if (std) {
+      newSession.value.startTime = std.defaultStart
+      newSession.value.endTime = std.defaultEnd
+    }
+  }
+)
 
 const playbookContent = ref('')
 const playbookContentModified = ref(false)
@@ -977,7 +1009,17 @@ watch(selectedSetupId, () => {
 })
 
 const openAddSessionModal = () => {
-  newSession.value = { sessionName: '', startTime: '', endTime: '' }
+  const firstAvailable = availableSessionOptions.value[0]
+  if (firstAvailable) {
+    const std = STANDARD_SESSIONS.find((s) => s.value === firstAvailable.value)
+    newSession.value = {
+      sessionName: firstAvailable.value,
+      startTime: std?.defaultStart || '08:00',
+      endTime: std?.defaultEnd || '17:00'
+    }
+  } else {
+    newSession.value = { sessionName: '', startTime: '', endTime: '' }
+  }
   isAddSessionModalOpen.value = true
 }
 
@@ -989,6 +1031,20 @@ const saveSession = async () => {
   console.log('saveSession called with:', newSession.value, 'setupId:', selectedSetupId.value)
   if (!newSession.value.sessionName || !selectedSetupId.value) {
     console.log('Validation failed')
+    return
+  }
+
+  const allowedNames = STANDARD_SESSIONS.map((s) => s.value as string)
+  if (!allowedNames.includes(newSession.value.sessionName)) {
+    showAlert('Error', `Session name must be one of: ${allowedNames.join(', ')}`, 'error')
+    return
+  }
+
+  const isDuplicate = setupSessionsList.value.some(
+    (s) => s.sessionName === newSession.value.sessionName
+  )
+  if (isDuplicate) {
+    showAlert('Error', `Session "${newSession.value.sessionName}" already exists for this setup.`, 'error')
     return
   }
   

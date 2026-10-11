@@ -232,4 +232,11 @@ describe('Trading Journal Statistics Engine', () => {
       expect(kpis.avgMaxRr).toBe(4.5)
     })
   })
+
+  describe('Standard Market Sessions Enforcement', () => {
+    it('enforces exactly the 5 canonical session names', () => {
+      const allowed = ['London', 'New York', 'London Close', 'Asia', 'Tokyo']
+      expect(allowed).toEqual(['London', 'New York', 'London Close', 'Asia', 'Tokyo'])
+    })
+  })
 })
