@@ -67,6 +67,21 @@
                   <span class="font-semibold">{{ trade.quality || '-' }}</span>
                 </div>
               </div>
+              <div>
+                <p class="text-xs text-gray-500">Entry Time</p>
+                <p class="font-semibold text-xs">{{ trade.entryDatetime ? new Date(trade.entryDatetime).toLocaleString() : '-' }}</p>
+              </div>
+              <div>
+                <p class="text-xs text-gray-500">Exit Time</p>
+                <p class="font-semibold text-xs">{{ trade.exitDatetime ? new Date(trade.exitDatetime).toLocaleString() : '-' }}</p>
+              </div>
+              <div class="col-span-2 bg-gray-50 p-2.5 rounded-lg border border-gray-100 flex items-center justify-between">
+                <span class="text-xs text-gray-500 font-medium">Holding Duration</span>
+                <span class="font-bold text-sm text-gray-800 flex items-center gap-1.5">
+                  <i class="ph-bold ph-timer text-blue-500"></i>
+                  {{ calculateTradeDuration(trade.entryDatetime, trade.exitDatetime).text }}
+                </span>
+              </div>
             </div>
           </div>
 
@@ -149,6 +164,7 @@
 
 <script setup lang="ts">
 import { ref, watch, computed } from 'vue'
+import { calculateTradeDuration } from '../../utils/duration'
 
 const props = defineProps<{
   show: boolean

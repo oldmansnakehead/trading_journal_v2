@@ -1020,7 +1020,7 @@
       </div>
 
       <div class="overflow-x-auto">
-        <table class="w-full text-left border-collapse min-w-[850px]">
+        <table class="w-full text-left border-collapse min-w-[960px]">
           <thead>
             <tr class="bg-gray-50 border-y border-gray-200 text-gray-500 text-sm font-semibold">
               <!-- Select All Checkbox -->
@@ -1036,6 +1036,16 @@
                 />
               </th>
               <th class="py-4 px-4">Date</th>
+              <th class="py-4 px-4">
+                <div class="flex items-center gap-1.5">
+                  <span>Duration</span>
+                  <InfoTooltip
+                    title="Holding Duration (ระยะเวลาถือออเดอร์)"
+                    description="ระยะเวลาตั้งแต่เปิดออเดอร์ (Entry Time) จนถึงปิดออเดอร์ (Exit Time) ใช้ประเมินความเร็วในการทำกำไรและสไตล์การถือครอง (Scalping / Day Trade / Swing)"
+                    formula="Exit Time - Entry Time"
+                  />
+                </div>
+              </th>
               <th class="py-4 px-4">Setup</th>
               <th class="py-4 px-4">Symbol</th>
               <th class="py-4 px-4">Position</th>
@@ -1063,10 +1073,28 @@
                   class="rounded border-gray-300 text-blue-600 focus:ring-blue-500 w-4 h-4 cursor-pointer align-middle"
                 />
               </td>
-              <td class="py-4 px-4 text-gray-900">
+              <td class="py-4 px-4 text-gray-900 whitespace-nowrap">
                 {{ new Date(trade.entryDatetime).toLocaleDateString() }}
                 <div class="text-xs text-gray-500">
                   {{ new Date(trade.entryDatetime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }}
+                </div>
+              </td>
+              <!-- Duration (Exit - Entry) -->
+              <td
+                class="py-4 px-4 text-gray-900 whitespace-nowrap"
+                :title="calculateTradeDuration(trade.entryDatetime, trade.exitDatetime).title"
+              >
+                <div class="flex items-center gap-1.5">
+                  <i class="ph-bold ph-timer text-gray-400 text-sm"></i>
+                  <span class="font-semibold text-gray-800">
+                    {{ calculateTradeDuration(trade.entryDatetime, trade.exitDatetime).text }}
+                  </span>
+                </div>
+                <div
+                  v-if="calculateTradeDuration(trade.entryDatetime, trade.exitDatetime).subText"
+                  class="text-xs text-gray-400 mt-0.5"
+                >
+                  {{ calculateTradeDuration(trade.entryDatetime, trade.exitDatetime).subText }}
                 </div>
               </td>
               <td class="py-4 px-4 text-gray-900">
@@ -1172,7 +1200,7 @@
               </td>
             </tr>
             <tr v-if="filteredTrades.length === 0">
-              <td colspan="9" class="py-8 text-center text-gray-500">
+              <td colspan="10" class="py-8 text-center text-gray-500">
                 No trades found matching the current filters.
               </td>
             </tr>
@@ -1234,6 +1262,7 @@ import TradeScreenshotsModal from '../ui/TradeScreenshotsModal.vue'
 import BaseConfirmModal from '../ui/BaseConfirmModal.vue'
 import BaseAlertDialog from '../ui/BaseAlertDialog.vue'
 import InfoTooltip from '../ui/InfoTooltip.vue'
+import { calculateTradeDuration } from '../../utils/duration'
 
 // Dashboard DOM ref & Export state
 const dashboardRef = ref<HTMLElement | null>(null)

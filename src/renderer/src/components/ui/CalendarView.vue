@@ -3,6 +3,7 @@ import { ref, computed, onMounted } from 'vue'
 import BaseSelect from './BaseSelect.vue'
 import TradeDetailsModal from './TradeDetailsModal.vue'
 import InfoTooltip from './InfoTooltip.vue'
+import { calculateTradeDuration } from '../../utils/duration'
 
 const currentDate = ref(new Date())
 
@@ -702,6 +703,13 @@ onMounted(() => {
                 <p class="text-xs text-gray-400">
                   {{ new Date(t.entryDatetime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }}
                   <span v-if="t.sessionName">· {{ t.sessionName }}</span>
+                  <span
+                    v-if="calculateTradeDuration(t.entryDatetime, t.exitDatetime).text !== '-'"
+                    class="text-gray-600 font-medium"
+                    :title="calculateTradeDuration(t.entryDatetime, t.exitDatetime).title"
+                  >
+                    · ⏱️ {{ calculateTradeDuration(t.entryDatetime, t.exitDatetime).text }}
+                  </span>
                 </p>
               </div>
             </div>
