@@ -14,10 +14,11 @@ const selectedSetup = ref<string>('all')
 const rrType = ref<'normal' | 'be' | 'trail'>('normal')
 const tradeType = ref<'all' | 'real' | 'test'>('all')
 
-// Capital & Risk % Simulation
+// Capital & Risk % Simulation & Return Calculation (Simple vs Log Compounded)
 const simulation = ref({
   initialBalance: 10000,
-  riskPerTrade: 1
+  riskPerTrade: 1,
+  returnCalculation: 'simple' as 'simple' | 'log'
 })
 
 const setupOptions = computed(() => [
@@ -36,13 +37,6 @@ const selectedDayDate = ref<string | null>(null)
 const showDayModal = ref(false)
 const selectedTradeId = ref<number | null>(null)
 const showTradeDetails = ref(false)
-
-// Risk amount per trade in dollars ($)
-const riskPerTradeAmount = computed(() => {
-  const cap = Number(simulation.value.initialBalance) || 10000
-  const rPct = (Number(simulation.value.riskPerTrade) || 1) / 100
-  return cap * rPct
-})
 
 // Helper to calculate RR according to selected RR mode with safe fallbacks
 const getTradeRr = (trade: any, mode: 'normal' | 'be' | 'trail' = rrType.value): number => {
@@ -99,6 +93,13 @@ const filteredTrades = computed(() => {
   })
 })
 
+// Chronologically sorted filtered trades for accurate compounding calculation
+const sortedFilteredTrades = computed(() => {
+  return [...filteredTrades.value].sort(
+    (a, b) => new Date(a.entryDatetime).getTime() - new Date(b.entryDatetime).getTime()
+  )
+})
+
 export interface DayStat {
   dateStr: string
   date: Date
@@ -114,9 +115,14 @@ export interface DayStat {
 // Compute daily aggregated data based on filtered trades & current RR type & simulation settings
 const dailyStats = computed(() => {
   const stats: Record<string, DayStat> = {}
-  const riskAmount = riskPerTradeAmount.value
+  const isSimple = simulation.value.returnCalculation === 'simple'
+  const initialBalance = Number(simulation.value.initialBalance) || 10000
+  const riskPercent = (Number(simulation.value.riskPerTrade) || 1) / 100
+  const fixedRiskAmount = initialBalance * riskPercent
 
-  filteredTrades.value.forEach((trade) => {
+  let currentBalance = initialBalance
+
+  sortedFilteredTrades.value.forEach((trade) => {
     if (!trade.entryDatetime) return
     const tradeDate = new Date(trade.entryDatetime)
     const dateStr = formatLocalDate(tradeDate)
@@ -136,12 +142,18 @@ const dailyStats = computed(() => {
     }
 
     const rr = getTradeRr(trade, rrType.value)
-    const pnl = rr * riskAmount
+    const riskAmount = isSimple ? fixedRiskAmount : currentBalance * riskPercent
+    const pnl = riskAmount * rr
+    currentBalance += pnl
 
     stats[dateStr].count++
     stats[dateStr].netRr += rr
     stats[dateStr].netPnl += pnl
-    stats[dateStr].trades.push(trade)
+    stats[dateStr].trades.push({
+      ...trade,
+      simulatedPnl: pnl,
+      simulatedRr: rr
+    })
 
     if (rr > 0) stats[dateStr].wins++
     else if (rr < 0) stats[dateStr].losses++
@@ -324,9 +336,9 @@ onMounted(() => {
         </div>
       </div>
 
-      <!-- Controls Row: Simulation Inputs (Capital, Risk%), Setup, Trade Type, and RR Mode Switcher -->
+      <!-- Controls Row: Simulation Inputs (Capital, Risk%, Return Calculation), Setup, Trade Type, and RR Mode Switcher -->
       <div class="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-gray-100">
-        <!-- Left Group: Capital, Risk%, Setup, Trade Type -->
+        <!-- Left Group: Capital, Risk%, Return Calculation, Setup, Trade Type -->
         <div class="flex flex-wrap items-center gap-3">
           <!-- Capital $ -->
           <div class="flex items-center gap-2 bg-gray-50 border border-gray-200 rounded-xl px-3 py-1.5 shadow-2xs">
@@ -353,8 +365,39 @@ onMounted(() => {
             />
           </div>
 
+          <!-- Return Calculation (Simple vs Log Compounded) -->
+          <div class="flex flex-col gap-0.5">
+            <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Return Calculation</span>
+            <div class="bg-gray-100 p-0.5 rounded-xl flex font-semibold text-xs border border-gray-200/60 shadow-2xs">
+              <button
+                type="button"
+                @click="simulation.returnCalculation = 'simple'"
+                :class="[
+                  'px-3 py-1 rounded-lg transition-all duration-150 cursor-pointer',
+                  simulation.returnCalculation === 'simple'
+                    ? 'bg-white text-gray-900 shadow-sm font-bold'
+                    : 'text-gray-500 hover:text-gray-800'
+                ]"
+              >
+                Simple
+              </button>
+              <button
+                type="button"
+                @click="simulation.returnCalculation = 'log'"
+                :class="[
+                  'px-3 py-1 rounded-lg transition-all duration-150 cursor-pointer',
+                  simulation.returnCalculation === 'log'
+                    ? 'bg-white text-gray-900 shadow-sm font-bold'
+                    : 'text-gray-500 hover:text-gray-800'
+                ]"
+              >
+                Log (Compounded)
+              </button>
+            </div>
+          </div>
+
           <!-- Setup Filter -->
-          <div class="w-44">
+          <div class="w-40">
             <BaseSelect
               v-model="selectedSetup"
               :options="setupOptions"
@@ -363,7 +406,7 @@ onMounted(() => {
           </div>
 
           <!-- Trade Type Filter -->
-          <div class="w-34">
+          <div class="w-32">
             <BaseSelect
               v-model="tradeType"
               :options="tradeTypeOptions"
@@ -423,7 +466,7 @@ onMounted(() => {
               {{ monthlySummary.netPnl >= 0 ? '+' : '' }}${{ monthlySummary.netPnl.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
             </p>
             <p class="text-[11px] font-semibold text-gray-500">
-              {{ monthlySummary.netRr > 0 ? '+' : '' }}{{ monthlySummary.netRr }} R ({{ rrType.toUpperCase() }})
+              {{ monthlySummary.netRr > 0 ? '+' : '' }}{{ monthlySummary.netRr }} R [{{ simulation.returnCalculation === 'simple' ? 'SIMPLE' : 'LOG' }}]
             </p>
           </div>
           <div
@@ -587,7 +630,7 @@ onMounted(() => {
                 {{ selectedDayStat.netPnl >= 0 ? '+' : '' }}${{ selectedDayStat.netPnl.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
                 ({{ selectedDayStat.netRr > 0 ? '+' : '' }}{{ selectedDayStat.netRr.toFixed(2) }} R)
               </span>
-              [{{ rrType.toUpperCase() }}]
+              [{{ rrType.toUpperCase() }} - {{ simulation.returnCalculation === 'simple' ? 'SIMPLE' : 'LOG' }}]
             </p>
           </div>
           <button
@@ -639,17 +682,17 @@ onMounted(() => {
                 <span
                   class="px-2.5 py-1 rounded-lg text-xs font-bold inline-block"
                   :class="[
-                    getTradeRr(t, rrType) > 0
+                    (t.simulatedPnl ?? 0) > 0
                       ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                      : getTradeRr(t, rrType) < 0
+                      : (t.simulatedPnl ?? 0) < 0
                         ? 'bg-rose-50 text-rose-700 border border-rose-200'
                         : 'bg-gray-100 text-gray-700 border border-gray-200'
                   ]"
                 >
-                  {{ (getTradeRr(t, rrType) * riskPerTradeAmount) >= 0 ? '+' : '' }}${{ (getTradeRr(t, rrType) * riskPerTradeAmount).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
+                  {{ (t.simulatedPnl ?? 0) >= 0 ? '+' : '' }}${{ (t.simulatedPnl ?? 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
                 </span>
                 <div class="text-[10px] text-gray-500 font-semibold mt-0.5">
-                  {{ getTradeRr(t, rrType) > 0 ? '+' : '' }}{{ getTradeRr(t, rrType).toFixed(2) }} R
+                  {{ (t.simulatedRr ?? getTradeRr(t, rrType)) > 0 ? '+' : '' }}{{ (t.simulatedRr ?? getTradeRr(t, rrType)).toFixed(2) }} R
                 </div>
               </div>
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-400">

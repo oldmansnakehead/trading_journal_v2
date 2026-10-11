@@ -216,6 +216,7 @@
           <label class="text-xs font-bold text-gray-500">Capital $</label>
           <input
             type="number"
+            min="0"
             v-model.number="simulation.initialBalance"
             class="w-28 bg-gray-50 border border-gray-200 text-gray-700 text-sm rounded-lg p-2 outline-none focus:border-blue-500 font-semibold"
             placeholder="10000"
@@ -225,11 +226,43 @@
           <label class="text-xs font-bold text-gray-500">Risk %</label>
           <input
             type="number"
+            min="0"
             step="0.1"
             v-model.number="simulation.riskPerTrade"
             class="w-20 bg-gray-50 border border-gray-200 text-gray-700 text-sm rounded-lg p-2 outline-none focus:border-blue-500 font-semibold"
             placeholder="1"
           />
+        </div>
+
+        <!-- Return Calculation (Simple vs Log Compounded) -->
+        <div class="flex flex-col gap-1">
+          <label class="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Return Calculation</label>
+          <div class="bg-gray-100 p-1 rounded-xl flex font-semibold text-xs border border-gray-200/60 shadow-2xs">
+            <button
+              type="button"
+              @click="simulation.returnCalculation = 'simple'"
+              :class="[
+                'px-3 py-1.5 rounded-lg transition-all duration-150 cursor-pointer',
+                simulation.returnCalculation === 'simple'
+                  ? 'bg-white text-gray-900 shadow-sm font-bold'
+                  : 'text-gray-500 hover:text-gray-800'
+              ]"
+            >
+              Simple
+            </button>
+            <button
+              type="button"
+              @click="simulation.returnCalculation = 'log'"
+              :class="[
+                'px-3 py-1.5 rounded-lg transition-all duration-150 cursor-pointer',
+                simulation.returnCalculation === 'log'
+                  ? 'bg-white text-gray-900 shadow-sm font-bold'
+                  : 'text-gray-500 hover:text-gray-800'
+              ]"
+            >
+              Log (Compounded)
+            </button>
+          </div>
         </div>
 
         <button
@@ -823,7 +856,8 @@ const reportCustomColumns = computed(() => {
 
 const simulation = ref({
   initialBalance: 10000,
-  riskPerTrade: 1
+  riskPerTrade: 1,
+  returnCalculation: 'simple' as 'simple' | 'log'
 })
 
 const resetFilters = () => {
@@ -960,10 +994,14 @@ const kpis = computed(() => {
     }
   }
 
+  const isSimple = simulation.value.returnCalculation === 'simple'
+  const initialBalance = Number(simulation.value.initialBalance) || 10000
+  const riskPercent = (Number(simulation.value.riskPerTrade) || 1) / 100
+  const fixedRiskAmount = initialBalance * riskPercent
+
   let wins = 0
   let totalRr = 0
-  let currentBalance = Number(simulation.value.initialBalance) || 10000
-  const riskPercent = (Number(simulation.value.riskPerTrade) || 1) / 100
+  let currentBalance = initialBalance
   let peak = currentBalance
   let maxDrawdown = 0
 
@@ -972,7 +1010,7 @@ const kpis = computed(() => {
     totalRr += rr
     if (rr > 0) wins++
 
-    const riskAmount = currentBalance * riskPercent
+    const riskAmount = isSimple ? fixedRiskAmount : currentBalance * riskPercent
     const pnl = riskAmount * rr
     currentBalance += pnl
 
@@ -1026,8 +1064,12 @@ const equityCurveData = computed(() => {
   const labels: string[] = []
   const data: number[] = []
 
-  let currentBalance = Number(simulation.value.initialBalance) || 10000
+  const isSimple = simulation.value.returnCalculation === 'simple'
+  const initialBalance = Number(simulation.value.initialBalance) || 10000
   const riskPercent = (Number(simulation.value.riskPerTrade) || 1) / 100
+  const fixedRiskAmount = initialBalance * riskPercent
+
+  let currentBalance = initialBalance
 
   // Point 0: Start
   labels.push('Start')
@@ -1035,7 +1077,7 @@ const equityCurveData = computed(() => {
 
   trades.forEach((trade, index) => {
     const rr = getTradeRr(trade, statMode.value)
-    const riskAmount = currentBalance * riskPercent
+    const riskAmount = isSimple ? fixedRiskAmount : currentBalance * riskPercent
     const pnl = riskAmount * rr
     currentBalance += pnl
 
@@ -1048,7 +1090,7 @@ const equityCurveData = computed(() => {
     labels: labels.length > 0 ? labels : ['No Data'],
     datasets: [
       {
-        label: `Balance ($) [${statMode.value.toUpperCase()}]`,
+        label: `Balance ($) [${statMode.value.toUpperCase()} - ${isSimple ? 'SIMPLE' : 'LOG'}]`,
         data: data.length > 0 ? data : [Number(simulation.value.initialBalance) || 10000],
         borderColor: '#00a76f',
         backgroundColor: 'rgba(0, 167, 111, 0.1)',
@@ -1063,12 +1105,16 @@ const dailyPnlData = computed(() => {
   const trades = filteredTrades.value
   const dailyPnl: Record<string, number> = {}
 
-  let currentBalance = Number(simulation.value.initialBalance) || 10000
+  const isSimple = simulation.value.returnCalculation === 'simple'
+  const initialBalance = Number(simulation.value.initialBalance) || 10000
   const riskPercent = (Number(simulation.value.riskPerTrade) || 1) / 100
+  const fixedRiskAmount = initialBalance * riskPercent
+
+  let currentBalance = initialBalance
 
   trades.forEach((trade) => {
     const rr = getTradeRr(trade, statMode.value)
-    const riskAmount = currentBalance * riskPercent
+    const riskAmount = isSimple ? fixedRiskAmount : currentBalance * riskPercent
     const pnl = riskAmount * rr
     currentBalance += pnl
 
