@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import BaseSelect from './BaseSelect.vue'
+import InfoTooltip from './InfoTooltip.vue'
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -27,6 +28,9 @@ interface Props {
   years?: string[]
   labels?: string[]
   datasets?: Dataset[]
+  infoTitle?: string
+  infoDescription?: string
+  infoFormula?: string
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -116,7 +120,15 @@ const options = {
   <div class="bg-white rounded-2xl p-6 shadow-card h-[400px] flex flex-col min-w-[500px]">
     <div class="flex justify-between items-start mb-6">
       <div>
-        <h6 class="text-lg font-bold text-textPrimary">{{ title }}</h6>
+        <div class="flex items-center gap-1.5">
+          <h6 class="text-lg font-bold text-textPrimary">{{ title }}</h6>
+          <InfoTooltip
+            v-if="infoTitle || infoDescription"
+            :title="infoTitle"
+            :description="infoDescription"
+            :formula="infoFormula"
+          />
+        </div>
         <p class="text-sm text-textSecondary">{{ subtitle }}</p>
       </div>
       <BaseSelect :modelValue="years[0]" :options="years" />

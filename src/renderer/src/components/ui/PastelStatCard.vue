@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import InfoTooltip from './InfoTooltip.vue'
 
 interface Props {
   title: string
@@ -7,11 +8,17 @@ interface Props {
   trend?: number
   icon: string
   color?: 'success' | 'info' | 'warning' | 'error' | 'primary'
+  infoTitle?: string
+  infoDescription?: string
+  infoFormula?: string
 }
 
 const props = withDefaults(defineProps<Props>(), {
   trend: 0,
-  color: 'success'
+  color: 'success',
+  infoTitle: '',
+  infoDescription: '',
+  infoFormula: ''
 })
 
 const trendIcon = computed(() => {
@@ -76,6 +83,16 @@ const styles = computed(() => {
       </div>
     </div>
     <h3 class="text-3xl font-bold mb-1" :class="styles.text">{{ value }}</h3>
-    <h6 class="text-sm font-semibold text-textSecondary">{{ title }}</h6>
+    <div class="flex items-center gap-1.5">
+      <h6 class="text-sm font-semibold text-textSecondary">{{ title }}</h6>
+      <InfoTooltip
+        v-if="infoDescription"
+        :title="infoTitle || title"
+        :description="infoDescription"
+        :formula="infoFormula"
+        align="left"
+        placement="top"
+      />
+    </div>
   </div>
 </template>

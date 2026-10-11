@@ -13,6 +13,8 @@ import { Radar } from 'vue-chartjs'
 
 ChartJS.register(RadialLinearScale, PointElement, LineElement, Filler, Tooltip, Legend)
 
+import InfoTooltip from './InfoTooltip.vue'
+
 interface Props {
   title?: string
   subtitle?: string
@@ -20,6 +22,9 @@ interface Props {
     labels: string[]
     datasets: any[]
   }
+  infoTitle?: string
+  infoDescription?: string
+  infoFormula?: string
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -72,7 +77,15 @@ const options = {
 
 <template>
   <div class="bg-white rounded-2xl p-6 shadow-card h-[400px] flex flex-col min-w-[320px]">
-    <h6 class="text-lg font-bold text-textPrimary">{{ title }}</h6>
+    <div class="flex items-center gap-1.5 mb-1">
+      <h6 class="text-lg font-bold text-textPrimary">{{ title }}</h6>
+      <InfoTooltip
+        v-if="infoTitle || infoDescription"
+        :title="infoTitle"
+        :description="infoDescription"
+        :formula="infoFormula"
+      />
+    </div>
     <p class="text-sm text-textSecondary mb-6">{{ subtitle }}</p>
 
     <div class="flex-1 relative flex items-center justify-center min-h-0">

@@ -282,6 +282,9 @@
         :trend="kpis.totalTrades"
         icon="ph-chart-bar"
         color="info"
+        infoTitle="Total Trades (จำนวนไม้ทั้งหมด)"
+        infoDescription="จำนวนออเดอร์ทั้งหมดที่เปิดและบันทึกในระบบตามตัวกรองปัจจุบัน ใช้ดูขนาดกลุ่มตัวอย่างเพื่อความแม่นยำทางสถิติ"
+        infoFormula="นับจำนวนรายการออเดอร์ทั้งหมดในตัวกรอง"
       />
       <PastelStatCard
         title="Win Rate"
@@ -289,6 +292,9 @@
         :trend="kpis.winRate"
         icon="ph-check-circle"
         color="success"
+        infoTitle="Win Rate (อัตราการชนะ)"
+        infoDescription="สัดส่วนเปอร์เซ็นต์ของไม้ที่ชนะ (RR > 0) บ่งบอกความแม่นยำของจุดเข้าเทรด ช่วยวิเคราะห์ความสม่ำเสมอของระบบ"
+        infoFormula="(จำนวนไม้ชนะ ÷ จำนวนไม้ทั้งหมด) × 100%"
       />
       <PastelStatCard
         title="Average RR"
@@ -296,6 +302,9 @@
         :trend="kpis.avgRr"
         icon="ph-trend-up"
         color="primary"
+        infoTitle="Average RR (ผลตอบแทนคาดหวังเฉลี่ย)"
+        infoDescription="ค่าเฉลี่ยผลตอบแทนต่อความเสี่ยงสุทธิต่อไม้ (Expectancy in R) ถ้ามีค่าเป็นบวกแสดงว่าระบบมีความได้เปรียบทางสถิติในระยะยาว"
+        infoFormula="ผลรวม RR สุทธิทั้งหมด ÷ จำนวนไม้ทั้งหมด"
       />
       <PastelStatCard
         title="Max Drawdown"
@@ -303,6 +312,9 @@
         :trend="kpis.maxDrawdown > 0 ? -kpis.maxDrawdown : 0"
         icon="ph-warning"
         color="warning"
+        infoTitle="Max Drawdown (การติดลบสูงสุด)"
+        infoDescription="เปอร์เซ็นต์ที่พอร์ตยุบตัวลงลึกที่สุดจากจุดสูงสุด (Peak to Trough) ใช้ประเมินความเสี่ยงสูงสุดเพื่อวางแผนคุมขนาดล็อต"
+        infoFormula="((ยอดพอร์ตสูงสุด - ยอดต่ำสุดหลังจุดสูงสุด) ÷ ยอดพอร์ตสูงสุด) × 100%"
       />
     </div>
 
@@ -314,9 +326,16 @@
             <i class="ph-bold ph-coins text-lg"></i>
           </div>
           <div>
-            <h2 class="text-base font-bold text-gray-900">
-              สถิติกระแสเงิน (PnL & Financials)
-            </h2>
+            <div class="flex items-center gap-1.5">
+              <h2 class="text-base font-bold text-gray-900">
+                สถิติกระแสเงิน (PnL & Financials)
+              </h2>
+              <InfoTooltip
+                title="สถิติกระแสเงิน (PnL & Financials)"
+                description="ภาพรวมทางการเงินของพอร์ต แสดงผลกำไรขาดทุนสุทธิ ยอดเงินคงเหลือล่าสุด อัตราส่วนความคุ้มค่า และค่าเฉลี่ยต่อไม้"
+                formula="NET PNL = GROSS PROFIT - GROSS LOSS"
+              />
+            </div>
             <p class="text-xs text-gray-500">
               คำนวณตามโหมด {{ statMode.toUpperCase() }} ({{ simulation.returnCalculation === 'simple' ? 'Simple Fixed Risk' : 'Log Compounded' }})
             </p>
@@ -338,7 +357,14 @@
         <!-- GROSS PROFIT -->
         <div class="bg-white rounded-2xl p-5 border border-emerald-100 shadow-xs flex items-center justify-between relative overflow-hidden group hover:border-emerald-300 transition-all">
           <div class="relative z-10">
-            <p class="text-xs font-bold text-gray-400 uppercase tracking-wider whitespace-nowrap">GROSS PROFIT</p>
+            <div class="flex items-center gap-1.5">
+              <p class="text-xs font-bold text-gray-400 uppercase tracking-wider whitespace-nowrap">GROSS PROFIT</p>
+              <InfoTooltip
+                title="Gross Profit (กำไรรวม)"
+                description="จำนวนเงินกำไรทั้งหมดที่ทำได้ นำเฉพาะไม้ที่เทรดชนะ (Wins) มารวมกัน บ่งบอกพลังในการสร้างกำไรของระบบเมื่อตลาดเป็นใจ"
+                formula="ผลรวมกำไร ($) ของไม้ชนะทั้งหมด"
+              />
+            </div>
             <p class="text-2xl font-extrabold text-emerald-600 mt-1">
               +${{ kpis.grossProfit.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
             </p>
@@ -355,7 +381,14 @@
         <!-- GROSS LOSS -->
         <div class="bg-white rounded-2xl p-5 border border-rose-100 shadow-xs flex items-center justify-between relative overflow-hidden group hover:border-rose-300 transition-all">
           <div class="relative z-10">
-            <p class="text-xs font-bold text-gray-400 uppercase tracking-wider whitespace-nowrap">GROSS LOSS</p>
+            <div class="flex items-center gap-1.5">
+              <p class="text-xs font-bold text-gray-400 uppercase tracking-wider whitespace-nowrap">GROSS LOSS</p>
+              <InfoTooltip
+                title="Gross Loss (ขาดทุนรวม)"
+                description="จำนวนเงินขาดทุนทั้งหมด นำเฉพาะไม้ที่เทรดแพ้ (Losses) มารวมกัน แสดงถึงความเสียหายรวมที่เกิดขึ้นเมื่อตลาดวิ่งผิดทาง"
+                formula="ผลรวมขาดทุน ($) ของไม้แพ้ทั้งหมด"
+              />
+            </div>
             <p class="text-2xl font-extrabold text-rose-600 mt-1">
               -${{ kpis.grossLoss.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
             </p>
@@ -377,6 +410,11 @@
           <div class="relative z-10">
             <div class="flex flex-wrap items-center gap-1.5 mb-1">
               <p class="text-xs font-bold text-gray-500 uppercase tracking-wider whitespace-nowrap">NET PNL</p>
+              <InfoTooltip
+                title="Net PnL (กำไรสุทธิ)"
+                description="กำไรหรือขาดทุนสุทธิที่แท้จริงหลังจากหักกลบลบต้นทุนและผลขาดทุนเรียบร้อยแล้ว ถ้าเป็นบวกแสดงว่าระบบมีกำไรและพอร์ตเติบโต"
+                formula="GROSS PROFIT - GROSS LOSS"
+              />
               <span
                 class="text-[10px] font-bold px-2 py-0.5 rounded-full whitespace-nowrap shrink-0"
                 :class="kpis.netPnl >= 0 ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'"
@@ -407,6 +445,11 @@
           <div class="relative z-10">
             <div class="flex flex-wrap items-center gap-1.5 mb-1">
               <p class="text-xs font-bold text-gray-400 uppercase tracking-wider whitespace-nowrap">FINAL BALANCE</p>
+              <InfoTooltip
+                title="Final Balance (ยอดเงินคงเหลือล่าสุด)"
+                description="ยอดเงินในพอร์ตปัจจุบันหลังจากการเทรดไม้ล่าสุด ใช้ติดตามขนาดพอร์ตจริงเทียบกับเงินทุนเริ่มต้น"
+                formula="ทุนเริ่มต้น + NET PNL"
+              />
               <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200 whitespace-nowrap shrink-0">
                 Capital + Net PnL
               </span>
@@ -432,6 +475,11 @@
           <div class="relative z-10">
             <div class="flex flex-wrap items-center gap-1.5 mb-1">
               <p class="text-xs font-bold text-gray-400 uppercase tracking-wider whitespace-nowrap">PROFIT FACTOR</p>
+              <InfoTooltip
+                title="Profit Factor (อัตราความคุ้มค่าของระบบ)"
+                description="อัตราส่วนความคุ้มค่า บ่งบอกว่าระบบได้กำไรกี่เท่าของเงินที่เสียไป ถ้ามากกว่า 1.0 ถือว่าระบบทำกำไรได้ (เกิน 1.5 ถือว่าระบบแข็งแกร่งมาก)"
+                formula="GROSS PROFIT ÷ GROSS LOSS"
+              />
               <span
                 class="text-[10px] font-bold px-2 py-0.5 rounded-full whitespace-nowrap shrink-0"
                 :class="kpis.profitFactor >= 1.0 ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' : 'bg-amber-100 text-amber-800 border border-amber-200'"
@@ -454,7 +502,14 @@
         <!-- AVG WIN $ -->
         <div class="bg-white rounded-2xl p-5 border border-emerald-100 shadow-xs flex items-center justify-between relative overflow-hidden group hover:border-emerald-300 transition-all">
           <div class="relative z-10">
-            <p class="text-xs font-bold text-gray-400 uppercase tracking-wider whitespace-nowrap">AVG WIN $</p>
+            <div class="flex items-center gap-1.5">
+              <p class="text-xs font-bold text-gray-400 uppercase tracking-wider whitespace-nowrap">AVG WIN $</p>
+              <InfoTooltip
+                title="Avg Win $ (กำไรเฉลี่ยต่อไม้ชนะ)"
+                description="จำนวนเงินกำไรเฉลี่ยในแต่ละครั้งที่เทรดชนะ ช่วยให้ทราบว่าเวลาชนะจะได้เงินกลับมาเฉลี่ยไม้ละกี่ดอลลาร์"
+                formula="GROSS PROFIT ÷ จำนวนไม้ชนะ (Wins)"
+              />
+            </div>
             <p class="text-2xl font-extrabold text-emerald-600 mt-1">
               +${{ kpis.avgWin.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
             </p>
@@ -471,7 +526,14 @@
         <!-- AVG LOSS $ -->
         <div class="bg-white rounded-2xl p-5 border border-rose-100 shadow-xs flex items-center justify-between relative overflow-hidden group hover:border-rose-300 transition-all">
           <div class="relative z-10">
-            <p class="text-xs font-bold text-gray-400 uppercase tracking-wider whitespace-nowrap">AVG LOSS $</p>
+            <div class="flex items-center gap-1.5">
+              <p class="text-xs font-bold text-gray-400 uppercase tracking-wider whitespace-nowrap">AVG LOSS $</p>
+              <InfoTooltip
+                title="Avg Loss $ (ขาดทุนเฉลี่ยต่อไม้แพ้)"
+                description="จำนวนเงินขาดทุนเฉลี่ยในแต่ละครั้งที่เทรดแพ้ ช่วยควบคุมความเสียหายไม่ให้ขาดทุนต่อไม้มากเกินไป"
+                formula="GROSS LOSS ÷ จำนวนไม้แพ้ (Losses)"
+              />
+            </div>
             <p class="text-2xl font-extrabold text-rose-600 mt-1">
               -${{ kpis.avgLoss.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
             </p>
@@ -495,9 +557,16 @@
             <i class="ph-bold ph-chart-line-up text-lg"></i>
           </div>
           <div>
-            <h2 class="text-base font-bold text-gray-900">
-              สถิติผลตอบแทนต่อความเสี่ยง (Risk:Reward - RR)
-            </h2>
+            <div class="flex items-center gap-1.5">
+              <h2 class="text-base font-bold text-gray-900">
+                สถิติผลตอบแทนต่อความเสี่ยง (Risk:Reward - RR)
+              </h2>
+              <InfoTooltip
+                title="สถิติผลตอบแทนต่อความเสี่ยง (Risk:Reward - RR)"
+                description="ประเมินความคุ้มค่าของการทำกำไรเทียบความเสี่ยงที่ยอมรับได้ในแต่ละออเดอร์ เพื่อให้แน่ใจว่าระบบมีแต้มต่อ (Edge) ในระยะยาว"
+                formula="AVG RR = AVG WIN $ ÷ AVG LOSS $"
+              />
+            </div>
             <p class="text-xs text-gray-500">
               ประเมินประสิทธิภาพความคุ้มค่าของการทำกำไรเทียบความเสี่ยงตามโหมด {{ statMode.toUpperCase() }}
             </p>
@@ -520,6 +589,11 @@
           <div class="relative z-10">
             <div class="flex flex-wrap items-center gap-1.5 mb-1">
               <p class="text-xs font-bold text-gray-400 uppercase tracking-wider whitespace-nowrap">TOTAL RR</p>
+              <InfoTooltip
+                title="Total RR (ผลรวม RR สุทธิ)"
+                description="ผลรวมของค่า Reward to Risk (R) สุทธิทั้งหมดในพอร์ต โดยนำค่า R ของไม้ชนะบวกกับค่า R ของไม้แพ้ เพื่อดูความคุ้มค่ารวมในหน่วย R-multiple"
+                formula="ผลรวมค่า RR ของทุกออเดอร์ (Σ R)"
+              />
               <span
                 class="text-[10px] font-bold px-2 py-0.5 rounded-full whitespace-nowrap shrink-0"
                 :class="kpis.totalRr >= 0 ? 'bg-indigo-50 text-indigo-700 border border-indigo-200' : 'bg-rose-50 text-rose-700 border border-rose-200'"
@@ -547,6 +621,11 @@
           <div class="relative z-10">
             <div class="flex flex-wrap items-center gap-1.5 mb-1">
               <p class="text-xs font-bold text-gray-400 uppercase tracking-wider whitespace-nowrap">AVG RR</p>
+              <InfoTooltip
+                title="Avg RR (Payoff Ratio / อัตราผลตอบแทนเฉลี่ย)"
+                description="อัตราส่วนความคุ้มค่าระหว่างไม้ชนะเทียบกับไม้แพ้ บอกว่าเวลาชนะจะได้กำไรกี่เท่าของความเสี่ยงที่เสียไปต่อไม้ (เช่น 1:3 หมายถึงชนะได้ 3R เสียแค่ 1R)"
+                formula="AVG WIN $ ÷ AVG LOSS $"
+              />
               <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 whitespace-nowrap shrink-0">
                 1 : {{ kpis.avgWinLossRr }}
               </span>
@@ -568,6 +647,11 @@
           <div class="relative z-10">
             <div class="flex flex-wrap items-center gap-1.5 mb-1">
               <p class="text-xs font-bold text-gray-400 uppercase tracking-wider whitespace-nowrap">MAX RR</p>
+              <InfoTooltip
+                title="Max RR (กำไรสูงสุดในไม้เดียว)"
+                description="ออเดอร์ที่สามารถรีดกำไรได้สูงสุดแบบสุดขั้วในไม้เดียว แสดงศักยภาพสูงสุดของระบบเมื่อเจอรันเทรนด์ใหญ่"
+                formula="ค่า RR สูงสุดที่ทำได้ในออเดอร์เดี่ยว"
+              />
               <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-purple-50 text-purple-700 border border-purple-200 whitespace-nowrap shrink-0">
                 Peak Single Trade
               </span>
@@ -589,6 +673,11 @@
           <div class="relative z-10">
             <div class="flex flex-wrap items-center gap-1.5 mb-1">
               <p class="text-xs font-bold text-gray-400 uppercase tracking-wider whitespace-nowrap">AVG MAX RR</p>
+              <InfoTooltip
+                title="Avg Max RR (ค่าเฉลี่ย RR สูงสุดที่ระบบไปถึง)"
+                description="ค่าเฉลี่ยของจุดสูงสุด (Maximum Favorable Excursion - MFE) ที่กราฟวิ่งไปถึงก่อนจะโดนปิดออเดอร์หรือโดน Trailing Stop ช่วยวิเคราะห์ว่าตั้ง TP ใกล้หรือไกลเกินไป"
+                formula="ผลรวม Max RR ของแต่ละไม้ ÷ จำนวนไม้"
+              />
               <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200 whitespace-nowrap shrink-0">
                 Potential MFE
               </span>
@@ -615,9 +704,16 @@
             <i class="ph-bold ph-shield-warning text-lg"></i>
           </div>
           <div>
-            <h2 class="text-base font-bold text-gray-900">
-              สถิติความเสี่ยงและการติดลบ (Streaks & Drawdown)
-            </h2>
+            <div class="flex items-center gap-1.5">
+              <h2 class="text-base font-bold text-gray-900">
+                สถิติความเสี่ยงและการติดลบ (Streaks & Drawdown)
+              </h2>
+              <InfoTooltip
+                title="สถิติความเสี่ยงและการติดลบ (Streaks & Drawdown)"
+                description="วิเคราะห์ความเสี่ยง จุดอ่อนของระบบ สถิติการชนะ/แพ้ติดต่อกัน และภาวะพอร์ตยุบตัวสูงสุด เพื่อช่วยเตรียมแผนบริหารจัดการความเสี่ยงและจิตวิทยา"
+                formula="DD % = ((Peak - Valley) ÷ Peak) × 100%"
+              />
+            </div>
             <p class="text-xs text-gray-500">
               วิเคราะห์จุดอ่อน อัตราการแพ้/ชนะติดต่อกัน และภาวะพอร์ตยุบตัวสูงสุด (Peak to Trough)
             </p>
@@ -640,6 +736,11 @@
           <div class="relative z-10">
             <div class="flex flex-wrap items-center gap-1.5 mb-1">
               <p class="text-xs font-bold text-gray-400 uppercase tracking-wider whitespace-nowrap">CONSEC. WINS</p>
+              <InfoTooltip
+                title="Consecutive Wins (ชนะติดต่อกันสูงสุด)"
+                description="จำนวนไม้ที่เทรดชนะติดต่อกันยาวนานที่สุด (Winning Streak) ใช้ดูช่วงเวลาที่ระบบทำงานได้เข้ากับสภาวะตลาดที่สุด"
+                formula="นับจำนวนไม้ชนะต่อเนื่องตามลำดับเวลา"
+              />
               <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 whitespace-nowrap shrink-0">
                 Winning Streak
               </span>
@@ -661,6 +762,11 @@
           <div class="relative z-10">
             <div class="flex flex-wrap items-center gap-1.5 mb-1">
               <p class="text-xs font-bold text-gray-400 uppercase tracking-wider whitespace-nowrap">CONSEC. LOSSES</p>
+              <InfoTooltip
+                title="Consecutive Losses (แพ้ติดต่อกันสูงสุด)"
+                description="จำนวนไม้ที่เทรดแพ้ติดต่อกันยาวนานที่สุด (Losing Streak) เป็นจุดทดสอบจิตวิทยาและจุดอ่อนสำคัญที่สุดของระบบ ที่ต้องเตรียมรับมือ"
+                formula="นับจำนวนไม้แพ้ต่อเนื่องตามลำดับเวลา"
+              />
               <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-100 text-rose-800 border border-rose-200 whitespace-nowrap shrink-0">
                 Losing Streak
               </span>
@@ -682,6 +788,11 @@
           <div class="relative z-10">
             <div class="flex flex-wrap items-center gap-1.5 mb-1">
               <p class="text-xs font-bold text-gray-400 uppercase tracking-wider whitespace-nowrap">MAX DRAWDOWN</p>
+              <InfoTooltip
+                title="Max Drawdown (พอร์ตยุบตัวสูงสุด %)"
+                description="เปอร์เซ็นต์ที่พอร์ตลดลงลึกที่สุดจากจุดสูงสุดของเงินทุน (Peak to Trough) ช่วยให้ทราบว่าต้องเผื่อเงินสำรองไว้เท่าไหร่เพื่อไม่ให้พอร์ตแตก"
+                formula="((Peak Balance - Valley Balance) ÷ Peak Balance) × 100%"
+              />
               <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-100 text-rose-800 border border-rose-200 whitespace-nowrap shrink-0">
                 Peak to Trough
               </span>
@@ -706,7 +817,14 @@
       <div class="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
         <div class="flex justify-between items-center mb-6">
           <div>
-            <h2 class="text-lg font-bold text-gray-900">Simulated Equity Curve</h2>
+            <div class="flex items-center gap-1.5">
+              <h2 class="text-lg font-bold text-gray-900">Simulated Equity Curve</h2>
+              <InfoTooltip
+                title="Simulated Equity Curve (กราฟการเติบโตของพอร์ต)"
+                description="กราฟจำลองเส้นทางการเติบโตของเงินทุนตามลำดับเวลาและผลการเทรดจริง โดยคำนวณตามเงินทุนเริ่มต้น, Risk %, และโหมดที่เลือก (Simple หรือ Log Compounded)"
+                formula="ยอดเงินสะสมต่อเนื่องในแต่ละไม้ตามลำดับเวลา"
+              />
+            </div>
             <p class="text-sm text-gray-500">
               Projected balance based on {{ statMode.toUpperCase() }} mode and current filters
             </p>
@@ -725,7 +843,14 @@
       <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col justify-between">
         <div class="flex flex-col gap-2 mb-4">
           <div class="flex items-center justify-between">
-            <h2 class="text-lg font-bold text-gray-900">Trade Outcomes</h2>
+            <div class="flex items-center gap-1.5">
+              <h2 class="text-lg font-bold text-gray-900">Trade Outcomes</h2>
+              <InfoTooltip
+                title="Trade Outcomes (สัดส่วนผลลัพธ์การเทรด)"
+                description="กราฟโดนัทแสดงสัดส่วนระหว่างไม้ชนะ (Wins), ไม้แพ้ (Losses), และไม้เสมอตัว (Break Even) ช่วยประเมินความสม่ำเสมอในการออกออเดอร์ของระบบ"
+                formula="สัดส่วน Wins / Losses / BE จากจำนวนไม้ทั้งหมด"
+              />
+            </div>
             <span class="text-xs font-semibold text-gray-400">({{ statMode.toUpperCase() }} mode)</span>
           </div>
 
@@ -759,6 +884,9 @@
         <AreaInstalledChart
           title="Net PnL (Daily)"
           subtitle="Simulated daily profit/loss"
+          infoTitle="Net PnL Daily (กำไร/ขาดทุนรายวัน)"
+          infoDescription="กราฟแท่งแสดงผลกำไรขาดทุนสุทธิรวมในแต่ละวัน ช่วยให้เห็นว่าวันไหนทำกำไรได้ดี หรือวันไหนที่ตลาดไม่เป็นใจ"
+          infoFormula="ผลรวม PnL ของออเดอร์ในแต่ละวัน"
           :labels="dailyPnlData.labels"
           :datasets="dailyPnlData.datasets"
           :years="['All Time']"
@@ -769,6 +897,9 @@
         <RadarChart
           title="Performance by Session"
           subtitle="Win Rate per session"
+          infoTitle="Session Performance (ประสิทธิภาพตามช่วงเวลาตลาด)"
+          infoDescription="กราฟเรดาร์เปรียบเทียบอัตราการชนะ (Win Rate %) ในแต่ละเซสชันของตลาด ช่วยให้โฟกัสเทรดเฉพาะช่วงเวลาที่ระบบทำผลงานได้ดีที่สุด"
+          infoFormula="(ไม้ชนะใน Session ÷ ไม้ทั้งหมดใน Session) × 100%"
           :chartData="sessionPerformance"
         />
       </div>
@@ -1040,6 +1171,7 @@ import TradeDetailsModal from '../ui/TradeDetailsModal.vue'
 import TradeScreenshotsModal from '../ui/TradeScreenshotsModal.vue'
 import BaseConfirmModal from '../ui/BaseConfirmModal.vue'
 import BaseAlertDialog from '../ui/BaseAlertDialog.vue'
+import InfoTooltip from '../ui/InfoTooltip.vue'
 
 // Dashboard DOM ref & Export state
 const dashboardRef = ref<HTMLElement | null>(null)

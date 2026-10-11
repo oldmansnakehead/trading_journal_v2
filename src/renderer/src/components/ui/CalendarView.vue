@@ -2,6 +2,7 @@
 import { ref, computed, onMounted } from 'vue'
 import BaseSelect from './BaseSelect.vue'
 import TradeDetailsModal from './TradeDetailsModal.vue'
+import InfoTooltip from './InfoTooltip.vue'
 
 const currentDate = ref(new Date())
 
@@ -458,7 +459,14 @@ onMounted(() => {
         <!-- Monthly Net PnL & Net RR -->
         <div class="bg-gray-50/80 rounded-xl p-3 border border-gray-100 flex items-center justify-between">
           <div>
-            <p class="text-xs text-gray-500 font-medium">Monthly Net PnL</p>
+            <div class="flex items-center gap-1.5">
+              <p class="text-xs text-gray-500 font-medium">Monthly Net PnL</p>
+              <InfoTooltip
+                title="Monthly Net PnL (กำไรสุทธิประจำเดือน)"
+                description="ผลรวมกำไรหรือขาดทุนสุทธิของเดือนนี้จากการเทรดทั้งหมดตามเงื่อนไขที่เลือก (Capital, Risk %, Return Calculation)"
+                formula="ผลรวม PnL ($) หรือ R ในเดือนนี้"
+              />
+            </div>
             <p
               class="text-lg font-bold"
               :class="monthlySummary.netPnl > 0 ? 'text-emerald-600' : monthlySummary.netPnl < 0 ? 'text-rose-600' : 'text-gray-700'"
@@ -480,7 +488,14 @@ onMounted(() => {
         <!-- Monthly Win Rate -->
         <div class="bg-gray-50/80 rounded-xl p-3 border border-gray-100 flex items-center justify-between">
           <div>
-            <p class="text-xs text-gray-500 font-medium">Win Rate</p>
+            <div class="flex items-center gap-1.5">
+              <p class="text-xs text-gray-500 font-medium">Win Rate</p>
+              <InfoTooltip
+                title="Monthly Win Rate (อัตราการชนะรายเดือน)"
+                description="สัดส่วนเปอร์เซ็นต์ของจำนวนไม้ที่ชนะเทียบกับไม้ทั้งหมดในเดือนนี้"
+                formula="(จำนวนไม้ชนะ ÷ จำนวนไม้ทั้งหมด) × 100%"
+              />
+            </div>
             <p class="text-lg font-bold text-gray-900">{{ monthlySummary.winRate }}%</p>
             <p class="text-[11px] text-gray-500">{{ monthlySummary.wins }} wins / {{ monthlySummary.losses }} losses</p>
           </div>
@@ -492,7 +507,14 @@ onMounted(() => {
         <!-- Total Trades -->
         <div class="bg-gray-50/80 rounded-xl p-3 border border-gray-100 flex items-center justify-between">
           <div>
-            <p class="text-xs text-gray-500 font-medium">Total Trades</p>
+            <div class="flex items-center gap-1.5">
+              <p class="text-xs text-gray-500 font-medium">Total Trades</p>
+              <InfoTooltip
+                title="Total Trades (จำนวนไม้ทั้งหมดในเดือน)"
+                description="จำนวนออเดอร์ทั้งหมดที่เปิดในเดือนนี้ เพื่อดูความถี่และวินัยในการเทรด"
+                formula="นับจำนวนรายการออเดอร์ในเดือน"
+              />
+            </div>
             <p class="text-lg font-bold text-gray-900">
               {{ monthlySummary.totalTrades }}
             </p>
@@ -506,7 +528,14 @@ onMounted(() => {
         <!-- Trading Days -->
         <div class="bg-gray-50/80 rounded-xl p-3 border border-gray-100 flex items-center justify-between">
           <div>
-            <p class="text-xs text-gray-500 font-medium">Trading Days</p>
+            <div class="flex items-center gap-1.5">
+              <p class="text-xs text-gray-500 font-medium">Trading Days</p>
+              <InfoTooltip
+                title="Trading Days (วันที่เทรดในเดือน)"
+                description="จำนวนวันที่ได้กำไร (Win Days) เทียบกับวันที่ขาดทุน (Loss Days) ในเดือนนี้ ช่วยดูความสม่ำเสมอในแต่ละวัน"
+                formula="นับจำนวนวันที่มี Net PnL เป็นบวก (W) หรือเป็นลบ (L)"
+              />
+            </div>
             <p class="text-lg font-bold text-gray-900">
               <span class="text-emerald-600">{{ monthlySummary.winDays }}W</span> · <span class="text-rose-600">{{ monthlySummary.lossDays }}L</span>
             </p>
