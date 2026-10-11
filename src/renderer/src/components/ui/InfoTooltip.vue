@@ -11,7 +11,7 @@ withDefaults(defineProps<Props>(), {
   title: '',
   formula: '',
   description: '',
-  align: 'center',
+  align: 'left',
   placement: 'top'
 })
 </script>
@@ -29,14 +29,14 @@ withDefaults(defineProps<Props>(), {
 
     <!-- Tooltip Popup -->
     <div
-      class="absolute w-64 max-w-xs p-3 bg-gray-900/95 text-white text-xs rounded-xl shadow-xl backdrop-blur-xs opacity-0 pointer-events-none group-hover/tooltip:opacity-100 transition-all duration-200 z-50 border border-gray-700/60 leading-relaxed font-normal whitespace-normal text-left"
+      class="absolute w-72 sm:w-80 max-w-[calc(100vw-2rem)] p-3.5 bg-gray-900/95 text-white text-xs rounded-xl shadow-2xl backdrop-blur-md opacity-0 pointer-events-none group-hover/tooltip:opacity-100 transition-all duration-200 z-[100] border border-gray-700/60 leading-relaxed font-normal whitespace-normal text-left"
       :class="[
         placement === 'top' ? 'bottom-full mb-2' : 'top-full mt-2',
         align === 'center'
           ? 'left-1/2 -translate-x-1/2'
           : align === 'left'
-            ? 'left-0'
-            : 'right-0'
+            ? '-left-2'
+            : '-right-2'
       ]"
     >
       <div
@@ -61,14 +61,22 @@ withDefaults(defineProps<Props>(), {
         v-if="placement === 'top'"
         class="absolute top-full -mt-px border-4 border-transparent border-t-gray-900/95"
         :class="[
-          align === 'center' ? 'left-1/2 -translate-x-1/2' : align === 'left' ? 'left-3' : 'right-3'
+          align === 'center'
+            ? 'left-1/2 -translate-x-1/2'
+            : align === 'left'
+              ? 'left-3.5'
+              : 'right-3.5'
         ]"
       ></div>
       <div
         v-else
         class="absolute bottom-full -mb-px border-4 border-transparent border-b-gray-900/95"
         :class="[
-          align === 'center' ? 'left-1/2 -translate-x-1/2' : align === 'left' ? 'left-3' : 'right-3'
+          align === 'center'
+            ? 'left-1/2 -translate-x-1/2'
+            : align === 'left'
+              ? 'left-3.5'
+              : 'right-3.5'
         ]"
       ></div>
     </div>

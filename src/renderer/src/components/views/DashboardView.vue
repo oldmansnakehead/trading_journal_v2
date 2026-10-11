@@ -355,7 +355,7 @@
       <!-- Primary Financials & Balance (Row 1) -->
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
         <!-- GROSS PROFIT -->
-        <div class="bg-white rounded-2xl p-5 border border-emerald-100 shadow-xs flex items-center justify-between relative overflow-hidden group hover:border-emerald-300 transition-all">
+        <div class="bg-white rounded-2xl p-5 border border-emerald-100 shadow-xs flex items-center justify-between relative group hover:z-30 hover:border-emerald-300 transition-all">
           <div class="relative z-10">
             <div class="flex items-center gap-1.5">
               <p class="text-xs font-bold text-gray-400 uppercase tracking-wider whitespace-nowrap">GROSS PROFIT</p>
@@ -379,7 +379,7 @@
         </div>
 
         <!-- GROSS LOSS -->
-        <div class="bg-white rounded-2xl p-5 border border-rose-100 shadow-xs flex items-center justify-between relative overflow-hidden group hover:border-rose-300 transition-all">
+        <div class="bg-white rounded-2xl p-5 border border-rose-100 shadow-xs flex items-center justify-between relative group hover:z-30 hover:border-rose-300 transition-all">
           <div class="relative z-10">
             <div class="flex items-center gap-1.5">
               <p class="text-xs font-bold text-gray-400 uppercase tracking-wider whitespace-nowrap">GROSS LOSS</p>
@@ -404,7 +404,7 @@
 
         <!-- NET PNL -->
         <div
-          class="bg-white rounded-2xl p-5 border shadow-xs flex items-center justify-between relative overflow-hidden group transition-all"
+          class="bg-white rounded-2xl p-5 border shadow-xs flex items-center justify-between relative group hover:z-30 transition-all"
           :class="kpis.netPnl >= 0 ? 'border-emerald-200 bg-emerald-50/20 hover:border-emerald-300' : 'border-rose-200 bg-rose-50/20 hover:border-rose-300'"
         >
           <div class="relative z-10">
@@ -441,7 +441,7 @@
         </div>
 
         <!-- FINAL BALANCE -->
-        <div class="bg-white rounded-2xl p-5 border border-indigo-100 shadow-xs flex items-center justify-between relative overflow-hidden group hover:border-indigo-300 transition-all">
+        <div class="bg-white rounded-2xl p-5 border border-indigo-100 shadow-xs flex items-center justify-between relative group hover:z-30 hover:border-indigo-300 transition-all">
           <div class="relative z-10">
             <div class="flex flex-wrap items-center gap-1.5 mb-1">
               <p class="text-xs font-bold text-gray-400 uppercase tracking-wider whitespace-nowrap">FINAL BALANCE</p>
@@ -471,7 +471,7 @@
       <!-- Trade Efficiency & Per-Trade Statistics (Row 2) -->
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <!-- PROFIT FACTOR -->
-        <div class="bg-white rounded-2xl p-5 border border-amber-100 shadow-xs flex items-center justify-between relative overflow-hidden group hover:border-amber-300 transition-all">
+        <div class="bg-white rounded-2xl p-5 border border-amber-100 shadow-xs flex items-center justify-between relative group hover:z-30 hover:border-amber-300 transition-all">
           <div class="relative z-10">
             <div class="flex flex-wrap items-center gap-1.5 mb-1">
               <p class="text-xs font-bold text-gray-400 uppercase tracking-wider whitespace-nowrap">PROFIT FACTOR</p>
@@ -500,7 +500,7 @@
         </div>
 
         <!-- AVG WIN $ -->
-        <div class="bg-white rounded-2xl p-5 border border-emerald-100 shadow-xs flex items-center justify-between relative overflow-hidden group hover:border-emerald-300 transition-all">
+        <div class="bg-white rounded-2xl p-5 border border-emerald-100 shadow-xs flex items-center justify-between relative group hover:z-30 hover:border-emerald-300 transition-all">
           <div class="relative z-10">
             <div class="flex items-center gap-1.5">
               <p class="text-xs font-bold text-gray-400 uppercase tracking-wider whitespace-nowrap">AVG WIN $</p>
@@ -524,7 +524,7 @@
         </div>
 
         <!-- AVG LOSS $ -->
-        <div class="bg-white rounded-2xl p-5 border border-rose-100 shadow-xs flex items-center justify-between relative overflow-hidden group hover:border-rose-300 transition-all">
+        <div class="bg-white rounded-2xl p-5 border border-rose-100 shadow-xs flex items-center justify-between relative group hover:z-30 hover:border-rose-300 transition-all">
           <div class="relative z-10">
             <div class="flex items-center gap-1.5">
               <p class="text-xs font-bold text-gray-400 uppercase tracking-wider whitespace-nowrap">AVG LOSS $</p>
@@ -585,7 +585,7 @@
 
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <!-- TOTAL RR -->
-        <div class="bg-white rounded-2xl p-5 border border-indigo-100 shadow-xs flex items-center justify-between relative overflow-hidden group hover:border-indigo-300 transition-all">
+        <div class="bg-white rounded-2xl p-5 border border-indigo-100 shadow-xs flex items-center justify-between relative group hover:z-30 hover:border-indigo-300 transition-all">
           <div class="relative z-10">
             <div class="flex flex-wrap items-center gap-1.5 mb-1">
               <p class="text-xs font-bold text-gray-400 uppercase tracking-wider whitespace-nowrap">TOTAL RR</p>
@@ -617,7 +617,7 @@
         </div>
 
         <!-- AVG RR -->
-        <div class="bg-white rounded-2xl p-5 border border-emerald-100 shadow-xs flex items-center justify-between relative overflow-hidden group hover:border-emerald-300 transition-all">
+        <div class="bg-white rounded-2xl p-5 border border-emerald-100 shadow-xs flex items-center justify-between relative group hover:z-30 hover:border-emerald-300 transition-all">
           <div class="relative z-10">
             <div class="flex flex-wrap items-center gap-1.5 mb-1">
               <p class="text-xs font-bold text-gray-400 uppercase tracking-wider whitespace-nowrap">AVG RR</p>
@@ -643,7 +643,7 @@
         </div>
 
         <!-- MAX RR -->
-        <div class="bg-white rounded-2xl p-5 border border-purple-100 shadow-xs flex items-center justify-between relative overflow-hidden group hover:border-purple-300 transition-all">
+        <div class="bg-white rounded-2xl p-5 border border-purple-100 shadow-xs flex items-center justify-between relative group hover:z-30 hover:border-purple-300 transition-all">
           <div class="relative z-10">
             <div class="flex flex-wrap items-center gap-1.5 mb-1">
               <p class="text-xs font-bold text-gray-400 uppercase tracking-wider whitespace-nowrap">MAX RR</p>
@@ -669,7 +669,7 @@
         </div>
 
         <!-- AVG MAX RR -->
-        <div class="bg-white rounded-2xl p-5 border border-amber-100 shadow-xs flex items-center justify-between relative overflow-hidden group hover:border-amber-300 transition-all">
+        <div class="bg-white rounded-2xl p-5 border border-amber-100 shadow-xs flex items-center justify-between relative group hover:z-30 hover:border-amber-300 transition-all">
           <div class="relative z-10">
             <div class="flex flex-wrap items-center gap-1.5 mb-1">
               <p class="text-xs font-bold text-gray-400 uppercase tracking-wider whitespace-nowrap">AVG MAX RR</p>
@@ -732,7 +732,7 @@
 
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <!-- CONSEC. WINS -->
-        <div class="bg-white rounded-2xl p-5 border border-emerald-100 shadow-xs flex items-center justify-between relative overflow-hidden group hover:border-emerald-300 transition-all">
+        <div class="bg-white rounded-2xl p-5 border border-emerald-100 shadow-xs flex items-center justify-between relative group hover:z-30 hover:border-emerald-300 transition-all">
           <div class="relative z-10">
             <div class="flex flex-wrap items-center gap-1.5 mb-1">
               <p class="text-xs font-bold text-gray-400 uppercase tracking-wider whitespace-nowrap">CONSEC. WINS</p>
@@ -758,7 +758,7 @@
         </div>
 
         <!-- CONSEC. LOSSES -->
-        <div class="bg-white rounded-2xl p-5 border border-rose-100 shadow-xs flex items-center justify-between relative overflow-hidden group hover:border-rose-300 transition-all">
+        <div class="bg-white rounded-2xl p-5 border border-rose-100 shadow-xs flex items-center justify-between relative group hover:z-30 hover:border-rose-300 transition-all">
           <div class="relative z-10">
             <div class="flex flex-wrap items-center gap-1.5 mb-1">
               <p class="text-xs font-bold text-gray-400 uppercase tracking-wider whitespace-nowrap">CONSEC. LOSSES</p>
@@ -784,7 +784,7 @@
         </div>
 
         <!-- MAX DRAWDOWN -->
-        <div class="bg-white rounded-2xl p-5 border border-rose-100 shadow-xs flex items-center justify-between relative overflow-hidden group hover:border-rose-300 transition-all">
+        <div class="bg-white rounded-2xl p-5 border border-rose-100 shadow-xs flex items-center justify-between relative group hover:z-30 hover:border-rose-300 transition-all">
           <div class="relative z-10">
             <div class="flex flex-wrap items-center gap-1.5 mb-1">
               <p class="text-xs font-bold text-gray-400 uppercase tracking-wider whitespace-nowrap">MAX DRAWDOWN</p>
