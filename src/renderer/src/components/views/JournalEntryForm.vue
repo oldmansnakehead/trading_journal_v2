@@ -129,17 +129,6 @@
               />
             </div>
 
-            <!-- Session -->
-            <div>
-              <label class="block text-sm font-semibold text-gray-700 mb-1.5">Session</label>
-              <BaseSelect
-                v-model="form.sessionName"
-                :options="setupSessions.map(s => ({ label: s.sessionName, value: s.sessionName }))"
-                placeholder="Select Session"
-                :disabled="setupSessions.length === 0"
-              />
-              <p v-if="setupSessions.length === 0 && form.setupId" class="text-xs text-orange-500 mt-1 font-medium">No sessions defined for this setup.</p>
-            </div>
           </div>
         </div>
 
@@ -165,7 +154,7 @@
             </svg>
             Timing
           </h2>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
             <div>
               <label class="block text-sm font-semibold text-gray-700 mb-1.5"
                 >Entry Date & Time</label
@@ -177,6 +166,20 @@
                 >Exit Date & Time</label
               >
               <BaseDateInput v-model="form.exitDatetime" :withTime="true" />
+            </div>
+          </div>
+          
+          <div class="pt-5 border-t border-gray-50">
+            <!-- Session -->
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-1.5">Session</label>
+              <BaseSelect
+                v-model="form.sessionName"
+                :options="setupSessions.map(s => ({ label: s.sessionName, value: s.sessionName }))"
+                placeholder="Select Session"
+                :disabled="setupSessions.length === 0"
+              />
+              <p v-if="setupSessions.length === 0 && form.setupId" class="text-xs text-orange-500 mt-1 font-medium">No sessions defined for this setup.</p>
             </div>
           </div>
         </div>
@@ -215,7 +218,6 @@
                     type="number"
                     step="any"
                     v-model="form.normalSlPoints"
-                    required
                     class="w-full bg-white border border-gray-200 text-gray-900 text-sm rounded-lg p-2 font-bold outline-none focus:border-blue-500"
                     placeholder="0"
                   />
@@ -226,7 +228,6 @@
                     type="number"
                     step="any"
                     v-model="form.normalRr"
-                    required
                     class="w-full bg-white border border-gray-200 text-gray-900 text-sm rounded-lg p-2 font-bold outline-none focus:border-blue-500"
                     placeholder="0"
                   />
@@ -237,7 +238,6 @@
                     type="number"
                     step="any"
                     v-model="form.normalMaxRr"
-                    required
                     class="w-full bg-white border border-gray-200 text-gray-900 text-sm rounded-lg p-2 font-bold outline-none focus:border-blue-500"
                     placeholder="0"
                   />
@@ -269,7 +269,6 @@
                     type="number"
                     step="any"
                     v-model="form.beSlPoints"
-                    required
                     class="w-full bg-white border border-gray-200 text-gray-900 text-sm rounded-lg p-2 font-bold outline-none focus:border-blue-500"
                     placeholder="0"
                   />
@@ -280,7 +279,6 @@
                     type="number"
                     step="any"
                     v-model="form.beRr"
-                    required
                     class="w-full bg-white border border-gray-200 text-gray-900 text-sm rounded-lg p-2 font-bold outline-none focus:border-blue-500"
                     placeholder="0"
                   />
@@ -291,7 +289,6 @@
                     type="number"
                     step="any"
                     v-model="form.beMaxRr"
-                    required
                     class="w-full bg-white border border-gray-200 text-gray-900 text-sm rounded-lg p-2 font-bold outline-none focus:border-blue-500"
                     placeholder="0"
                   />
@@ -323,7 +320,6 @@
                     type="number"
                     step="any"
                     v-model="form.trailSlPoints"
-                    required
                     class="w-full bg-white border border-gray-200 text-gray-900 text-sm rounded-lg p-2 font-bold outline-none focus:border-blue-500"
                     placeholder="0"
                   />
@@ -334,7 +330,6 @@
                     type="number"
                     step="any"
                     v-model="form.trailRr"
-                    required
                     class="w-full bg-white border border-gray-200 text-gray-900 text-sm rounded-lg p-2 font-bold outline-none focus:border-blue-500"
                     placeholder="0"
                   />
@@ -345,7 +340,6 @@
                     type="number"
                     step="any"
                     v-model="form.trailMaxRr"
-                    required
                     class="w-full bg-white border border-gray-200 text-gray-900 text-sm rounded-lg p-2 font-bold outline-none focus:border-blue-500"
                     placeholder="0"
                   />
@@ -758,6 +752,57 @@ const imageUrls = ref<string[]>([''])
 const setupSessions = ref<any[]>([])
 
 watch(
+  () => form.value.entryDatetime,
+  (newVal) => {
+    if (newVal) {
+      form.value.exitDatetime = newVal;
+      
+      if (setupSessions.value && setupSessions.value.length > 0) {
+        const timePart = newVal.includes('T') ? newVal.split('T')[1] : newVal.split(' ')[1];
+        if (timePart) {
+          const [hours, mins] = timePart.split(':').map(Number);
+          const currentMins = hours * 60 + mins;
+          
+          let foundSession = '';
+          for (const s of setupSessions.value) {
+            if (!s.startTime || !s.endTime) continue;
+            const [sHours, sMins] = s.startTime.split(':').map(Number);
+            const [eHours, eMins] = s.endTime.split(':').map(Number);
+            const startMins = sHours * 60 + sMins;
+            const endMins = eHours * 60 + eMins;
+            
+            if (startMins <= endMins) {
+              if (currentMins >= startMins && currentMins <= endMins) {
+                foundSession = s.sessionName;
+                break;
+              }
+            } else {
+              if (currentMins >= startMins || currentMins <= endMins) {
+                foundSession = s.sessionName;
+                break;
+              }
+            }
+          }
+          if (foundSession) {
+            form.value.sessionName = foundSession;
+          }
+        }
+      }
+    }
+  }
+)
+
+watch(
+  () => form.value.normalSlPoints,
+  (newVal) => {
+    if (newVal !== null && newVal !== undefined && (newVal as any) !== '') {
+      form.value.beSlPoints = newVal;
+      form.value.trailSlPoints = newVal;
+    }
+  }
+)
+
+watch(
   () => form.value.setupId,
   async (newSetupId) => {
     if (!newSetupId) {
@@ -814,6 +859,37 @@ const removeImageUrl = (index: number) => {
   }
 }
 
+
+const resetFormKeepCore = () => {
+  form.value.quality = 'Green';
+  form.value.news = false;
+  form.value.isTest = false;
+  form.value.notes = '';
+  
+  form.value.normalRr = null;
+  form.value.normalMaxRr = null;
+  form.value.normalSlPoints = null;
+  
+  form.value.beRr = null;
+  form.value.beMaxRr = null;
+  form.value.beSlPoints = null;
+  
+  form.value.trailRr = null;
+  form.value.trailMaxRr = null;
+  form.value.trailSlPoints = null;
+  
+  imageUrls.value = [''];
+
+  if (customColumns.value) {
+    customColumns.value.forEach((col: any) => {
+      if (col.type === 'switch' || col.type === 'checkbox') customData.value[col.id] = false
+      else if (col.type === 'number') customData.value[col.id] = null
+      else if (col.type === 'multiple_selector') customData.value[col.id] = []
+      else customData.value[col.id] = ''
+    })
+  }
+}
+
 const resetForm = () => {
   form.value = getInitialForm()
   imageUrls.value = ['']
@@ -849,10 +925,20 @@ const saveEntry = async () => {
     showAlert('Error', 'Trading Setup is required', 'error')
     return
   }
+  
   if (!form.value.symbolId) {
     showAlert('Error', 'Symbol is required', 'error')
     return
   }
+
+  const hasRR = (form.value.normalRr !== null && (form.value.normalRr as any) !== '') || 
+                (form.value.beRr !== null && (form.value.beRr as any) !== '') || 
+                (form.value.trailRr !== null && (form.value.trailRr as any) !== '');
+  if (!hasRR) {
+    showAlert('Error', 'At least one RR value is required (Normal, BE, or Trail)', 'error')
+    return
+  }
+
 
   isSaving.value = true
 
@@ -884,11 +970,12 @@ const saveEntry = async () => {
       customData: Object.keys(customData.value).length > 0 ? customData.value : null
     }
 
-    const res = await window.api.journal.create(entryData)
+    const plainEntryData = JSON.parse(JSON.stringify(entryData))
+    const res = await window.api.journal.create(plainEntryData)
     
     if (res.success) {
       showAlert('Success', 'Entry saved successfully!', 'success')
-      resetForm()
+      resetFormKeepCore()
     } else {
       console.error('Failed to save entry:', res.error)
       showAlert('Error', 'Failed to save entry: ' + res.error, 'error')

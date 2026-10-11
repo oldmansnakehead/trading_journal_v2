@@ -1,9 +1,56 @@
 import { ipcMain } from 'electron'
 import { getDb } from '../db/client'
 import { journalEntries, symbols, setups } from '../db/schema'
-import { eq, sql, desc } from 'drizzle-orm'
+import { eq, sql, desc, inArray } from 'drizzle-orm'
 
 export const registerJournalHandlers = () => {
+  ipcMain.handle('journal:get', async (_, id: number) => {
+    try {
+      const db = getDb()
+      if (!db) throw new Error('Database not initialized')
+      const result = db
+        .select({
+          id: journalEntries.id,
+          entryDatetime: journalEntries.entryDatetime,
+          exitDatetime: journalEntries.exitDatetime,
+          position: journalEntries.position,
+          directionBias: journalEntries.directionBias,
+          entryTimeframe: journalEntries.entryTimeframe,
+          news: journalEntries.news,
+          quality: journalEntries.quality,
+          isTest: journalEntries.isTest,
+          images: journalEntries.images,
+          notes: journalEntries.notes,
+          normalRr: journalEntries.normalRr,
+          normalMaxRr: journalEntries.normalMaxRr,
+          normalSlPoints: journalEntries.normalSlPoints,
+          normalTpPoints: journalEntries.normalTpPoints,
+          beRr: journalEntries.beRr,
+          beMaxRr: journalEntries.beMaxRr,
+          beSlPoints: journalEntries.beSlPoints,
+          beTpPoints: journalEntries.beTpPoints,
+          trailRr: journalEntries.trailRr,
+          trailMaxRr: journalEntries.trailMaxRr,
+          trailSlPoints: journalEntries.trailSlPoints,
+          trailTpPoints: journalEntries.trailTpPoints,
+          sessionName: journalEntries.sessionName,
+          customData: journalEntries.customData,
+          setupId: journalEntries.setupId,
+          symbolId: journalEntries.symbolId,
+          symbolName: symbols.name,
+          setupName: setups.name
+        })
+        .from(journalEntries)
+        .leftJoin(symbols, eq(journalEntries.symbolId, symbols.id))
+        .leftJoin(setups, eq(journalEntries.setupId, setups.id))
+        .where(eq(journalEntries.id, id))
+        .get()
+      return { success: true, data: result }
+    } catch (error: any) {
+      return { success: false, error: error.message }
+    }
+  })
+
   // Get all trades with basic related data
   ipcMain.handle('journal:list', async () => {
     try {
@@ -22,6 +69,10 @@ export const registerJournalHandlers = () => {
           trailRr: journalEntries.trailRr,
           normalTpPoints: journalEntries.normalTpPoints,
           normalSlPoints: journalEntries.normalSlPoints,
+          sessionName: journalEntries.sessionName,
+          customData: journalEntries.customData,
+          setupId: journalEntries.setupId,
+          symbolId: journalEntries.symbolId,
           symbolName: symbols.name,
           setupName: setups.name,
           isTest: journalEntries.isTest
@@ -74,6 +125,31 @@ export const registerJournalHandlers = () => {
       if (!db) throw new Error('Database not initialized')
       const result = db.insert(journalEntries).values(data).returning().get()
       return { success: true, data: result }
+    } catch (error: any) {
+      return { success: false, error: error.message }
+    }
+  })
+
+  // Delete a single journal entry
+  ipcMain.handle('journal:delete', async (_, id: number) => {
+    try {
+      const db = getDb()
+      if (!db) throw new Error('Database not initialized')
+      db.delete(journalEntries).where(eq(journalEntries.id, id)).run()
+      return { success: true }
+    } catch (error: any) {
+      return { success: false, error: error.message }
+    }
+  })
+
+  // Delete multiple journal entries
+  ipcMain.handle('journal:deleteMany', async (_, ids: number[]) => {
+    try {
+      const db = getDb()
+      if (!db) throw new Error('Database not initialized')
+      if (!ids || ids.length === 0) return { success: true }
+      db.delete(journalEntries).where(inArray(journalEntries.id, ids)).run()
+      return { success: true }
     } catch (error: any) {
       return { success: false, error: error.message }
     }

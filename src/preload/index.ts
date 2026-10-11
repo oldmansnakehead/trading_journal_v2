@@ -20,12 +20,16 @@ const api = {
   },
   backup: {
     export: () => ipcRenderer.invoke('backup:export'),
-    import: () => ipcRenderer.invoke('backup:import')
+    import: () => ipcRenderer.invoke('backup:import'),
+    clear: () => ipcRenderer.invoke('backup:clear')
   },
   journal: {
     list: () => ipcRenderer.invoke('journal:list'),
+    get: (id: number) => ipcRenderer.invoke('journal:get', id),
     kpi: (mode: string) => ipcRenderer.invoke('journal:kpi', mode),
-    create: (data: any) => ipcRenderer.invoke('journal:create', data)
+    create: (data: any) => ipcRenderer.invoke('journal:create', data),
+    delete: (id: number) => ipcRenderer.invoke('journal:delete', id),
+    deleteMany: (ids: number[]) => ipcRenderer.invoke('journal:deleteMany', ids)
   },
   customColumns: {
     list: (setupId: number) => ipcRenderer.invoke('customColumns:list', setupId),

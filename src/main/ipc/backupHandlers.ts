@@ -1,5 +1,5 @@
 import { ipcMain, dialog, BrowserWindow } from 'electron'
-import { exportBackup, importBackup } from '../services/backup'
+import { exportBackup, importBackup, clearDatabase } from '../services/backup'
 
 export const registerBackupHandlers = () => {
   ipcMain.handle('backup:export', async (event) => {
@@ -7,35 +7,26 @@ export const registerBackupHandlers = () => {
     if (!window) return { success: false, error: 'No window found' }
 
     // Let user pick where to save the zip
+    const dateStr = new Date().toISOString().split('T')[0]
     const { canceled, filePath } = await dialog.showSaveDialog(window, {
       title: 'Export Data Backup',
-      defaultPath: `TradingJournalBackup_${new Date().toISOString().split('T')[0]}.zip`,
+      defaultPath: `TradingJournalBackup_${dateStr}.zip`,
       filters: [{ name: 'Zip Archives', extensions: ['zip'] }]
     })
 
     if (canceled || !filePath) return { success: false, error: 'User canceled' }
 
-    return await exportBackup(filePath)
+    const result = await exportBackup(filePath)
+    return { ...result, filePath }
   })
 
   ipcMain.handle('backup:import', async (event) => {
     const window = BrowserWindow.fromWebContents(event.sender)
     if (!window) return { success: false, error: 'No window found' }
 
-    // Warn the user before importing
-    const { response } = await dialog.showMessageBox(window, {
-      type: 'warning',
-      title: 'Import Backup',
-      message:
-        'This will overwrite your current data. A safe backup of your current state will be saved in the app data folder. Do you wish to continue?',
-      buttons: ['Cancel', 'Yes, Import']
-    })
-
-    if (response !== 1) return { success: false, error: 'User canceled' }
-
-    // Let user pick the zip file
+    // Open native file picker to select backup file
     const { canceled, filePaths } = await dialog.showOpenDialog(window, {
-      title: 'Select Backup File',
+      title: 'Select Backup File (.zip)',
       filters: [{ name: 'Zip Archives', extensions: ['zip'] }],
       properties: ['openFile']
     })
@@ -43,18 +34,14 @@ export const registerBackupHandlers = () => {
     if (canceled || filePaths.length === 0) return { success: false, error: 'User canceled' }
 
     const result = await importBackup(filePaths[0])
+    return result
+  })
 
-    if (result.success) {
-      // Optional: Ask user to restart the app to reload the DB properly
-      await dialog.showMessageBox(window, {
-        type: 'info',
-        title: 'Import Successful',
-        message:
-          'Your backup has been imported successfully. Please restart the app to apply the changes.',
-        buttons: ['OK']
-      })
-    }
+  ipcMain.handle('backup:clear', async (event) => {
+    const window = BrowserWindow.fromWebContents(event.sender)
+    if (!window) return { success: false, error: 'No window found' }
 
+    const result = await clearDatabase()
     return result
   })
 }

@@ -433,6 +433,7 @@
     <!-- Add Setup Modal -->
     <div
       v-if="isAddSetupModalOpen"
+      @click.self="closeAddSetupModal"
       class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
     >
       <div class="bg-white rounded-2xl w-full max-w-md shadow-xl overflow-hidden flex flex-col">
@@ -497,6 +498,7 @@
     <!-- Add Column Modal -->
     <div
       v-if="isAddColumnModalOpen"
+      @click.self="closeAddColumnModal"
       class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
     >
       <div class="bg-white rounded-2xl w-full max-w-md shadow-xl overflow-hidden flex flex-col">
@@ -622,6 +624,7 @@
     <!-- Add Session Modal -->
     <div
       v-if="isAddSessionModalOpen"
+      @click.self="closeAddSessionModal"
       class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
     >
       <div class="bg-white rounded-2xl w-full max-w-md shadow-xl overflow-hidden flex flex-col">

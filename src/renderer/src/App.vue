@@ -88,61 +88,6 @@ import { RouterView } from 'vue-router'
 
     <!-- Main Content Wrapper -->
     <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
-      <!-- 1. Layout Elements: Top Header -->
-      <header
-        class="h-20 bg-white/80 backdrop-blur-md border-b border-gray-200 border-dashed flex items-center justify-between px-4 sm:px-6 lg:px-8 z-10 sticky top-0"
-      >
-        <div class="flex items-center gap-4">
-          <button class="lg:hidden text-gray-500 hover:text-gray-700">
-            <i class="ph ph-list text-2xl"></i>
-          </button>
-          <div class="hidden sm:flex items-center text-sm font-semibold text-gray-700 gap-2">
-            <div class="w-6 h-6 rounded bg-primary/20 flex items-center justify-center">
-              <img
-                src="https://placehold.co/24x24/transparent/00a76f?text=T"
-                class="rounded"
-                alt="Team"
-              />
-            </div>
-            Team 1
-            <span class="bg-gray-100 text-gray-500 text-xs px-1.5 py-0.5 rounded ml-1 font-bold"
-              >Free</span
-            >
-            <i class="ph ph-caret-up-down text-gray-400"></i>
-          </div>
-        </div>
-
-        <div class="flex items-center gap-3 sm:gap-5">
-          <!-- Search -->
-          <button
-            class="w-10 h-10 rounded-full flex items-center justify-center text-gray-500 hover:bg-gray-100 transition-colors"
-          >
-            <i class="ph ph-magnifying-glass text-xl"></i>
-          </button>
-
-          <!-- Notifications -->
-          <button
-            class="w-10 h-10 rounded-full flex items-center justify-center text-gray-500 hover:bg-gray-100 transition-colors relative"
-          >
-            <i class="ph ph-bell text-xl"></i>
-            <span
-              class="absolute top-1 right-1 w-2 h-2 bg-error rounded-full border-2 border-white"
-            ></span>
-          </button>
-
-          <!-- Avatar -->
-          <button
-            class="w-10 h-10 rounded-full overflow-hidden border-2 border-transparent hover:border-gray-200 transition-all p-0.5"
-          >
-            <img
-              src="https://i.pravatar.cc/150?img=11"
-              alt="Avatar"
-              class="w-full h-full rounded-full object-cover"
-            />
-          </button>
-        </div>
-      </header>
-
       <!-- Main Scrollable Content -->
       <main class="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
         <RouterView />

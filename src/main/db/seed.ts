@@ -4,7 +4,6 @@ import {
   setups,
   setupSessions,
   setupPlaybooks,
-  strategies,
   customColumns,
   journalEntries
 } from './schema'
@@ -17,7 +16,6 @@ export async function seed() {
     console.log('Clearing existing data...')
     db.delete(journalEntries).run()
     db.delete(customColumns).run()
-    db.delete(strategies).run()
     db.delete(setupPlaybooks).run()
     db.delete(setupSessions).run()
     db.delete(setups).run()
@@ -30,8 +28,8 @@ export async function seed() {
         { name: 'XAUUSD' },
         { name: 'EURUSD' },
         { name: 'GBPUSD' },
-        { name: 'US30' },
-        { name: 'NAS100' }
+        { name: 'USDJPY' },
+        { name: 'BTCUSD' }
       ])
       .returning()
       .all()
@@ -41,41 +39,36 @@ export async function seed() {
       .insert(setups)
       .values([
         {
-          name: 'SMC Classic',
-          description: 'Smart Money Concepts targeting liquidity sweeps.',
-          type: 'real'
+          name: 'ICT / SMC Classic',
+          type: 'real',
+          description: 'Focus on FVG, Liquidity sweeps, and Order Blocks in London & NY sessions.'
         },
         {
           name: 'Breakout Strategy',
-          description: 'Trading breakout of London/Asia range.',
-          type: 'demo'
+          type: 'demo',
+          description: 'Testing high-momentum breakout on Asian range high/low.'
         }
       ])
       .returning()
       .all()
 
-    console.log('Inserting setup details (sessions, strategies, playbooks)...')
+    console.log('Inserting sessions, playbooks & custom columns...')
     for (const setup of insertedSetups) {
       db.insert(setupSessions)
         .values([
-          { setupId: setup.id, sessionName: 'Asia', startTime: '00:00', endTime: '08:00' },
           { setupId: setup.id, sessionName: 'London', startTime: '08:00', endTime: '16:00' },
           { setupId: setup.id, sessionName: 'New York', startTime: '13:00', endTime: '21:00' }
         ])
         .run()
 
-      db.insert(strategies)
-        .values([
-          { setupId: setup.id, name: 'Liquidity Sweep' },
-          { setupId: setup.id, name: 'Order Block Test' }
-        ])
-        .run()
-
       db.insert(setupPlaybooks)
-        .values({
-          setupId: setup.id,
-          content: `Playbook for ${setup.name}:\n1. Wait for liquidity sweep.\n2. Look for change of character (CHOCH) on M1/M5.\n3. Enter on retracement to the unmitigated OB.`
-        })
+        .values([
+          {
+            setupId: setup.id,
+            content:
+              '# Entry Rules\n1. Wait for Asian Range high/low sweep\n2. M5 MSS with displacement\n3. Enter on FVG retracement'
+          }
+        ])
         .run()
 
       db.insert(customColumns)
@@ -98,14 +91,13 @@ export async function seed() {
           position: 'Buy',
           directionBias: 'Bullish',
           entryTimeframe: 'M5',
-          strategies: ['Liquidity Sweep'],
           news: false,
           quality: 'Green',
           isTest: false,
-          images: [
+          images: JSON.stringify([
             'https://placehold.co/800x450/e2e8f0/64748b?text=Chart+1',
             'https://placehold.co/800x450/e2e8f0/64748b?text=Chart+2'
-          ],
+          ]),
           notes:
             'Great setup, followed the plan perfectly. Waited for the London open liquidity sweep and entered on M5 CHOCH.',
           normalSlPoints: 20,
@@ -120,7 +112,7 @@ export async function seed() {
           trailRr: 4.0,
           trailMaxRr: 5.5,
           trailTpPoints: 80,
-          customData: { 'Confluence Count': 4, 'Emotional State': 'Calm' }
+          customData: JSON.stringify({ 'Confluence Count': 4, 'Emotional State': 'Calm' })
         },
         {
           setupId: insertedSetups[1].id,
@@ -131,11 +123,10 @@ export async function seed() {
           position: 'Sell',
           directionBias: 'Bearish',
           entryTimeframe: 'M1',
-          strategies: ['Order Block Test'],
           news: true,
           quality: 'Orange',
           isTest: true,
-          images: ['https://placehold.co/800x450/e2e8f0/64748b?text=Chart+3'],
+          images: JSON.stringify(['https://placehold.co/800x450/e2e8f0/64748b?text=Chart+3']),
           notes: 'Took a paper trade during news. Spread got wide and hit SL quickly.',
           normalSlPoints: 10,
           normalRr: -1,
@@ -149,7 +140,7 @@ export async function seed() {
           trailRr: null,
           trailMaxRr: null,
           trailTpPoints: null,
-          customData: { 'Confluence Count': 2, 'Emotional State': 'Anxious' }
+          customData: JSON.stringify({ 'Confluence Count': 2, 'Emotional State': 'Anxious' })
         }
       ])
       .run()

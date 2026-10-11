@@ -22,6 +22,11 @@ export const getDb = () => {
   return db
 }
 
+export const getSqliteDb = () => {
+  getDb()
+  return sqliteDb
+}
+
 export const runMigrations = () => {
   const database = getDb()
   const migrationsFolder = app.isPackaged
@@ -31,8 +36,19 @@ export const runMigrations = () => {
   migrate(database, { migrationsFolder })
 }
 
+export const checkpointDb = () => {
+  if (sqliteDb) {
+    try {
+      sqliteDb.pragma('wal_checkpoint(TRUNCATE)')
+    } catch (e) {
+      console.error('Failed to checkpoint WAL:', e)
+    }
+  }
+}
+
 export const closeDb = () => {
   if (sqliteDb) {
+    checkpointDb()
     sqliteDb.close()
     sqliteDb = null
     db = null
