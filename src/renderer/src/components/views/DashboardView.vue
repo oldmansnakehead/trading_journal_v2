@@ -1208,6 +1208,19 @@
         </table>
       </div>
     </div>
+
+    <!-- Calendar View Section -->
+    <div class="mt-8">
+      <CalendarView
+        :embedded-trades="allTrades"
+        :initial-stat-mode="statMode"
+        :initial-capital="simulation.initialBalance"
+        :initial-risk-percent="simulation.riskPerTrade"
+        :initial-return-calculation="simulation.returnCalculation"
+        :initial-trade-type="filters.tradeType"
+        :initial-setup="filters.setup"
+      />
+    </div>
     
     <!-- Trade Details Modal -->
     <TradeDetailsModal
@@ -1262,6 +1275,7 @@ import TradeScreenshotsModal from '../ui/TradeScreenshotsModal.vue'
 import BaseConfirmModal from '../ui/BaseConfirmModal.vue'
 import BaseAlertDialog from '../ui/BaseAlertDialog.vue'
 import InfoTooltip from '../ui/InfoTooltip.vue'
+import CalendarView from '../ui/CalendarView.vue'
 import { calculateTradeDuration } from '../../utils/duration'
 
 // Dashboard DOM ref & Export state

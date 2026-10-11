@@ -1,9 +1,28 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import BaseSelect from './BaseSelect.vue'
 import TradeDetailsModal from './TradeDetailsModal.vue'
 import InfoTooltip from './InfoTooltip.vue'
 import { calculateTradeDuration } from '../../utils/duration'
+
+interface Props {
+  embeddedTrades?: any[]
+  initialStatMode?: 'normal' | 'be' | 'trail'
+  initialCapital?: number
+  initialRiskPercent?: number
+  initialReturnCalculation?: 'simple' | 'log'
+  initialTradeType?: 'all' | 'real' | 'test' | string
+  initialSetup?: string
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  initialStatMode: 'normal',
+  initialCapital: 10000,
+  initialRiskPercent: 1,
+  initialReturnCalculation: 'simple',
+  initialTradeType: 'all',
+  initialSetup: 'all'
+})
 
 const currentDate = ref(new Date())
 
@@ -12,16 +31,33 @@ const trades = ref<any[]>([])
 const setups = ref<{ id: number; name: string }[]>([])
 
 // Filter State: Setup & RR Type & Trade Type
-const selectedSetup = ref<string>('all')
-const rrType = ref<'normal' | 'be' | 'trail'>('normal')
-const tradeType = ref<'all' | 'real' | 'test'>('all')
+const selectedSetup = ref<string>(props.initialSetup)
+const rrType = ref<'normal' | 'be' | 'trail'>(props.initialStatMode)
+const tradeType = ref<'all' | 'real' | 'test'>((props.initialTradeType as any) || 'all')
 
 // Capital & Risk % Simulation & Return Calculation (Simple vs Log Compounded)
 const simulation = ref({
-  initialBalance: 10000,
-  riskPerTrade: 1,
-  returnCalculation: 'simple' as 'simple' | 'log'
+  initialBalance: props.initialCapital,
+  riskPerTrade: props.initialRiskPercent,
+  returnCalculation: props.initialReturnCalculation
 })
+
+watch(() => props.initialStatMode, (val) => { if (val) rrType.value = val })
+watch(() => props.initialCapital, (val) => { if (val !== undefined) simulation.value.initialBalance = val })
+watch(() => props.initialRiskPercent, (val) => { if (val !== undefined) simulation.value.riskPerTrade = val })
+watch(() => props.initialReturnCalculation, (val) => { if (val) simulation.value.returnCalculation = val })
+watch(() => props.initialTradeType, (val) => { if (val) tradeType.value = val as any })
+watch(() => props.initialSetup, (val) => { if (val) selectedSetup.value = val })
+
+watch(
+  () => props.embeddedTrades,
+  (newTrades) => {
+    if (newTrades) {
+      trades.value = newTrades
+    }
+  },
+  { immediate: true }
+)
 
 const setupOptions = computed(() => [
   { label: 'All Setups', value: 'all' },
@@ -62,7 +98,7 @@ const isToday = (dayDateStr: string) => {
 
 const fetchData = async () => {
   try {
-    if (window.api?.journal?.list) {
+    if (!props.embeddedTrades && window.api?.journal?.list) {
       const res = await window.api.journal.list()
       if (res.success) {
         trades.value = res.data
@@ -296,7 +332,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="h-full flex flex-col bg-white">
+  <div class="w-full flex flex-col bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
     <!-- Header Controls -->
     <div class="p-6 border-b border-gray-100 flex flex-col gap-4">
       <!-- Top Row: Title & Month Navigation -->
@@ -642,7 +678,7 @@ onMounted(() => {
     <div
       v-if="showDayModal && selectedDayStat"
       @click.self="showDayModal = false"
-      class="fixed inset-0 z-[90] flex items-center justify-center bg-gray-900/40 backdrop-blur-2xs p-4"
+      class="fixed inset-0 z-[90] flex items-center justify-center bg-gray-900/40 backdrop-blur-2xs p-4 export-exclude"
     >
       <div class="bg-white rounded-2xl shadow-xl w-full max-w-xl max-h-[85vh] flex flex-col overflow-hidden">
         <!-- Modal Header -->
@@ -745,6 +781,7 @@ onMounted(() => {
     <TradeDetailsModal
       v-model:show="showTradeDetails"
       :tradeId="selectedTradeId"
+      class="export-exclude"
     />
   </div>
 </template>
