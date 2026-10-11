@@ -306,6 +306,187 @@
       />
     </div>
 
+    <!-- PnL & Financials Row -->
+    <div class="mb-8 bg-gradient-to-r from-gray-50 via-white to-gray-50 p-6 rounded-2xl border border-gray-200/80 shadow-2xs">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold">
+            <i class="ph-bold ph-coins text-lg"></i>
+          </div>
+          <div>
+            <h2 class="text-base font-bold text-gray-900">
+              สถิติกระแสเงิน (PnL & Financials)
+            </h2>
+            <p class="text-xs text-gray-500">
+              คำนวณตามโหมด {{ statMode.toUpperCase() }} ({{ simulation.returnCalculation === 'simple' ? 'Simple Fixed Risk' : 'Log Compounded' }})
+            </p>
+          </div>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2">
+          <span class="text-xs font-semibold text-gray-500 bg-white px-3 py-1.5 rounded-lg border border-gray-200">
+            NET PNL = GROSS PROFIT - GROSS LOSS
+          </span>
+          <span class="text-xs font-semibold text-gray-500 bg-white px-3 py-1.5 rounded-lg border border-gray-200">
+            PROFIT FACTOR = GROSS PROFIT / GROSS LOSS
+          </span>
+        </div>
+      </div>
+
+      <!-- Primary Financials & Balance (Row 1) -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+        <!-- GROSS PROFIT -->
+        <div class="bg-white rounded-2xl p-5 border border-emerald-100 shadow-xs flex items-center justify-between relative overflow-hidden group hover:border-emerald-300 transition-all">
+          <div class="relative z-10">
+            <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">GROSS PROFIT</p>
+            <p class="text-2xl font-extrabold text-emerald-600 mt-1">
+              +${{ kpis.grossProfit.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
+            </p>
+            <p class="text-xs text-emerald-700/80 mt-1.5 font-medium flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+              กำไรรวมจากไม้ชนะ ({{ kpis.wins }} ไม้)
+            </p>
+          </div>
+          <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl shrink-0 group-hover:scale-105 transition-transform">
+            <i class="ph-bold ph-arrow-circle-up"></i>
+          </div>
+        </div>
+
+        <!-- GROSS LOSS -->
+        <div class="bg-white rounded-2xl p-5 border border-rose-100 shadow-xs flex items-center justify-between relative overflow-hidden group hover:border-rose-300 transition-all">
+          <div class="relative z-10">
+            <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">GROSS LOSS</p>
+            <p class="text-2xl font-extrabold text-rose-600 mt-1">
+              -${{ kpis.grossLoss.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
+            </p>
+            <p class="text-xs text-rose-700/80 mt-1.5 font-medium flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-rose-500"></span>
+              ขาดทุนรวมจากไม้แพ้ ({{ kpis.losses }} ไม้)
+            </p>
+          </div>
+          <div class="w-12 h-12 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center text-xl shrink-0 group-hover:scale-105 transition-transform">
+            <i class="ph-bold ph-arrow-circle-down"></i>
+          </div>
+        </div>
+
+        <!-- NET PNL -->
+        <div
+          class="bg-white rounded-2xl p-5 border shadow-xs flex items-center justify-between relative overflow-hidden group transition-all"
+          :class="kpis.netPnl >= 0 ? 'border-emerald-200 bg-emerald-50/20 hover:border-emerald-300' : 'border-rose-200 bg-rose-50/20 hover:border-rose-300'"
+        >
+          <div class="relative z-10">
+            <div class="flex items-center gap-2">
+              <p class="text-xs font-bold text-gray-500 uppercase tracking-wider">NET PNL</p>
+              <span
+                class="text-[10px] font-bold px-2 py-0.5 rounded-full"
+                :class="kpis.netPnl >= 0 ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'"
+              >
+                Profit - Loss
+              </span>
+            </div>
+            <p
+              class="text-2xl font-extrabold mt-1"
+              :class="kpis.netPnl >= 0 ? 'text-emerald-600' : 'text-rose-600'"
+            >
+              {{ kpis.netPnl >= 0 ? '+' : '-' }}${{ Math.abs(kpis.netPnl).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
+            </p>
+            <p class="text-xs text-gray-500 mt-1.5 font-medium truncate">
+              ${{ kpis.grossProfit.toFixed(2) }} - ${{ kpis.grossLoss.toFixed(2) }}
+            </p>
+          </div>
+          <div
+            class="w-12 h-12 rounded-xl flex items-center justify-center text-xl shrink-0 group-hover:scale-105 transition-transform"
+            :class="kpis.netPnl >= 0 ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'"
+          >
+            <i :class="kpis.netPnl >= 0 ? 'ph-bold ph-wallet' : 'ph-bold ph-trend-down'"></i>
+          </div>
+        </div>
+
+        <!-- FINAL BALANCE -->
+        <div class="bg-white rounded-2xl p-5 border border-indigo-100 shadow-xs flex items-center justify-between relative overflow-hidden group hover:border-indigo-300 transition-all">
+          <div class="relative z-10">
+            <div class="flex items-center gap-2">
+              <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">FINAL BALANCE</p>
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">
+                Capital + Net PnL
+              </span>
+            </div>
+            <p class="text-2xl font-extrabold text-indigo-600 mt-1">
+              ${{ kpis.finalBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
+            </p>
+            <p class="text-xs text-indigo-700/80 mt-1.5 font-medium flex items-center gap-1.5 truncate">
+              <span class="w-2 h-2 rounded-full bg-indigo-500"></span>
+              ทุน ${{ (Number(simulation.initialBalance) || 10000).toLocaleString() }} {{ kpis.netPnl >= 0 ? '+' : '-' }} ${{ Math.abs(kpis.netPnl).toFixed(2) }}
+            </p>
+          </div>
+          <div class="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-xl shrink-0 group-hover:scale-105 transition-transform">
+            <i class="ph-bold ph-bank"></i>
+          </div>
+        </div>
+      </div>
+
+      <!-- Trade Efficiency & Per-Trade Statistics (Row 2) -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <!-- PROFIT FACTOR -->
+        <div class="bg-white rounded-2xl p-5 border border-amber-100 shadow-xs flex items-center justify-between relative overflow-hidden group hover:border-amber-300 transition-all">
+          <div class="relative z-10">
+            <div class="flex items-center gap-2">
+              <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">PROFIT FACTOR</p>
+              <span
+                class="text-[10px] font-bold px-2 py-0.5 rounded-full"
+                :class="kpis.profitFactor >= 1.0 ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' : 'bg-amber-100 text-amber-800 border border-amber-200'"
+              >
+                {{ kpis.profitFactor >= 1.0 ? '≥ 1.0 ทำกำไรได้' : '< 1.0 ยังไม่คุ้มทุน' }}
+              </span>
+            </div>
+            <p class="text-2xl font-extrabold text-amber-600 mt-1">
+              {{ kpis.grossLoss === 0 && kpis.grossProfit > 0 ? '∞ (MAX)' : kpis.profitFactor.toFixed(2) }}
+            </p>
+            <p class="text-xs text-gray-500 mt-1.5 font-medium">
+              ได้กำไร {{ kpis.grossLoss === 0 && kpis.grossProfit > 0 ? '∞' : kpis.profitFactor.toFixed(2) }} เท่าของที่เสียไป (Profit / Loss)
+            </p>
+          </div>
+          <div class="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-xl shrink-0 group-hover:scale-105 transition-transform">
+            <i class="ph-bold ph-scales"></i>
+          </div>
+        </div>
+
+        <!-- AVG WIN $ -->
+        <div class="bg-white rounded-2xl p-5 border border-emerald-100 shadow-xs flex items-center justify-between relative overflow-hidden group hover:border-emerald-300 transition-all">
+          <div class="relative z-10">
+            <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">AVG WIN $</p>
+            <p class="text-2xl font-extrabold text-emerald-600 mt-1">
+              +${{ kpis.avgWin.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
+            </p>
+            <p class="text-xs text-emerald-700/80 mt-1.5 font-medium flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+              กำไรเฉลี่ยต่อไม้ชนะ (Profit / {{ kpis.wins }} Wins)
+            </p>
+          </div>
+          <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl shrink-0 group-hover:scale-105 transition-transform">
+            <i class="ph-bold ph-trend-up"></i>
+          </div>
+        </div>
+
+        <!-- AVG LOSS $ -->
+        <div class="bg-white rounded-2xl p-5 border border-rose-100 shadow-xs flex items-center justify-between relative overflow-hidden group hover:border-rose-300 transition-all">
+          <div class="relative z-10">
+            <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">AVG LOSS $</p>
+            <p class="text-2xl font-extrabold text-rose-600 mt-1">
+              -${{ kpis.avgLoss.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
+            </p>
+            <p class="text-xs text-rose-700/80 mt-1.5 font-medium flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-rose-500"></span>
+              ขาดทุนเฉลี่ยต่อไม้แพ้ (Loss / {{ kpis.losses }} Losses)
+            </p>
+          </div>
+          <div class="w-12 h-12 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center text-xl shrink-0 group-hover:scale-105 transition-transform">
+            <i class="ph-bold ph-trend-down"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Charts Row -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
       <!-- Main Equity/PnL Curve -->
@@ -328,13 +509,30 @@
       </div>
 
       <!-- Win/Loss Ratio Doughnut -->
-      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-        <div class="flex justify-between items-center mb-6">
-          <div>
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col justify-between">
+        <div class="flex flex-col gap-2 mb-4">
+          <div class="flex items-center justify-between">
             <h2 class="text-lg font-bold text-gray-900">Trade Outcomes</h2>
-            <p class="text-sm text-gray-500">Distribution of trades ({{ statMode.toUpperCase() }} mode)</p>
+            <span class="text-xs font-semibold text-gray-400">({{ statMode.toUpperCase() }} mode)</span>
+          </div>
+
+          <!-- Win / Loss / BE Badges -->
+          <div class="flex flex-wrap items-center gap-1.5 pt-1">
+            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+              <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+              {{ outcomeDistribution.data[0] }} Wins (ไม้)
+            </span>
+            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold bg-rose-50 text-rose-700 border border-rose-200">
+              <span class="w-2 h-2 rounded-full bg-rose-500"></span>
+              {{ outcomeDistribution.data[1] }} Losses (ไม้)
+            </span>
+            <span v-if="outcomeDistribution.data[2] > 0" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200">
+              <span class="w-2 h-2 rounded-full bg-amber-500"></span>
+              {{ outcomeDistribution.data[2] }} BE (ไม้)
+            </span>
           </div>
         </div>
+
         <CurrentDownloadChart
           title="Win/Loss Ratio"
           subtitle="Based on selected RR mode"
@@ -985,21 +1183,36 @@ watch(
 const kpis = computed(() => {
   const trades = filteredTrades.value
   const total = trades.length
+  const initialBalance = Number(simulation.value.initialBalance) || 10000
+
   if (total === 0) {
     return {
       totalTrades: 0,
       winRate: 0,
       avgRr: 0,
-      maxDrawdown: 0
+      maxDrawdown: 0,
+      wins: 0,
+      losses: 0,
+      breakEvens: 0,
+      grossProfit: 0,
+      grossLoss: 0,
+      netPnl: 0,
+      profitFactor: 0,
+      avgWin: 0,
+      avgLoss: 0,
+      finalBalance: initialBalance
     }
   }
 
   const isSimple = simulation.value.returnCalculation === 'simple'
-  const initialBalance = Number(simulation.value.initialBalance) || 10000
   const riskPercent = (Number(simulation.value.riskPerTrade) || 1) / 100
   const fixedRiskAmount = initialBalance * riskPercent
 
   let wins = 0
+  let losses = 0
+  let breakEvens = 0
+  let grossProfit = 0
+  let grossLoss = 0
   let totalRr = 0
   let currentBalance = initialBalance
   let peak = currentBalance
@@ -1008,22 +1221,60 @@ const kpis = computed(() => {
   for (const trade of trades) {
     const rr = getTradeRr(trade, statMode.value)
     totalRr += rr
-    if (rr > 0) wins++
 
     const riskAmount = isSimple ? fixedRiskAmount : currentBalance * riskPercent
     const pnl = riskAmount * rr
     currentBalance += pnl
+
+    if (rr > 0) {
+      wins++
+      grossProfit += pnl
+    } else if (rr < 0) {
+      losses++
+      grossLoss += Math.abs(pnl)
+    } else {
+      breakEvens++
+    }
 
     if (currentBalance > peak) peak = currentBalance
     const dd = peak > 0 ? ((peak - currentBalance) / peak) * 100 : 0
     if (dd > maxDrawdown) maxDrawdown = dd
   }
 
+  const netPnl = grossProfit - grossLoss
+
+  // PROFIT FACTOR: GROSS PROFIT / GROSS LOSS
+  let profitFactor = 0
+  if (grossLoss > 0) {
+    profitFactor = Number((grossProfit / grossLoss).toFixed(2))
+  } else if (grossProfit > 0) {
+    profitFactor = 999.00
+  }
+
+  // AVG WIN $: GROSS PROFIT / WINS
+  const avgWin = wins > 0 ? Number((grossProfit / wins).toFixed(2)) : 0
+
+  // AVG LOSS $: GROSS LOSS / LOSSES
+  const avgLoss = losses > 0 ? Number((grossLoss / losses).toFixed(2)) : 0
+
+  // FINAL BALANCE: ทุนเริ่มต้น + NET PNL
+  const finalBalance = Number((initialBalance + netPnl).toFixed(2))
+
   return {
     totalTrades: total,
     winRate: Number(((wins / total) * 100).toFixed(1)),
     avgRr: Number((totalRr / total).toFixed(2)),
-    maxDrawdown: Number(maxDrawdown.toFixed(2))
+    maxDrawdown: Number(maxDrawdown.toFixed(2)),
+    wins,
+    losses,
+    breakEvens,
+    grossProfit: Number(grossProfit.toFixed(2)),
+    grossLoss: Number(grossLoss.toFixed(2)),
+    netPnl: Number(netPnl.toFixed(2)),
+    profitFactor,
+    avgWin,
+    avgLoss,
+    finalBalance
   }
 })
 
@@ -1155,7 +1406,7 @@ const outcomeDistribution = computed(() => {
   })
 
   return {
-    labels: ['Wins', 'Losses', 'Break Evens'],
+    labels: [`Wins (${wins} ไม้)`, `Losses (${losses} ไม้)`, `Break Evens (${breakEvens} ไม้)`],
     data: [wins, losses, breakEvens],
     colors: ['#00a76f', '#ff5630', '#ffab00']
   }
