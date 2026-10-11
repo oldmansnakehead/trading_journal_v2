@@ -297,13 +297,13 @@
         infoFormula="(จำนวนไม้ชนะ ÷ จำนวนไม้ทั้งหมด) × 100%"
       />
       <PastelStatCard
-        title="Average RR"
+        title="Expectancy"
         :value="kpis.avgRr + 'R'"
         :trend="kpis.avgRr"
         icon="ph-trend-up"
         color="primary"
-        infoTitle="Average RR (ผลตอบแทนคาดหวังเฉลี่ย)"
-        infoDescription="ค่าเฉลี่ยผลตอบแทนต่อความเสี่ยงสุทธิต่อไม้ (Expectancy in R) ถ้ามีค่าเป็นบวกแสดงว่าระบบมีความได้เปรียบทางสถิติในระยะยาว"
+        infoTitle="Expectancy (ผลตอบแทนคาดหวังเฉลี่ยต่อไม้)"
+        infoDescription="ค่าเฉลี่ยผลตอบแทนต่อความเสี่ยงสุทธิต่อไม้ (Expectancy in R) ถ้ามีค่าเป็นบวกแสดงว่าระบบมีความได้เปรียบทางสถิติในระยะยาว (คนละตัวกับ AVG RR ในการ์ดด้านล่างที่เป็น Reward:Risk Payoff Ratio)"
         infoFormula="ผลรวม RR สุทธิทั้งหมด ÷ จำนวนไม้ทั้งหมด"
       />
       <PastelStatCard
@@ -806,6 +806,132 @@
           </div>
           <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center text-lg sm:text-xl shrink-0 group-hover:scale-105 transition-transform">
             <i class="ph-bold ph-trend-down"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Long vs Short Performance (Buy / Sell) -->
+    <div class="mb-8 bg-gradient-to-r from-gray-50 via-white to-gray-50 p-6 rounded-2xl border border-gray-200/80 shadow-2xs">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-xl bg-teal-100 text-teal-700 flex items-center justify-center font-bold">
+            <i class="ph-bold ph-arrows-split text-lg"></i>
+          </div>
+          <div>
+            <div class="flex items-center gap-1.5">
+              <h2 class="text-base font-bold text-gray-900">
+                สถิติตามประเภทคำสั่ง (Long vs Short / Buy vs Sell)
+              </h2>
+              <InfoTooltip
+                title="Long vs Short Performance"
+                description="เปรียบเทียบผลการเทรดระหว่างฝั่ง Buy (Long) และ Sell (Short) เพื่อวิเคราะห์ว่าระบบหรือสไตล์การเทรดของคุณถนัดฝั่งไหนมากกว่า หรือมี Directional Bias ที่ส่งผลต่อผลกำไรหรือไม่"
+                formula="Win Rate = (Wins ÷ Total Trades ในฝั่งนั้น) × 100% | Net PnL = กำไรสุทธิของฝั่งนั้น"
+              />
+            </div>
+            <p class="text-xs text-gray-500">
+              วิเคราะห์ Win Rate, Net PnL และสัดส่วนการเทรดแยกตามประเภทคำสั่ง
+            </p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <span class="text-xs font-semibold text-gray-500 bg-white px-3 py-1.5 rounded-lg border border-gray-200">
+            Total {{ filteredTrades.length }} Trades
+          </span>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <!-- BUY (LONG) CARD -->
+        <div class="bg-white rounded-2xl p-5 border border-emerald-100/80 shadow-xs hover:border-emerald-300 transition-all">
+          <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center gap-2">
+              <div class="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold">
+                <i class="ph-bold ph-arrow-up-right text-lg"></i>
+              </div>
+              <div>
+                <h3 class="text-sm font-bold text-gray-900">BUY (LONG)</h3>
+                <p class="text-xs text-gray-500">สัดส่วน {{ positionPerformance.buy.share }}% ({{ positionPerformance.buy.total }} ไม้)</p>
+              </div>
+            </div>
+            <span class="text-xs font-bold px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+              Long Bias
+            </span>
+          </div>
+
+          <div class="grid grid-cols-2 gap-4 mb-4">
+            <div class="p-3 bg-emerald-50/50 rounded-xl border border-emerald-100/50">
+              <p class="text-xs font-semibold text-emerald-800 mb-1">Win Rate</p>
+              <p class="text-2xl font-extrabold text-emerald-600">{{ positionPerformance.buy.winRate }}%</p>
+              <div class="w-full bg-emerald-100 rounded-full h-1.5 mt-2 overflow-hidden">
+                <div class="bg-emerald-500 h-1.5 rounded-full transition-all duration-500" :style="{ width: `${positionPerformance.buy.winRate}%` }"></div>
+              </div>
+            </div>
+
+            <div class="p-3 bg-gray-50 rounded-xl border border-gray-100">
+              <p class="text-xs font-semibold text-gray-600 mb-1">Net PnL</p>
+              <p
+                class="text-2xl font-extrabold truncate"
+                :class="positionPerformance.buy.netPnl >= 0 ? 'text-emerald-600' : 'text-rose-600'"
+              >
+                {{ positionPerformance.buy.netPnl >= 0 ? '+' : '' }}${{ positionPerformance.buy.netPnl.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
+              </p>
+              <p class="text-[11px] text-gray-500 mt-2 truncate">
+                Gross: ${{ positionPerformance.buy.grossProfit.toFixed(1) }} / -${{ positionPerformance.buy.grossLoss.toFixed(1) }}
+              </p>
+            </div>
+          </div>
+
+          <div class="flex items-center justify-between text-xs text-gray-500 pt-3 border-t border-gray-100">
+            <span>ชนะ/แพ้/เสมอ: <strong class="text-gray-800">{{ positionPerformance.buy.wins }}W / {{ positionPerformance.buy.losses }}L / {{ positionPerformance.buy.breakEvens }}BE</strong></span>
+            <span>Avg Expectancy: <strong :class="positionPerformance.buy.avgRr >= 0 ? 'text-emerald-600' : 'text-rose-600'">{{ positionPerformance.buy.avgRr }}R</strong></span>
+          </div>
+        </div>
+
+        <!-- SELL (SHORT) CARD -->
+        <div class="bg-white rounded-2xl p-5 border border-rose-100/80 shadow-xs hover:border-rose-300 transition-all">
+          <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center gap-2">
+              <div class="w-9 h-9 rounded-xl bg-rose-100 text-rose-700 flex items-center justify-center font-bold">
+                <i class="ph-bold ph-arrow-down-right text-lg"></i>
+              </div>
+              <div>
+                <h3 class="text-sm font-bold text-gray-900">SELL (SHORT)</h3>
+                <p class="text-xs text-gray-500">สัดส่วน {{ positionPerformance.sell.share }}% ({{ positionPerformance.sell.total }} ไม้)</p>
+              </div>
+            </div>
+            <span class="text-xs font-bold px-2.5 py-1 rounded-full bg-rose-50 text-rose-700 border border-rose-200">
+              Short Bias
+            </span>
+          </div>
+
+          <div class="grid grid-cols-2 gap-4 mb-4">
+            <div class="p-3 bg-rose-50/50 rounded-xl border border-rose-100/50">
+              <p class="text-xs font-semibold text-rose-800 mb-1">Win Rate</p>
+              <p class="text-2xl font-extrabold text-rose-600">{{ positionPerformance.sell.winRate }}%</p>
+              <div class="w-full bg-rose-100 rounded-full h-1.5 mt-2 overflow-hidden">
+                <div class="bg-rose-500 h-1.5 rounded-full transition-all duration-500" :style="{ width: `${positionPerformance.sell.winRate}%` }"></div>
+              </div>
+            </div>
+
+            <div class="p-3 bg-gray-50 rounded-xl border border-gray-100">
+              <p class="text-xs font-semibold text-gray-600 mb-1">Net PnL</p>
+              <p
+                class="text-2xl font-extrabold truncate"
+                :class="positionPerformance.sell.netPnl >= 0 ? 'text-emerald-600' : 'text-rose-600'"
+              >
+                {{ positionPerformance.sell.netPnl >= 0 ? '+' : '' }}${{ positionPerformance.sell.netPnl.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
+              </p>
+              <p class="text-[11px] text-gray-500 mt-2 truncate">
+                Gross: ${{ positionPerformance.sell.grossProfit.toFixed(1) }} / -${{ positionPerformance.sell.grossLoss.toFixed(1) }}
+              </p>
+            </div>
+          </div>
+
+          <div class="flex items-center justify-between text-xs text-gray-500 pt-3 border-t border-gray-100">
+            <span>ชนะ/แพ้/เสมอ: <strong class="text-gray-800">{{ positionPerformance.sell.wins }}W / {{ positionPerformance.sell.losses }}L / {{ positionPerformance.sell.breakEvens }}BE</strong></span>
+            <span>Avg Expectancy: <strong :class="positionPerformance.sell.avgRr >= 0 ? 'text-emerald-600' : 'text-rose-600'">{{ positionPerformance.sell.avgRr }}R</strong></span>
           </div>
         </div>
       </div>
@@ -1848,6 +1974,82 @@ const kpis = computed(() => {
     consecWins,
     consecLosses
   }
+})
+
+// Long vs Short Performance (Buy vs Sell)
+const positionPerformance = computed(() => {
+  const trades = filteredTrades.value
+  const isSimple = simulation.value.returnCalculation === 'simple'
+  const initialBalance = Number(simulation.value.initialBalance) || 10000
+  const riskPercent = (Number(simulation.value.riskPerTrade) || 1) / 100
+  const fixedRiskAmount = initialBalance * riskPercent
+
+  const buy = {
+    total: 0,
+    wins: 0,
+    losses: 0,
+    breakEvens: 0,
+    grossProfit: 0,
+    grossLoss: 0,
+    netPnl: 0,
+    winRate: 0,
+    totalRr: 0,
+    avgRr: 0,
+    share: 0
+  }
+
+  const sell = {
+    total: 0,
+    wins: 0,
+    losses: 0,
+    breakEvens: 0,
+    grossProfit: 0,
+    grossLoss: 0,
+    netPnl: 0,
+    winRate: 0,
+    totalRr: 0,
+    avgRr: 0,
+    share: 0
+  }
+
+  let currentBalance = initialBalance
+
+  for (const trade of trades) {
+    const rr = getTradeRr(trade, statMode.value)
+    const riskAmount = isSimple ? fixedRiskAmount : currentBalance * riskPercent
+    const pnl = riskAmount * rr
+    currentBalance += pnl
+
+    const pos = (trade.position || '').toLowerCase()
+    const isSell = pos === 'sell' || pos === 'short'
+    const target = isSell ? sell : buy
+
+    target.total++
+    target.totalRr += rr
+    if (rr > 0) {
+      target.wins++
+      target.grossProfit += pnl
+    } else if (rr < 0) {
+      target.losses++
+      target.grossLoss += Math.abs(pnl)
+    } else {
+      target.breakEvens++
+    }
+  }
+
+  const totalCount = trades.length || 1
+
+  buy.netPnl = Number((buy.grossProfit - buy.grossLoss).toFixed(2))
+  buy.winRate = buy.total > 0 ? Number(((buy.wins / buy.total) * 100).toFixed(1)) : 0
+  buy.avgRr = buy.total > 0 ? Number((buy.totalRr / buy.total).toFixed(2)) : 0
+  buy.share = Number(((buy.total / totalCount) * 100).toFixed(1))
+
+  sell.netPnl = Number((sell.grossProfit - sell.grossLoss).toFixed(2))
+  sell.winRate = sell.total > 0 ? Number(((sell.wins / sell.total) * 100).toFixed(1)) : 0
+  sell.avgRr = sell.total > 0 ? Number((sell.totalRr / sell.total).toFixed(2)) : 0
+  sell.share = Number(((sell.total / totalCount) * 100).toFixed(1))
+
+  return { buy, sell }
 })
 
 // Fetch all Trades, Setups, Symbols
