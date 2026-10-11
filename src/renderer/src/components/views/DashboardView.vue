@@ -275,7 +275,7 @@
     </div>
 
     <!-- KPIs Row (Cards) -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-6 mb-8">
       <PastelStatCard
         title="Total Trades"
         :value="kpis.totalTrades"
@@ -353,63 +353,63 @@
       </div>
 
       <!-- Primary Financials & Balance (Row 1) -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+      <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-4">
         <!-- GROSS PROFIT -->
-        <div class="bg-white rounded-2xl p-5 border border-emerald-100 shadow-xs flex items-center justify-between relative group hover:z-30 hover:border-emerald-300 transition-all">
-          <div class="relative z-10">
-            <div class="flex items-center gap-1.5">
-              <p class="text-xs font-bold text-gray-400 uppercase tracking-wider whitespace-nowrap">GROSS PROFIT</p>
+        <div class="bg-white rounded-2xl p-4 sm:p-5 border border-emerald-100 shadow-xs flex items-center justify-between gap-3 min-w-0 relative group hover:z-30 hover:border-emerald-300 transition-all">
+          <div class="relative z-10 min-w-0 flex-1">
+            <div class="flex flex-wrap items-center gap-1.5 mb-1">
+              <p class="text-xs font-bold text-gray-400 uppercase tracking-wider whitespace-nowrap shrink-0">GROSS PROFIT</p>
               <InfoTooltip
                 title="Gross Profit (กำไรรวม)"
                 description="จำนวนเงินกำไรทั้งหมดที่ทำได้ นำเฉพาะไม้ที่เทรดชนะ (Wins) มารวมกัน บ่งบอกพลังในการสร้างกำไรของระบบเมื่อตลาดเป็นใจ"
                 formula="ผลรวมกำไร ($) ของไม้ชนะทั้งหมด"
               />
             </div>
-            <p class="text-2xl font-extrabold text-emerald-600 mt-1">
+            <p class="text-xl sm:text-2xl font-extrabold text-emerald-600 mt-0.5 truncate">
               +${{ kpis.grossProfit.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
             </p>
-            <p class="text-xs text-emerald-700/80 mt-1 font-medium flex items-center gap-1.5">
-              <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-              กำไรรวมจากไม้ชนะ ({{ kpis.wins }} ไม้)
+            <p class="text-xs text-emerald-700/80 mt-1 font-medium flex items-center gap-1.5 truncate">
+              <span class="w-2 h-2 rounded-full bg-emerald-500 shrink-0"></span>
+              <span class="truncate">กำไรรวมจากไม้ชนะ ({{ kpis.wins }} ไม้)</span>
             </p>
           </div>
-          <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl shrink-0 group-hover:scale-105 transition-transform">
+          <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-lg sm:text-xl shrink-0 group-hover:scale-105 transition-transform">
             <i class="ph-bold ph-arrow-circle-up"></i>
           </div>
         </div>
 
         <!-- GROSS LOSS -->
-        <div class="bg-white rounded-2xl p-5 border border-rose-100 shadow-xs flex items-center justify-between relative group hover:z-30 hover:border-rose-300 transition-all">
-          <div class="relative z-10">
-            <div class="flex items-center gap-1.5">
-              <p class="text-xs font-bold text-gray-400 uppercase tracking-wider whitespace-nowrap">GROSS LOSS</p>
+        <div class="bg-white rounded-2xl p-4 sm:p-5 border border-rose-100 shadow-xs flex items-center justify-between gap-3 min-w-0 relative group hover:z-30 hover:border-rose-300 transition-all">
+          <div class="relative z-10 min-w-0 flex-1">
+            <div class="flex flex-wrap items-center gap-1.5 mb-1">
+              <p class="text-xs font-bold text-gray-400 uppercase tracking-wider whitespace-nowrap shrink-0">GROSS LOSS</p>
               <InfoTooltip
                 title="Gross Loss (ขาดทุนรวม)"
                 description="จำนวนเงินขาดทุนทั้งหมด นำเฉพาะไม้ที่เทรดแพ้ (Losses) มารวมกัน แสดงถึงความเสียหายรวมที่เกิดขึ้นเมื่อตลาดวิ่งผิดทาง"
                 formula="ผลรวมขาดทุน ($) ของไม้แพ้ทั้งหมด"
               />
             </div>
-            <p class="text-2xl font-extrabold text-rose-600 mt-1">
+            <p class="text-xl sm:text-2xl font-extrabold text-rose-600 mt-0.5 truncate">
               -${{ kpis.grossLoss.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
             </p>
-            <p class="text-xs text-rose-700/80 mt-1 font-medium flex items-center gap-1.5">
-              <span class="w-2 h-2 rounded-full bg-rose-500"></span>
-              ขาดทุนรวมจากไม้แพ้ ({{ kpis.losses }} ไม้)
+            <p class="text-xs text-rose-700/80 mt-1 font-medium flex items-center gap-1.5 truncate">
+              <span class="w-2 h-2 rounded-full bg-rose-500 shrink-0"></span>
+              <span class="truncate">ขาดทุนรวมจากไม้แพ้ ({{ kpis.losses }} ไม้)</span>
             </p>
           </div>
-          <div class="w-12 h-12 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center text-xl shrink-0 group-hover:scale-105 transition-transform">
+          <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center text-lg sm:text-xl shrink-0 group-hover:scale-105 transition-transform">
             <i class="ph-bold ph-arrow-circle-down"></i>
           </div>
         </div>
 
         <!-- NET PNL -->
         <div
-          class="bg-white rounded-2xl p-5 border shadow-xs flex items-center justify-between relative group hover:z-30 transition-all"
+          class="bg-white rounded-2xl p-4 sm:p-5 border shadow-xs flex items-center justify-between gap-3 min-w-0 relative group hover:z-30 transition-all"
           :class="kpis.netPnl >= 0 ? 'border-emerald-200 bg-emerald-50/20 hover:border-emerald-300' : 'border-rose-200 bg-rose-50/20 hover:border-rose-300'"
         >
-          <div class="relative z-10">
+          <div class="relative z-10 min-w-0 flex-1">
             <div class="flex flex-wrap items-center gap-1.5 mb-1">
-              <p class="text-xs font-bold text-gray-500 uppercase tracking-wider whitespace-nowrap">NET PNL</p>
+              <p class="text-xs font-bold text-gray-500 uppercase tracking-wider whitespace-nowrap shrink-0">NET PNL</p>
               <InfoTooltip
                 title="Net PnL (กำไรสุทธิ)"
                 description="กำไรหรือขาดทุนสุทธิที่แท้จริงหลังจากหักกลบลบต้นทุนและผลขาดทุนเรียบร้อยแล้ว ถ้าเป็นบวกแสดงว่าระบบมีกำไรและพอร์ตเติบโต"
@@ -423,7 +423,7 @@
               </span>
             </div>
             <p
-              class="text-2xl font-extrabold"
+              class="text-xl sm:text-2xl font-extrabold truncate"
               :class="kpis.netPnl >= 0 ? 'text-emerald-600' : 'text-rose-600'"
             >
               {{ kpis.netPnl >= 0 ? '+' : '-' }}${{ Math.abs(kpis.netPnl).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
@@ -433,7 +433,7 @@
             </p>
           </div>
           <div
-            class="w-12 h-12 rounded-xl flex items-center justify-center text-xl shrink-0 group-hover:scale-105 transition-transform"
+            class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center text-lg sm:text-xl shrink-0 group-hover:scale-105 transition-transform"
             :class="kpis.netPnl >= 0 ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'"
           >
             <i :class="kpis.netPnl >= 0 ? 'ph-bold ph-wallet' : 'ph-bold ph-trend-down'"></i>
@@ -441,10 +441,10 @@
         </div>
 
         <!-- FINAL BALANCE -->
-        <div class="bg-white rounded-2xl p-5 border border-indigo-100 shadow-xs flex items-center justify-between relative group hover:z-30 hover:border-indigo-300 transition-all">
-          <div class="relative z-10">
+        <div class="bg-white rounded-2xl p-4 sm:p-5 border border-indigo-100 shadow-xs flex items-center justify-between gap-3 min-w-0 relative group hover:z-30 hover:border-indigo-300 transition-all">
+          <div class="relative z-10 min-w-0 flex-1">
             <div class="flex flex-wrap items-center gap-1.5 mb-1">
-              <p class="text-xs font-bold text-gray-400 uppercase tracking-wider whitespace-nowrap">FINAL BALANCE</p>
+              <p class="text-xs font-bold text-gray-400 uppercase tracking-wider whitespace-nowrap shrink-0">FINAL BALANCE</p>
               <InfoTooltip
                 title="Final Balance (ยอดเงินคงเหลือล่าสุด)"
                 description="ยอดเงินในพอร์ตปัจจุบันหลังจากการเทรดไม้ล่าสุด ใช้ติดตามขนาดพอร์ตจริงเทียบกับเงินทุนเริ่มต้น"
@@ -454,27 +454,27 @@
                 Capital + Net PnL
               </span>
             </div>
-            <p class="text-2xl font-extrabold text-indigo-600">
+            <p class="text-xl sm:text-2xl font-extrabold text-indigo-600 truncate">
               ${{ kpis.finalBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
             </p>
             <p class="text-xs text-indigo-700/80 mt-1 font-medium flex items-center gap-1.5 truncate">
-              <span class="w-2 h-2 rounded-full bg-indigo-500"></span>
-              ทุน ${{ (Number(simulation.initialBalance) || 10000).toLocaleString() }} {{ kpis.netPnl >= 0 ? '+' : '-' }} ${{ Math.abs(kpis.netPnl).toFixed(2) }}
+              <span class="w-2 h-2 rounded-full bg-indigo-500 shrink-0"></span>
+              <span class="truncate">ทุน ${{ (Number(simulation.initialBalance) || 10000).toLocaleString() }} {{ kpis.netPnl >= 0 ? '+' : '-' }} ${{ Math.abs(kpis.netPnl).toFixed(2) }}</span>
             </p>
           </div>
-          <div class="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-xl shrink-0 group-hover:scale-105 transition-transform">
+          <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-lg sm:text-xl shrink-0 group-hover:scale-105 transition-transform">
             <i class="ph-bold ph-bank"></i>
           </div>
         </div>
       </div>
 
       <!-- Trade Efficiency & Per-Trade Statistics (Row 2) -->
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <!-- PROFIT FACTOR -->
-        <div class="bg-white rounded-2xl p-5 border border-amber-100 shadow-xs flex items-center justify-between relative group hover:z-30 hover:border-amber-300 transition-all">
-          <div class="relative z-10">
+        <div class="bg-white rounded-2xl p-4 sm:p-5 border border-amber-100 shadow-xs flex items-center justify-between gap-3 min-w-0 relative group hover:z-30 hover:border-amber-300 transition-all">
+          <div class="relative z-10 min-w-0 flex-1">
             <div class="flex flex-wrap items-center gap-1.5 mb-1">
-              <p class="text-xs font-bold text-gray-400 uppercase tracking-wider whitespace-nowrap">PROFIT FACTOR</p>
+              <p class="text-xs font-bold text-gray-400 uppercase tracking-wider whitespace-nowrap shrink-0">PROFIT FACTOR</p>
               <InfoTooltip
                 title="Profit Factor (อัตราความคุ้มค่าของระบบ)"
                 description="อัตราส่วนความคุ้มค่า บ่งบอกว่าระบบได้กำไรกี่เท่าของเงินที่เสียไป ถ้ามากกว่า 1.0 ถือว่าระบบทำกำไรได้ (เกิน 1.5 ถือว่าระบบแข็งแกร่งมาก)"
@@ -487,62 +487,62 @@
                 {{ kpis.profitFactor >= 1.0 ? '≥ 1.0 ทำกำไรได้' : '< 1.0 ยังไม่คุ้มทุน' }}
               </span>
             </div>
-            <p class="text-2xl font-extrabold text-amber-600">
+            <p class="text-xl sm:text-2xl font-extrabold text-amber-600 truncate">
               {{ kpis.grossLoss === 0 && kpis.grossProfit > 0 ? '∞ (MAX)' : kpis.profitFactor.toFixed(2) }}
             </p>
-            <p class="text-xs text-gray-500 mt-1 font-medium">
+            <p class="text-xs text-gray-500 mt-1 font-medium truncate" title="Profit / Loss">
               ได้กำไร {{ kpis.grossLoss === 0 && kpis.grossProfit > 0 ? '∞' : kpis.profitFactor.toFixed(2) }} เท่าของที่เสียไป (Profit / Loss)
             </p>
           </div>
-          <div class="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-xl shrink-0 group-hover:scale-105 transition-transform">
+          <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-lg sm:text-xl shrink-0 group-hover:scale-105 transition-transform">
             <i class="ph-bold ph-scales"></i>
           </div>
         </div>
 
         <!-- AVG WIN $ -->
-        <div class="bg-white rounded-2xl p-5 border border-emerald-100 shadow-xs flex items-center justify-between relative group hover:z-30 hover:border-emerald-300 transition-all">
-          <div class="relative z-10">
-            <div class="flex items-center gap-1.5">
-              <p class="text-xs font-bold text-gray-400 uppercase tracking-wider whitespace-nowrap">AVG WIN $</p>
+        <div class="bg-white rounded-2xl p-4 sm:p-5 border border-emerald-100 shadow-xs flex items-center justify-between gap-3 min-w-0 relative group hover:z-30 hover:border-emerald-300 transition-all">
+          <div class="relative z-10 min-w-0 flex-1">
+            <div class="flex flex-wrap items-center gap-1.5 mb-1">
+              <p class="text-xs font-bold text-gray-400 uppercase tracking-wider whitespace-nowrap shrink-0">AVG WIN $</p>
               <InfoTooltip
                 title="Avg Win $ (กำไรเฉลี่ยต่อไม้ชนะ)"
                 description="จำนวนเงินกำไรเฉลี่ยในแต่ละครั้งที่เทรดชนะ ช่วยให้ทราบว่าเวลาชนะจะได้เงินกลับมาเฉลี่ยไม้ละกี่ดอลลาร์"
                 formula="GROSS PROFIT ÷ จำนวนไม้ชนะ (Wins)"
               />
             </div>
-            <p class="text-2xl font-extrabold text-emerald-600 mt-1">
+            <p class="text-xl sm:text-2xl font-extrabold text-emerald-600 mt-0.5 truncate">
               +${{ kpis.avgWin.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
             </p>
-            <p class="text-xs text-emerald-700/80 mt-1 font-medium flex items-center gap-1.5">
-              <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-              กำไรเฉลี่ยต่อไม้ชนะ (Profit / {{ kpis.wins }} Wins)
+            <p class="text-xs text-emerald-700/80 mt-1 font-medium flex items-center gap-1.5 truncate">
+              <span class="w-2 h-2 rounded-full bg-emerald-500 shrink-0"></span>
+              <span class="truncate">กำไรเฉลี่ยต่อไม้ชนะ (Profit / {{ kpis.wins }} Wins)</span>
             </p>
           </div>
-          <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl shrink-0 group-hover:scale-105 transition-transform">
+          <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-lg sm:text-xl shrink-0 group-hover:scale-105 transition-transform">
             <i class="ph-bold ph-trend-up"></i>
           </div>
         </div>
 
         <!-- AVG LOSS $ -->
-        <div class="bg-white rounded-2xl p-5 border border-rose-100 shadow-xs flex items-center justify-between relative group hover:z-30 hover:border-rose-300 transition-all">
-          <div class="relative z-10">
-            <div class="flex items-center gap-1.5">
-              <p class="text-xs font-bold text-gray-400 uppercase tracking-wider whitespace-nowrap">AVG LOSS $</p>
+        <div class="bg-white rounded-2xl p-4 sm:p-5 border border-rose-100 shadow-xs flex items-center justify-between gap-3 min-w-0 relative group hover:z-30 hover:border-rose-300 transition-all">
+          <div class="relative z-10 min-w-0 flex-1">
+            <div class="flex flex-wrap items-center gap-1.5 mb-1">
+              <p class="text-xs font-bold text-gray-400 uppercase tracking-wider whitespace-nowrap shrink-0">AVG LOSS $</p>
               <InfoTooltip
                 title="Avg Loss $ (ขาดทุนเฉลี่ยต่อไม้แพ้)"
                 description="จำนวนเงินขาดทุนเฉลี่ยในแต่ละครั้งที่เทรดแพ้ ช่วยควบคุมความเสียหายไม่ให้ขาดทุนต่อไม้มากเกินไป"
                 formula="GROSS LOSS ÷ จำนวนไม้แพ้ (Losses)"
               />
             </div>
-            <p class="text-2xl font-extrabold text-rose-600 mt-1">
+            <p class="text-xl sm:text-2xl font-extrabold text-rose-600 mt-0.5 truncate">
               -${{ kpis.avgLoss.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
             </p>
-            <p class="text-xs text-rose-700/80 mt-1 font-medium flex items-center gap-1.5">
-              <span class="w-2 h-2 rounded-full bg-rose-500"></span>
-              ขาดทุนเฉลี่ยต่อไม้แพ้ (Loss / {{ kpis.losses }} Losses)
+            <p class="text-xs text-rose-700/80 mt-1 font-medium flex items-center gap-1.5 truncate">
+              <span class="w-2 h-2 rounded-full bg-rose-500 shrink-0"></span>
+              <span class="truncate">ขาดทุนเฉลี่ยต่อไม้แพ้ (Loss / {{ kpis.losses }} Losses)</span>
             </p>
           </div>
-          <div class="w-12 h-12 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center text-xl shrink-0 group-hover:scale-105 transition-transform">
+          <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center text-lg sm:text-xl shrink-0 group-hover:scale-105 transition-transform">
             <i class="ph-bold ph-trend-down"></i>
           </div>
         </div>
@@ -583,12 +583,12 @@
         </div>
       </div>
 
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
         <!-- TOTAL RR -->
-        <div class="bg-white rounded-2xl p-5 border border-indigo-100 shadow-xs flex items-center justify-between relative group hover:z-30 hover:border-indigo-300 transition-all">
-          <div class="relative z-10">
+        <div class="bg-white rounded-2xl p-4 sm:p-5 border border-indigo-100 shadow-xs flex items-center justify-between gap-3 min-w-0 relative group hover:z-30 hover:border-indigo-300 transition-all">
+          <div class="relative z-10 min-w-0 flex-1">
             <div class="flex flex-wrap items-center gap-1.5 mb-1">
-              <p class="text-xs font-bold text-gray-400 uppercase tracking-wider whitespace-nowrap">TOTAL RR</p>
+              <p class="text-xs font-bold text-gray-400 uppercase tracking-wider whitespace-nowrap shrink-0">TOTAL RR</p>
               <InfoTooltip
                 title="Total RR (ผลรวม RR สุทธิ)"
                 description="ผลรวมของค่า Reward to Risk (R) สุทธิทั้งหมดในพอร์ต โดยนำค่า R ของไม้ชนะบวกกับค่า R ของไม้แพ้ เพื่อดูความคุ้มค่ารวมในหน่วย R-multiple"
@@ -602,25 +602,25 @@
               </span>
             </div>
             <p
-              class="text-2xl font-extrabold"
+              class="text-xl sm:text-2xl font-extrabold truncate"
               :class="kpis.totalRr >= 0 ? 'text-indigo-600' : 'text-rose-600'"
             >
               {{ kpis.totalRr >= 0 ? '+' : '' }}{{ kpis.totalRr }}R
             </p>
-            <p class="text-xs text-gray-500 mt-1 font-medium">
+            <p class="text-xs text-gray-500 mt-1 font-medium truncate" title="ผลรวมของ RR สุทธิทั้งหมดในพอร์ต">
               ผลรวมของ RR สุทธิทั้งหมดในพอร์ต
             </p>
           </div>
-          <div class="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-xl shrink-0 group-hover:scale-105 transition-transform">
+          <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-lg sm:text-xl shrink-0 group-hover:scale-105 transition-transform">
             <i class="ph-bold ph-sigma"></i>
           </div>
         </div>
 
         <!-- AVG RR -->
-        <div class="bg-white rounded-2xl p-5 border border-emerald-100 shadow-xs flex items-center justify-between relative group hover:z-30 hover:border-emerald-300 transition-all">
-          <div class="relative z-10">
+        <div class="bg-white rounded-2xl p-4 sm:p-5 border border-emerald-100 shadow-xs flex items-center justify-between gap-3 min-w-0 relative group hover:z-30 hover:border-emerald-300 transition-all">
+          <div class="relative z-10 min-w-0 flex-1">
             <div class="flex flex-wrap items-center gap-1.5 mb-1">
-              <p class="text-xs font-bold text-gray-400 uppercase tracking-wider whitespace-nowrap">AVG RR</p>
+              <p class="text-xs font-bold text-gray-400 uppercase tracking-wider whitespace-nowrap shrink-0">AVG RR</p>
               <InfoTooltip
                 title="Avg RR (Payoff Ratio / อัตราผลตอบแทนเฉลี่ย)"
                 description="อัตราส่วนความคุ้มค่าระหว่างไม้ชนะเทียบกับไม้แพ้ บอกว่าเวลาชนะจะได้กำไรกี่เท่าของความเสี่ยงที่เสียไปต่อไม้ (เช่น 1:3 หมายถึงชนะได้ 3R เสียแค่ 1R)"
@@ -630,23 +630,23 @@
                 1 : {{ kpis.avgWinLossRr }}
               </span>
             </div>
-            <p class="text-2xl font-extrabold text-emerald-600">
+            <p class="text-xl sm:text-2xl font-extrabold text-emerald-600 truncate">
               {{ kpis.avgWinLossRr }}R
             </p>
-            <p class="text-xs text-gray-500 mt-1 font-medium truncate">
+            <p class="text-xs text-gray-500 mt-1 font-medium truncate" title="กำไร ~{{ kpis.avgWinLossRr }} เท่าของความเสี่ยง (AVG WIN / AVG LOSS)">
               กำไร ~{{ kpis.avgWinLossRr }} เท่าของความเสี่ยง (AVG WIN / AVG LOSS)
             </p>
           </div>
-          <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl shrink-0 group-hover:scale-105 transition-transform">
+          <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-lg sm:text-xl shrink-0 group-hover:scale-105 transition-transform">
             <i class="ph-bold ph-scales"></i>
           </div>
         </div>
 
         <!-- MAX RR -->
-        <div class="bg-white rounded-2xl p-5 border border-purple-100 shadow-xs flex items-center justify-between relative group hover:z-30 hover:border-purple-300 transition-all">
-          <div class="relative z-10">
+        <div class="bg-white rounded-2xl p-4 sm:p-5 border border-purple-100 shadow-xs flex items-center justify-between gap-3 min-w-0 relative group hover:z-30 hover:border-purple-300 transition-all">
+          <div class="relative z-10 min-w-0 flex-1">
             <div class="flex flex-wrap items-center gap-1.5 mb-1">
-              <p class="text-xs font-bold text-gray-400 uppercase tracking-wider whitespace-nowrap">MAX RR</p>
+              <p class="text-xs font-bold text-gray-400 uppercase tracking-wider whitespace-nowrap shrink-0">MAX RR</p>
               <InfoTooltip
                 title="Max RR (กำไรสูงสุดในไม้เดียว)"
                 description="ออเดอร์ที่สามารถรีดกำไรได้สูงสุดแบบสุดขั้วในไม้เดียว แสดงศักยภาพสูงสุดของระบบเมื่อเจอรันเทรนด์ใหญ่"
@@ -656,23 +656,23 @@
                 Peak Single Trade
               </span>
             </div>
-            <p class="text-2xl font-extrabold text-purple-600">
+            <p class="text-xl sm:text-2xl font-extrabold text-purple-600 truncate">
               +{{ kpis.maxRr }}R
             </p>
-            <p class="text-xs text-purple-700/80 mt-1 font-medium truncate">
+            <p class="text-xs text-purple-700/80 mt-1 font-medium truncate" title="ออเดอร์ที่รีดกำไรได้สูงสุดแบบสุดขั้วในไม้เดียว">
               ออเดอร์ที่รีดกำไรได้สูงสุดแบบสุดขั้วในไม้เดียว
             </p>
           </div>
-          <div class="w-12 h-12 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center text-xl shrink-0 group-hover:scale-105 transition-transform">
+          <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center text-lg sm:text-xl shrink-0 group-hover:scale-105 transition-transform">
             <i class="ph-bold ph-rocket-launch"></i>
           </div>
         </div>
 
         <!-- AVG MAX RR -->
-        <div class="bg-white rounded-2xl p-5 border border-amber-100 shadow-xs flex items-center justify-between relative group hover:z-30 hover:border-amber-300 transition-all">
-          <div class="relative z-10">
+        <div class="bg-white rounded-2xl p-4 sm:p-5 border border-amber-100 shadow-xs flex items-center justify-between gap-3 min-w-0 relative group hover:z-30 hover:border-amber-300 transition-all">
+          <div class="relative z-10 min-w-0 flex-1">
             <div class="flex flex-wrap items-center gap-1.5 mb-1">
-              <p class="text-xs font-bold text-gray-400 uppercase tracking-wider whitespace-nowrap">AVG MAX RR</p>
+              <p class="text-xs font-bold text-gray-400 uppercase tracking-wider whitespace-nowrap shrink-0">AVG MAX RR</p>
               <InfoTooltip
                 title="Avg Max RR (ค่าเฉลี่ย RR สูงสุดที่ระบบไปถึง)"
                 description="ค่าเฉลี่ยของจุดสูงสุด (Maximum Favorable Excursion - MFE) ที่กราฟวิ่งไปถึงก่อนจะโดนปิดออเดอร์หรือโดน Trailing Stop ช่วยวิเคราะห์ว่าตั้ง TP ใกล้หรือไกลเกินไป"
@@ -682,14 +682,14 @@
                 Potential MFE
               </span>
             </div>
-            <p class="text-2xl font-extrabold text-amber-600">
+            <p class="text-xl sm:text-2xl font-extrabold text-amber-600 truncate">
               {{ kpis.avgMaxRr }}R
             </p>
-            <p class="text-xs text-amber-700/80 mt-1 font-medium truncate">
+            <p class="text-xs text-amber-700/80 mt-1 font-medium truncate" title="ค่าเฉลี่ย RR สูงสุดที่ระบบไปถึงก่อนโดนปิดออเดอร์">
               ค่าเฉลี่ย RR สูงสุดที่ระบบไปถึงก่อนโดนปิดออเดอร์
             </p>
           </div>
-          <div class="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-xl shrink-0 group-hover:scale-105 transition-transform">
+          <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-lg sm:text-xl shrink-0 group-hover:scale-105 transition-transform">
             <i class="ph-bold ph-target"></i>
           </div>
         </div>
@@ -730,12 +730,12 @@
         </div>
       </div>
 
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <!-- CONSEC. WINS -->
-        <div class="bg-white rounded-2xl p-5 border border-emerald-100 shadow-xs flex items-center justify-between relative group hover:z-30 hover:border-emerald-300 transition-all">
-          <div class="relative z-10">
+        <div class="bg-white rounded-2xl p-4 sm:p-5 border border-emerald-100 shadow-xs flex items-center justify-between gap-3 min-w-0 relative group hover:z-30 hover:border-emerald-300 transition-all">
+          <div class="relative z-10 min-w-0 flex-1">
             <div class="flex flex-wrap items-center gap-1.5 mb-1">
-              <p class="text-xs font-bold text-gray-400 uppercase tracking-wider whitespace-nowrap">CONSEC. WINS</p>
+              <p class="text-xs font-bold text-gray-400 uppercase tracking-wider whitespace-nowrap shrink-0">CONSEC. WINS</p>
               <InfoTooltip
                 title="Consecutive Wins (ชนะติดต่อกันสูงสุด)"
                 description="จำนวนไม้ที่เทรดชนะติดต่อกันยาวนานที่สุด (Winning Streak) ใช้ดูช่วงเวลาที่ระบบทำงานได้เข้ากับสภาวะตลาดที่สุด"
@@ -745,23 +745,23 @@
                 Winning Streak
               </span>
             </div>
-            <p class="text-2xl font-extrabold text-emerald-600">
+            <p class="text-xl sm:text-2xl font-extrabold text-emerald-600 truncate">
               {{ kpis.consecWins }} ไม้
             </p>
-            <p class="text-xs text-emerald-700/80 mt-1 font-medium">
+            <p class="text-xs text-emerald-700/80 mt-1 font-medium truncate" title="จำนวนครั้งที่เทรดชนะติดต่อกันมากที่สุด">
               จำนวนครั้งที่เทรดชนะติดต่อกันมากที่สุด
             </p>
           </div>
-          <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl shrink-0 group-hover:scale-105 transition-transform">
+          <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-lg sm:text-xl shrink-0 group-hover:scale-105 transition-transform">
             <i class="ph-bold ph-trophy"></i>
           </div>
         </div>
 
         <!-- CONSEC. LOSSES -->
-        <div class="bg-white rounded-2xl p-5 border border-rose-100 shadow-xs flex items-center justify-between relative group hover:z-30 hover:border-rose-300 transition-all">
-          <div class="relative z-10">
+        <div class="bg-white rounded-2xl p-4 sm:p-5 border border-rose-100 shadow-xs flex items-center justify-between gap-3 min-w-0 relative group hover:z-30 hover:border-rose-300 transition-all">
+          <div class="relative z-10 min-w-0 flex-1">
             <div class="flex flex-wrap items-center gap-1.5 mb-1">
-              <p class="text-xs font-bold text-gray-400 uppercase tracking-wider whitespace-nowrap">CONSEC. LOSSES</p>
+              <p class="text-xs font-bold text-gray-400 uppercase tracking-wider whitespace-nowrap shrink-0">CONSEC. LOSSES</p>
               <InfoTooltip
                 title="Consecutive Losses (แพ้ติดต่อกันสูงสุด)"
                 description="จำนวนไม้ที่เทรดแพ้ติดต่อกันยาวนานที่สุด (Losing Streak) เป็นจุดทดสอบจิตวิทยาและจุดอ่อนสำคัญที่สุดของระบบ ที่ต้องเตรียมรับมือ"
@@ -771,23 +771,23 @@
                 Losing Streak
               </span>
             </div>
-            <p class="text-2xl font-extrabold text-rose-600">
+            <p class="text-xl sm:text-2xl font-extrabold text-rose-600 truncate">
               {{ kpis.consecLosses }} ไม้
             </p>
-            <p class="text-xs text-rose-700/80 mt-1 font-medium">
+            <p class="text-xs text-rose-700/80 mt-1 font-medium truncate" title="จำนวนครั้งที่เทรดแพ้ติดต่อกันมากที่สุด (จุดอ่อนความเสี่ยง)">
               จำนวนครั้งที่เทรดแพ้ติดต่อกันมากที่สุด (จุดอ่อนความเสี่ยง)
             </p>
           </div>
-          <div class="w-12 h-12 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center text-xl shrink-0 group-hover:scale-105 transition-transform">
+          <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center text-lg sm:text-xl shrink-0 group-hover:scale-105 transition-transform">
             <i class="ph-bold ph-warning-circle"></i>
           </div>
         </div>
 
         <!-- MAX DRAWDOWN -->
-        <div class="bg-white rounded-2xl p-5 border border-rose-100 shadow-xs flex items-center justify-between relative group hover:z-30 hover:border-rose-300 transition-all">
-          <div class="relative z-10">
+        <div class="bg-white rounded-2xl p-4 sm:p-5 border border-rose-100 shadow-xs flex items-center justify-between gap-3 min-w-0 relative group hover:z-30 hover:border-rose-300 transition-all">
+          <div class="relative z-10 min-w-0 flex-1">
             <div class="flex flex-wrap items-center gap-1.5 mb-1">
-              <p class="text-xs font-bold text-gray-400 uppercase tracking-wider whitespace-nowrap">MAX DRAWDOWN</p>
+              <p class="text-xs font-bold text-gray-400 uppercase tracking-wider whitespace-nowrap shrink-0">MAX DRAWDOWN</p>
               <InfoTooltip
                 title="Max Drawdown (พอร์ตยุบตัวสูงสุด %)"
                 description="เปอร์เซ็นต์ที่พอร์ตลดลงลึกที่สุดจากจุดสูงสุดของเงินทุน (Peak to Trough) ช่วยให้ทราบว่าต้องเผื่อเงินสำรองไว้เท่าไหร่เพื่อไม่ให้พอร์ตแตก"
@@ -797,14 +797,14 @@
                 Peak to Trough
               </span>
             </div>
-            <p class="text-2xl font-extrabold text-rose-600">
+            <p class="text-xl sm:text-2xl font-extrabold text-rose-600 truncate">
               -{{ kpis.maxDrawdown }}%
             </p>
-            <p class="text-xs text-rose-700/80 mt-1 font-medium">
+            <p class="text-xs text-rose-700/80 mt-1 font-medium truncate" title="เปอร์เซ็นต์พอร์ตยุบตัวลึกที่สุดจากจุดสูงสุด">
               เปอร์เซ็นต์พอร์ตยุบตัวลึกที่สุดจากจุดสูงสุด
             </p>
           </div>
-          <div class="w-12 h-12 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center text-xl shrink-0 group-hover:scale-105 transition-transform">
+          <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center text-lg sm:text-xl shrink-0 group-hover:scale-105 transition-transform">
             <i class="ph-bold ph-trend-down"></i>
           </div>
         </div>
@@ -916,7 +916,7 @@
       </div>
 
       <!-- 4 Radar Cards Grid -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
         <!-- 1. Win Rate -->
         <SessionRadarCard
           title="Win Rate"
