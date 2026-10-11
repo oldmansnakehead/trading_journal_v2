@@ -19,6 +19,11 @@ const router = createRouter({
       component: () => import('../components/views/ReportsView.vue')
     },
     {
+      path: '/monte-carlo',
+      name: 'monte-carlo',
+      component: () => import('../components/views/MonteCarloView.vue')
+    },
+    {
       path: '/calendar',
       name: 'calendar',
       component: () => import('../components/ui/CalendarView.vue')

@@ -44,6 +44,14 @@ import { RouterView } from 'vue-router'
             <span>Win/Loss Report</span>
           </router-link>
           <router-link
+            to="/monte-carlo"
+            active-class="bg-primary/10 text-primary font-semibold"
+            class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-textSecondary hover:bg-gray-100 hover:text-textPrimary font-medium transition-colors"
+          >
+            <i class="ph ph-dice-five text-xl"></i>
+            <span>Monte Carlo</span>
+          </router-link>
+          <router-link
             to="/calendar"
             active-class="bg-primary/10 text-primary font-semibold"
             class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-textSecondary hover:bg-gray-100 hover:text-textPrimary font-medium transition-colors"

@@ -243,3 +243,37 @@ src/
 - **Performance by Session:** กราฟเรดาร์ (Radar Chart) แสดงสถิติ Win Rate, Total Trades, Avg RR, และ Profit แยกตาม Session
 - **Performance by Time:** กราฟแท่งกระจายตามช่วงเวลาของวัน
 - **Calendar (ปฏิทินการเทรด):** ปฏิทินแสดงสรุปข้อมูลรายวัน ว่าในวันนั้นๆ ได้กำไรเท่าไหร่ หรือเสียเท่าไหร่ เพื่อดูความต่อเนื่องของการเทรด
+
+---
+
+## 14. ระบบจำลอง Monte Carlo Simulation
+
+ระบบจำลองสถานการณ์ความเสี่ยงและผลตอบแทนในอนาคต แยกเป็นหน้าใหม่ `/monte-carlo` ตามหลักวิชาการ:
+
+### 14.1. ทฤษฎีและตัวชี้วัด (Theory & Risk Metrics)
+- **Van Tharp's R-multiple Bootstrap:** สุ่มค่า R-multiples จากข้อมูลประวัติการเทรด
+- **Kevin Davey's Risk Analysis:**
+  - Max Drawdown ที่ระดับ P95 (Worst 5%)
+  - Risk of Ruin ระหว่างทาง (Anytime Ruin)
+  - Max Consecutive Losses distribution (การกระจายตัวของไม้แพ้ต่อเนื่อง)
+
+### 14.2. การตั้งค่าและการคำนวณ (Simulation Settings & Methods)
+- **โหมด RR:** Normal RR, Break Even (BE), Trail + BE
+- **ตัวกรอง (Shared Filter):** ใช้ `TradeFiltersBar` รองรับ Setup, Symbol, Session, Paper Trades, Date Range, และ Setup Custom Columns
+- **วิธีการสุ่ม:**
+  - `Bootstrap`: สุ่มใส่คืน
+  - `Shuffle`: สลับลำดับเดิม ไม่ใส่คืน (จำนวนไม้ล็อกเท่าจำนวนไม้จริง)
+  - `Block Bootstrap`: สุ่มบล็อกไม้ติดกัน (รักษา Autocorrelation) พร้อมระบุ Block Size
+- **การคำนวณผลตอบแทน:** Simple (Fixed Risk) หรือ Log Compounded
+- **เกณฑ์และรอบจำลอง:** รอบจำลองสูงสุด 20,000 รอบ, Ruin Threshold % (Anytime), Seeded PRNG (`mulberry32`)
+- **Stress Testing:** ปรับลด R ไม้ชนะ $X\%$, สุ่มข้ามไม้ $Y\%$
+- **การประมวลผล:** ประมวลผลใน Web Worker พื้นหลัง ไม่ทำให้ UI ค้าง
+
+### 14.3. การแสดงผล (Visualizations & Tables)
+- Summary Cards (Median Return, P5 Return, Profit Probability, Median DD, P95 DD, Risk of Ruin, P95 Consec Losses)
+- Equity Cone Chart (Percentiles 5/25/50/75/95 พร้อม Actual Equity ซ้อนทับ)
+- Max Drawdown Histogram (พร้อมเส้น Median และ P95)
+- Final Balance Histogram (พร้อมเส้นทุนเริ่มต้น)
+- Max Consecutive Losses Distribution Bar Chart
+- Detailed Percentile Statistics Table (P5, P25, P50, P75, P95)
+

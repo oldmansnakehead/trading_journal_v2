@@ -58,6 +58,19 @@
           <span>{{ isCapturing ? 'Exporting...' : 'Export Image' }}</span>
         </button>
 
+        <!-- Monte Carlo Button -->
+        <router-link
+          :to="{
+            path: '/monte-carlo',
+            query: monteCarloRouteQuery
+          }"
+          class="export-exclude inline-flex items-center gap-2 px-4 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-semibold text-sm rounded-xl border border-indigo-200 shadow-sm transition-all duration-150 cursor-pointer"
+          title="Run Monte Carlo simulation on filtered trades"
+        >
+          <i class="ph ph-dice-five text-lg"></i>
+          <span>Run Monte Carlo</span>
+        </router-link>
+
         <!-- Mode Switcher -->
         <div
           class="bg-white p-1.5 rounded-xl border border-gray-200 shadow-sm flex font-semibold text-sm"
@@ -100,179 +113,17 @@
     </div>
 
     <!-- Filters Bar -->
-    <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 mb-8 flex flex-col gap-5">
-      <!-- Top Row: Primary Filters -->
-      <div class="flex flex-wrap gap-4 items-end">
-        <div class="flex items-center gap-2 text-gray-500 mr-2 h-[38px]">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="18"
-            height="18"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
-          </svg>
-          <span class="font-bold text-sm">Filters:</span>
-        </div>
+    <TradeFiltersBar
+      v-model="filters"
+      :setups="setups"
+      :symbols="symbols"
+      :available-sessions="availableSessions"
+      :report-custom-columns="reportCustomColumns"
+      :show-simulation-row="true"
+      :simulation-model="simulation"
+      @reset="resetFilters"
+    />
 
-        <div class="flex flex-col gap-1">
-          <label class="text-xs font-bold text-gray-500">Setup</label>
-          <BaseSelect
-            v-model="filters.setup"
-            :options="[{ label: 'All Setups', value: 'all' }, ...setups.map((s) => ({ label: s.name, value: s.id }))]"
-          />
-        </div>
-
-        <div class="flex flex-col gap-1">
-          <label class="text-xs font-bold text-gray-500">Symbol</label>
-          <BaseSelect
-            v-model="filters.symbol"
-            :options="[{ label: 'All Symbols', value: 'all' }, ...symbols.map((s) => ({ label: s.name, value: s.id }))]"
-          />
-        </div>
-
-        <div class="flex flex-col gap-1">
-          <label class="text-xs font-bold text-gray-500">Session</label>
-          <BaseSelect
-            v-model="filters.session"
-            :options="availableSessions"
-          />
-        </div>
-
-        <div class="flex flex-col gap-1">
-          <label class="text-xs font-bold text-gray-500">Paper Trades</label>
-          <label class="flex items-center gap-2 h-[38px] px-3 bg-gray-50 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors select-none">
-            <input
-              type="checkbox"
-              v-model="filters.includePaperTrades"
-              class="w-4 h-4 text-primary rounded border-gray-300 focus:ring-primary cursor-pointer"
-            />
-            <span class="text-xs font-semibold text-gray-700 whitespace-nowrap">Include Paper Trades</span>
-          </label>
-        </div>
-
-        <div class="flex flex-col gap-1">
-          <label class="text-xs font-bold text-gray-500">From</label>
-          <input
-            type="date"
-            v-model="filters.startDate"
-            class="w-32 bg-gray-50 border border-gray-200 text-gray-700 text-sm rounded-lg p-2 outline-none focus:border-blue-500"
-          />
-        </div>
-        <div class="flex flex-col gap-1">
-          <label class="text-xs font-bold text-gray-500">To</label>
-          <input
-            type="date"
-            v-model="filters.endDate"
-            class="w-32 bg-gray-50 border border-gray-200 text-gray-700 text-sm rounded-lg p-2 outline-none focus:border-blue-500"
-          />
-        </div>
-      </div>
-
-      <!-- Middle Row: Custom Columns -->
-      <div v-if="reportCustomColumns.length > 0" class="flex flex-wrap gap-4 items-end pt-5 border-t border-gray-100">
-        <div class="text-xs font-bold text-gray-400 uppercase tracking-wider mr-2 h-[38px] flex items-center">Custom</div>
-        <template v-for="col in reportCustomColumns" :key="col.id">
-          <div class="flex flex-col gap-1">
-            <label class="text-xs font-bold text-gray-500">{{ col.name }}</label>
-            <BaseSelect
-              v-if="col.type === 'single_selector' || col.type === 'multiple_selector'"
-              v-model="filters.customFields[col.id]"
-              :options="[{label: 'All', value: 'all'}, ...(typeof col.options === 'string' ? JSON.parse(col.options) : (col.options || [])).map(o => ({label: o, value: o}))]"
-            />
-            <BaseSelect
-              v-else-if="col.type === 'switch' || col.type === 'checkbox'"
-              v-model="filters.customFields[col.id]"
-              :options="[{label: 'All', value: 'all'}, {label: 'Yes', value: 'true'}, {label: 'No', value: 'false'}]"
-            />
-            <input
-              v-else-if="col.type === 'string'"
-              type="text"
-              v-model="filters.customFields[col.id]"
-              :placeholder="'Filter...'"
-              class="w-32 bg-gray-50 border border-gray-200 text-gray-700 text-sm rounded-lg p-2 outline-none focus:border-blue-500"
-            />
-            <input
-              v-else-if="col.type === 'number'"
-              type="number"
-              step="any"
-              v-model="filters.customFields[col.id]"
-              :placeholder="'Filter...'"
-              class="w-32 bg-gray-50 border border-gray-200 text-gray-700 text-sm rounded-lg p-2 outline-none focus:border-blue-500"
-            />
-          </div>
-        </template>
-      </div>
-
-      <!-- Bottom Row: Simulation -->
-      <div class="flex flex-wrap gap-4 items-end pt-5 border-t border-gray-100">
-        <div class="text-xs font-bold text-gray-400 uppercase tracking-wider mr-2 h-[38px] flex items-center">Simulation</div>
-        <div class="flex flex-col gap-1">
-          <label class="text-xs font-bold text-gray-500">Capital $</label>
-          <input
-            type="number"
-            min="0"
-            v-model.number="simulation.initialBalance"
-            class="w-28 bg-gray-50 border border-gray-200 text-gray-700 text-sm rounded-lg p-2 outline-none focus:border-blue-500 font-semibold"
-            placeholder="10000"
-          />
-        </div>
-        <div class="flex flex-col gap-1">
-          <label class="text-xs font-bold text-gray-500">Risk %</label>
-          <input
-            type="number"
-            min="0"
-            step="0.1"
-            v-model.number="simulation.riskPerTrade"
-            class="w-20 bg-gray-50 border border-gray-200 text-gray-700 text-sm rounded-lg p-2 outline-none focus:border-blue-500 font-semibold"
-            placeholder="1"
-          />
-        </div>
-
-        <!-- Return Calculation (Simple vs Log Compounded) -->
-        <div class="flex flex-col gap-1">
-          <label class="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Return Calculation</label>
-          <div class="bg-gray-100 p-1 rounded-xl flex font-semibold text-xs border border-gray-200/60 shadow-2xs">
-            <button
-              type="button"
-              @click="simulation.returnCalculation = 'simple'"
-              :class="[
-                'px-3 py-1.5 rounded-lg transition-all duration-150 cursor-pointer',
-                simulation.returnCalculation === 'simple'
-                  ? 'bg-white text-gray-900 shadow-sm font-bold'
-                  : 'text-gray-500 hover:text-gray-800'
-              ]"
-            >
-              Simple
-            </button>
-            <button
-              type="button"
-              @click="simulation.returnCalculation = 'log'"
-              :class="[
-                'px-3 py-1.5 rounded-lg transition-all duration-150 cursor-pointer',
-                simulation.returnCalculation === 'log'
-                  ? 'bg-white text-gray-900 shadow-sm font-bold'
-                  : 'text-gray-500 hover:text-gray-800'
-              ]"
-            >
-              Log (Compounded)
-            </button>
-          </div>
-        </div>
-
-        <button
-          @click="resetFilters"
-          class="text-sm font-semibold text-red-500 hover:text-red-700 transition-colors ml-auto flex items-center gap-1 h-[38px] cursor-pointer"
-        >
-          <i class="ph-bold ph-x"></i> Clear All Filters
-        </button>
-      </div>
-    </div>
 
     <!-- KPIs Row (Cards) -->
     <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-6 mb-8">
@@ -1417,14 +1268,15 @@ import YearlySalesChart from '../ui/YearlySalesChart.vue'
 import CurrentDownloadChart from '../ui/CurrentDownloadChart.vue'
 import AreaInstalledChart from '../ui/AreaInstalledChart.vue'
 import SessionRadarCard from '../ui/SessionRadarCard.vue'
-import BaseSelect from '../ui/BaseSelect.vue'
 import TradeDetailsModal from '../ui/TradeDetailsModal.vue'
 import TradeScreenshotsModal from '../ui/TradeScreenshotsModal.vue'
 import BaseConfirmModal from '../ui/BaseConfirmModal.vue'
 import BaseAlertDialog from '../ui/BaseAlertDialog.vue'
+import TradeFiltersBar from '../ui/TradeFiltersBar.vue'
 import InfoTooltip from '../ui/InfoTooltip.vue'
 import CalendarView from '../ui/CalendarView.vue'
 import { calculateTradeDuration } from '../../utils/duration'
+import { filterTrades } from '../../utils/tradeFilters'
 import {
   calculateKpis,
   calculatePositionPerformance,
@@ -1716,6 +1568,27 @@ const reportCustomColumns = computed(() => {
   return allReportCustomColumns.value.filter((c) => c.setupId.toString() === String(filters.value.setup))
 })
 
+const monteCarloRouteQuery = computed(() => {
+  const q: Record<string, any> = {
+    mode: statMode.value,
+    setup: filters.value.setup,
+    symbol: filters.value.symbol,
+    session: filters.value.session,
+    includePaperTrades: String(filters.value.includePaperTrades),
+    from: filters.value.startDate,
+    to: filters.value.endDate
+  }
+  if (filters.value.customFields) {
+    Object.keys(filters.value.customFields).forEach((colId) => {
+      const val = filters.value.customFields[colId]
+      if (val !== undefined && val !== '' && val !== 'all') {
+        q[`cf_${colId}`] = val
+      }
+    })
+  }
+  return q
+})
+
 const simulation = ref({
   initialBalance: 10000,
   riskPerTrade: 1,
@@ -1760,69 +1633,7 @@ const availableSessions = computed(() => {
 
 // Single Source of Truth: Filter trades based on selected filters
 const filteredTrades = computed(() => {
-  return allTrades.value.filter((t) => {
-    if (
-      filters.value.setup !== 'all' &&
-      t.setupId?.toString() !== String(filters.value.setup)
-    )
-      return false
-
-    if (
-      filters.value.symbol !== 'all' &&
-      t.symbolId?.toString() !== String(filters.value.symbol)
-    )
-      return false
-
-    if (
-      filters.value.session !== 'all' &&
-      (!t.sessionName || t.sessionName.trim() !== filters.value.session.trim())
-    )
-      return false
-
-    // Paper trades toggle: default false excludes paper trades (t.isTest)
-    if (!filters.value.includePaperTrades && t.isTest) return false
-
-    if (filters.value.startDate) {
-      const [y, m, d] = filters.value.startDate.split('-').map(Number)
-      const sDate = new Date(y, m - 1, d, 0, 0, 0, 0)
-      if (new Date(t.entryDatetime) < sDate) return false
-    }
-
-    if (filters.value.endDate) {
-      const [y, m, d] = filters.value.endDate.split('-').map(Number)
-      const eDate = new Date(y, m - 1, d, 23, 59, 59, 999)
-      if (new Date(t.entryDatetime) > eDate) return false
-    }
-
-    // Custom Fields filtering
-    for (const col of reportCustomColumns.value) {
-      const filterVal = filters.value.customFields[col.id]
-      if (filterVal !== undefined && filterVal !== '' && filterVal !== 'all') {
-        const tradeCustomData = t.customData ? (typeof t.customData === 'string' ? JSON.parse(t.customData) : t.customData) : {}
-        
-        const actualVal = tradeCustomData[col.id]
-        if (col.type === 'switch' || col.type === 'checkbox') {
-          const boolActual = String(actualVal) === 'true'
-          const boolFilter = String(filterVal) === 'true'
-          if (boolActual !== boolFilter) return false
-        } else if (col.type === 'multiple_selector') {
-          if (Array.isArray(actualVal)) {
-            if (!actualVal.includes(filterVal)) return false
-          } else if (!actualVal || !String(actualVal).includes(String(filterVal))) {
-            return false
-          }
-        } else if (col.type === 'string') {
-          if (!actualVal || !String(actualVal).toLowerCase().includes(String(filterVal).toLowerCase())) return false
-        } else if (col.type === 'number') {
-          if (actualVal === undefined || actualVal === null || Number(actualVal) !== Number(filterVal)) return false
-        } else {
-          if (String(actualVal) !== String(filterVal)) return false
-        }
-      }
-    }
-
-    return true
-  })
+  return filterTrades(allTrades.value, filters.value, reportCustomColumns.value)
 })
 
 // Display trades in Recent Trades table with newest entries on top

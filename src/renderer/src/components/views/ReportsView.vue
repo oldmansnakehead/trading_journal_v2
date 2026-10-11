@@ -8,19 +8,30 @@
       </div>
     </div>
 
-    <!-- Mode Switcher -->
+    <!-- Mode Switcher & Actions -->
     <div
-      class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 mb-8 flex gap-4 items-center"
+      class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 mb-8 flex flex-wrap justify-between items-center gap-4"
     >
-      <span class="font-bold text-sm text-gray-500">RR Mode:</span>
-      <BaseSelect
-        v-model="statMode"
-        :options="[
-          { label: 'Normal RR', value: 'normal' },
-          { label: 'Break Even', value: 'be' },
-          { label: 'Trail + BE', value: 'trail' }
-        ]"
-      />
+      <div class="flex gap-4 items-center">
+        <span class="font-bold text-sm text-gray-500">RR Mode:</span>
+        <BaseSelect
+          v-model="statMode"
+          :options="[
+            { label: 'Normal RR', value: 'normal' },
+            { label: 'Break Even', value: 'be' },
+            { label: 'Trail + BE', value: 'trail' }
+          ]"
+        />
+      </div>
+
+      <router-link
+        :to="{ path: '/monte-carlo', query: { mode: statMode } }"
+        class="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm rounded-xl shadow-sm transition-all duration-150 cursor-pointer"
+        title="Run Monte Carlo simulation on these trades"
+      >
+        <i class="ph-bold ph-dice-five text-lg"></i>
+        <span>Run Monte Carlo</span>
+      </router-link>
     </div>
 
     <!-- Winners / Losers Cards -->
