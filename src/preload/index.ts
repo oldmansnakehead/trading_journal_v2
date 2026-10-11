@@ -16,7 +16,11 @@ const api = {
     delete: (id: number) => ipcRenderer.invoke('symbols:delete', id)
   },
   images: {
-    save: (buffer: ArrayBuffer, name: string) => ipcRenderer.invoke('images:save', { buffer, name })
+    save: (buffer: ArrayBuffer, name: string) => ipcRenderer.invoke('images:save', { buffer, name }),
+    export: (dataUrl: string, defaultName?: string) =>
+      ipcRenderer.invoke('images:export', { dataUrl, defaultName }),
+    copyToClipboard: (dataUrl: string) =>
+      ipcRenderer.invoke('images:copyToClipboard', { dataUrl })
   },
   backup: {
     export: () => ipcRenderer.invoke('backup:export'),

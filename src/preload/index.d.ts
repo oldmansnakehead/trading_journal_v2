@@ -19,6 +19,11 @@ declare global {
       }
       images: {
         save: (buffer: ArrayBuffer, name: string) => Promise<any>
+        export: (
+          dataUrl: string,
+          defaultName?: string
+        ) => Promise<{ success: boolean; filePath?: string; canceled?: boolean; error?: string }>
+        copyToClipboard: (dataUrl: string) => Promise<{ success: boolean; error?: string }>
       }
       backup: {
         export: () => Promise<any>

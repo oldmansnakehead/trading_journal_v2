@@ -1,5 +1,5 @@
 <template>
-  <div class="p-8 w-full mx-auto bg-gray-50/50 min-h-screen">
+  <div ref="dashboardRef" class="p-8 w-full mx-auto bg-gray-50/50 min-h-screen">
     <!-- Header & Mode Switcher -->
     <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
       <div>
@@ -7,43 +7,95 @@
         <p class="text-gray-500 text-sm">Analyze your trading performance and KPIs.</p>
       </div>
 
-      <!-- Mode Switcher -->
-      <div
-        class="bg-white p-1.5 rounded-xl border border-gray-200 shadow-sm flex font-semibold text-sm"
-      >
+      <!-- Header Actions -->
+      <div class="flex flex-wrap items-center gap-3">
+        <!-- Export Image Button -->
         <button
-          @click="statMode = 'normal'"
-          :class="[
-            'px-4 py-2 rounded-lg transition-colors cursor-pointer',
-            statMode === 'normal'
-              ? 'bg-gray-900 text-white shadow-sm'
-              : 'text-gray-500 hover:text-gray-900'
-          ]"
+          @click="captureDashboard"
+          :disabled="isCapturing"
+          class="export-exclude inline-flex items-center gap-2 px-4 py-2 bg-white hover:bg-gray-50 text-gray-700 font-semibold text-sm rounded-xl border border-gray-200 shadow-sm transition-all duration-150 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed hover:border-gray-300 active:scale-95"
+          title="Capture and export full dashboard as image"
         >
-          Normal RR
+          <!-- Loading Spinner -->
+          <svg
+            v-if="isCapturing"
+            class="animate-spin h-4 w-4 text-blue-600"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+          >
+            <circle
+              class="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              stroke-width="4"
+            ></circle>
+            <path
+              class="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+            ></path>
+          </svg>
+          <!-- Camera / Picture Icon -->
+          <svg
+            v-else
+            xmlns="http://www.w3.org/2000/svg"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            class="text-gray-600"
+          >
+            <path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z" />
+            <circle cx="12" cy="13" r="3" />
+          </svg>
+          <span>{{ isCapturing ? 'Exporting...' : 'Export Image' }}</span>
         </button>
-        <button
-          @click="statMode = 'be'"
-          :class="[
-            'px-4 py-2 rounded-lg transition-colors cursor-pointer',
-            statMode === 'be'
-              ? 'bg-gray-900 text-white shadow-sm'
-              : 'text-gray-500 hover:text-gray-900'
-          ]"
+
+        <!-- Mode Switcher -->
+        <div
+          class="bg-white p-1.5 rounded-xl border border-gray-200 shadow-sm flex font-semibold text-sm"
         >
-          Break Even
-        </button>
-        <button
-          @click="statMode = 'trail'"
-          :class="[
-            'px-4 py-2 rounded-lg transition-colors cursor-pointer',
-            statMode === 'trail'
-              ? 'bg-gray-900 text-white shadow-sm'
-              : 'text-gray-500 hover:text-gray-900'
-          ]"
-        >
-          Trail + BE
-        </button>
+          <button
+            @click="statMode = 'normal'"
+            :class="[
+              'px-4 py-2 rounded-lg transition-colors cursor-pointer',
+              statMode === 'normal'
+                ? 'bg-gray-900 text-white shadow-sm'
+                : 'text-gray-500 hover:text-gray-900'
+            ]"
+          >
+            Normal RR
+          </button>
+          <button
+            @click="statMode = 'be'"
+            :class="[
+              'px-4 py-2 rounded-lg transition-colors cursor-pointer',
+              statMode === 'be'
+                ? 'bg-gray-900 text-white shadow-sm'
+                : 'text-gray-500 hover:text-gray-900'
+            ]"
+          >
+            Break Even
+          </button>
+          <button
+            @click="statMode = 'trail'"
+            :class="[
+              'px-4 py-2 rounded-lg transition-colors cursor-pointer',
+              statMode === 'trail'
+                ? 'bg-gray-900 text-white shadow-sm'
+                : 'text-gray-500 hover:text-gray-900'
+            ]"
+          >
+            Trail + BE
+          </button>
+        </div>
       </div>
     </div>
 
@@ -360,7 +412,7 @@
           </thead>
           <tbody class="text-sm font-medium">
             <tr
-              v-for="trade in filteredTrades"
+              v-for="trade in displayTrades"
               :key="trade.id"
               :class="[
                 selectedTradeIds.includes(trade.id) ? 'bg-blue-50/50' : 'hover:bg-gray-50',
@@ -498,12 +550,14 @@
     <TradeDetailsModal
       v-model:show="showTradeDetails"
       :tradeId="selectedTradeId"
+      class="export-exclude"
     />
     
     <!-- Trade Screenshots Modal -->
     <TradeScreenshotsModal
       v-model:show="showTradeScreenshots"
       :tradeId="selectedTradeId"
+      class="export-exclude"
     />
 
     <!-- Delete Confirmation Modal -->
@@ -514,6 +568,7 @@
       confirmText="Yes, Delete"
       cancelText="Cancel"
       variant="danger"
+      class="export-exclude"
       @confirm="handleConfirmDelete"
       @cancel="showDeleteModal = false"
     />
@@ -524,13 +579,15 @@
       :title="toast.title"
       :message="toast.message"
       :variant="toast.variant"
+      class="export-exclude"
       @close="toast.isOpen = false"
     />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, watch } from 'vue'
+import { toPng } from 'html-to-image'
 import PastelStatCard from '../ui/PastelStatCard.vue'
 import YearlySalesChart from '../ui/YearlySalesChart.vue'
 import CurrentDownloadChart from '../ui/CurrentDownloadChart.vue'
@@ -541,6 +598,10 @@ import TradeDetailsModal from '../ui/TradeDetailsModal.vue'
 import TradeScreenshotsModal from '../ui/TradeScreenshotsModal.vue'
 import BaseConfirmModal from '../ui/BaseConfirmModal.vue'
 import BaseAlertDialog from '../ui/BaseAlertDialog.vue'
+
+// Dashboard DOM ref & Export state
+const dashboardRef = ref<HTMLElement | null>(null)
+const isCapturing = ref(false)
 
 // Stat Mode: 'normal' | 'be' | 'trail'
 const statMode = ref<'normal' | 'be' | 'trail'>('normal')
@@ -619,6 +680,84 @@ const showToast = (title: string, message: string, variant: 'success' | 'error' 
     title,
     message,
     variant
+  }
+}
+
+// Capture Dashboard Full-Page Screenshot
+const captureDashboard = async () => {
+  if (!dashboardRef.value || isCapturing.value) return
+  isCapturing.value = true
+
+  try {
+    const element = dashboardRef.value
+    // Short delay to let any UI animations settle
+    await new Promise((resolve) => setTimeout(resolve, 150))
+
+    const width = element.scrollWidth
+    const height = element.scrollHeight
+
+    const captureOptions = {
+      quality: 0.95,
+      pixelRatio: 2,
+      backgroundColor: '#f9fafb',
+      width,
+      height,
+      filter: (node: HTMLElement) => {
+        if (node.classList && node.classList.contains('export-exclude')) {
+          return false
+        }
+        return true
+      }
+    }
+
+    let dataUrl: string
+    try {
+      dataUrl = await toPng(element, captureOptions)
+    } catch (err) {
+      console.warn('Initial capture with font embed failed, retrying with skipFonts: true', err)
+      dataUrl = await toPng(element, { ...captureOptions, skipFonts: true })
+    }
+
+    const dateStr = new Date().toISOString().split('T')[0]
+    const defaultFileName = `Trading_Dashboard_${statMode.value.toUpperCase()}_${dateStr}.png`
+
+    if (window.api?.images?.export) {
+      const res = await window.api.images.export(dataUrl, defaultFileName)
+      if (res.canceled) {
+        return
+      }
+
+      if (res.success) {
+        if (window.api?.images?.copyToClipboard) {
+          try {
+            await window.api.images.copyToClipboard(dataUrl)
+          } catch (clipErr) {
+            console.warn('Clipboard copy failed:', clipErr)
+          }
+        }
+
+        const fileName = res.filePath ? res.filePath.split(/[\\/]/).pop() : defaultFileName
+        showToast(
+          'Export Successful',
+          `Dashboard saved as "${fileName}"\n(Also copied to clipboard)`,
+          'success'
+        )
+      } else {
+        showToast('Export Failed', res.error || 'Failed to save dashboard image.', 'error')
+      }
+    } else {
+      // Browser fallback (download link)
+      const a = document.createElement('a')
+      a.href = dataUrl
+      a.download = defaultFileName
+      a.click()
+      showToast('Export Successful', `Dashboard downloaded as "${defaultFileName}"`, 'success')
+    }
+  } catch (err: any) {
+    console.error('Failed to capture dashboard:', err)
+    showToast('Export Failed', err.message || 'An error occurred while capturing image.', 'error')
+  } finally {
+    isCapturing.value = false
   }
 }
 
@@ -723,8 +862,8 @@ const availableSessions = computed(() => {
 // Helper to get RR for a trade according to selected RR mode
 const getTradeRr = (trade: any, mode: 'normal' | 'be' | 'trail' = statMode.value): number => {
   if (mode === 'normal') return Number(trade.normalRr ?? 0)
-  if (mode === 'be') return Number(trade.beRr ?? 0)
-  if (mode === 'trail') return Number(trade.trailRr ?? 0)
+  if (mode === 'be') return Number(trade.beRr ?? trade.normalRr ?? 0)
+  if (mode === 'trail') return Number(trade.trailRr ?? trade.normalRr ?? 0)
   return 0
 }
 
@@ -754,14 +893,14 @@ const filteredTrades = computed(() => {
     if (filters.value.tradeType === 'test' && !t.isTest) return false
 
     if (filters.value.startDate) {
-      const sDate = new Date(filters.value.startDate)
-      sDate.setHours(0, 0, 0, 0)
+      const [y, m, d] = filters.value.startDate.split('-').map(Number)
+      const sDate = new Date(y, m - 1, d, 0, 0, 0, 0)
       if (new Date(t.entryDatetime) < sDate) return false
     }
 
     if (filters.value.endDate) {
-      const eDate = new Date(filters.value.endDate)
-      eDate.setHours(23, 59, 59, 999)
+      const [y, m, d] = filters.value.endDate.split('-').map(Number)
+      const eDate = new Date(y, m - 1, d, 23, 59, 59, 999)
       if (new Date(t.entryDatetime) > eDate) return false
     }
 
@@ -771,10 +910,17 @@ const filteredTrades = computed(() => {
       if (filterVal !== undefined && filterVal !== '' && filterVal !== 'all') {
         const tradeCustomData = t.customData ? (typeof t.customData === 'string' ? JSON.parse(t.customData) : t.customData) : {}
         
-        let actualVal = tradeCustomData[col.id]
+        const actualVal = tradeCustomData[col.id]
         if (col.type === 'switch' || col.type === 'checkbox') {
-          if (actualVal === undefined) actualVal = false
-          if (String(actualVal) !== String(filterVal)) return false
+          const boolActual = String(actualVal) === 'true'
+          const boolFilter = String(filterVal) === 'true'
+          if (boolActual !== boolFilter) return false
+        } else if (col.type === 'multiple_selector') {
+          if (Array.isArray(actualVal)) {
+            if (!actualVal.includes(filterVal)) return false
+          } else if (!actualVal || !String(actualVal).includes(String(filterVal))) {
+            return false
+          }
         } else if (col.type === 'string') {
           if (!actualVal || !String(actualVal).toLowerCase().includes(String(filterVal).toLowerCase())) return false
         } else if (col.type === 'number') {
@@ -788,6 +934,18 @@ const filteredTrades = computed(() => {
     return true
   })
 })
+
+// Display trades in Recent Trades table with newest entries on top
+const displayTrades = computed(() => [...filteredTrades.value].reverse())
+
+// Reset selected trades when filters change
+watch(
+  filters,
+  () => {
+    selectedTradeIds.value = []
+  },
+  { deep: true }
+)
 
 // Reactive KPIs computed directly from filteredTrades (Exact Same Dataset)
 const kpis = computed(() => {
