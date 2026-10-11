@@ -145,15 +145,15 @@
         </div>
 
         <div class="flex flex-col gap-1">
-          <label class="text-xs font-bold text-gray-500">Type</label>
-          <BaseSelect
-            v-model="filters.tradeType"
-            :options="[
-              { label: 'All Trades', value: 'all' },
-              { label: 'Real Trades', value: 'real' },
-              { label: 'Paper / Test', value: 'test' }
-            ]"
-          />
+          <label class="text-xs font-bold text-gray-500">Paper Trades</label>
+          <label class="flex items-center gap-2 h-[38px] px-3 bg-gray-50 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors select-none">
+            <input
+              type="checkbox"
+              v-model="filters.includePaperTrades"
+              class="w-4 h-4 text-primary rounded border-gray-300 focus:ring-primary cursor-pointer"
+            />
+            <span class="text-xs font-semibold text-gray-700 whitespace-nowrap">Include Paper Trades</span>
+          </label>
         </div>
 
         <div class="flex flex-col gap-1">
@@ -279,7 +279,8 @@
       <PastelStatCard
         title="Total Trades"
         :value="kpis.totalTrades"
-        :trend="kpis.totalTrades"
+        :trend="kpiBadges.trades?.value"
+        :trendText="kpiBadges.trades?.text"
         icon="ph-chart-bar"
         color="info"
         infoTitle="Total Trades (จำนวนไม้ทั้งหมด)"
@@ -289,7 +290,8 @@
       <PastelStatCard
         title="Win Rate"
         :value="kpis.winRate + '%'"
-        :trend="kpis.winRate"
+        :trend="kpiBadges.winRate?.value"
+        :trendText="kpiBadges.winRate?.text"
         icon="ph-check-circle"
         color="success"
         infoTitle="Win Rate (อัตราการชนะ)"
@@ -299,17 +301,19 @@
       <PastelStatCard
         title="Expectancy"
         :value="kpis.avgRr + 'R'"
-        :trend="kpis.avgRr"
+        :trend="kpiBadges.expectancy?.value"
+        :trendText="kpiBadges.expectancy?.text"
         icon="ph-trend-up"
         color="primary"
         infoTitle="Expectancy (ผลตอบแทนคาดหวังเฉลี่ยต่อไม้)"
-        infoDescription="ค่าเฉลี่ยผลตอบแทนต่อความเสี่ยงสุทธิต่อไม้ (Expectancy in R) ถ้ามีค่าเป็นบวกแสดงว่าระบบมีความได้เปรียบทางสถิติในระยะยาว (คนละตัวกับ AVG RR ในการ์ดด้านล่างที่เป็น Reward:Risk Payoff Ratio)"
+        infoDescription="ค่าเฉลี่ยผลตอบแทนต่อความเสี่ยงสุทธิต่อไม้ (Expectancy in R) ถ้ามีค่าเป็นบวกแสดงว่าระบบมีความได้เปรียบทางสถิติในระยะยาว (คนละตัวกับ Payoff Ratio ในการ์ดด้านล่างที่เป็น Reward:Risk Payoff Ratio)"
         infoFormula="ผลรวม RR สุทธิทั้งหมด ÷ จำนวนไม้ทั้งหมด"
       />
       <PastelStatCard
         title="Max Drawdown"
-        :value="kpis.maxDrawdown + '%'"
-        :trend="kpis.maxDrawdown > 0 ? -kpis.maxDrawdown : 0"
+        :value="kpis.maxDrawdown > 0 ? '-' + kpis.maxDrawdown + '%' : '0%'"
+        :trend="kpiBadges.drawdown?.value"
+        :trendText="kpiBadges.drawdown?.text"
         icon="ph-warning"
         color="warning"
         infoTitle="Max Drawdown (การติดลบสูงสุด)"
@@ -578,7 +582,7 @@
             TOTAL RR = Σ R (Net)
           </span>
           <span class="text-xs font-semibold text-gray-500 bg-white px-3 py-1.5 rounded-lg border border-gray-200">
-            AVG RR = AVG WIN / AVG LOSS
+            PAYOFF RATIO = AVG WIN / AVG LOSS
           </span>
         </div>
       </div>
@@ -616,14 +620,14 @@
           </div>
         </div>
 
-        <!-- AVG RR -->
+        <!-- PAYOFF RATIO -->
         <div class="bg-white rounded-2xl p-4 sm:p-5 border border-emerald-100 shadow-xs flex items-center justify-between gap-3 min-w-0 relative group hover:z-30 hover:border-emerald-300 transition-all">
           <div class="relative z-10 min-w-0 flex-1">
             <div class="flex flex-wrap items-center gap-1.5 mb-1">
-              <p class="text-xs font-bold text-gray-400 uppercase tracking-wider whitespace-nowrap shrink-0">AVG RR</p>
+              <p class="text-xs font-bold text-gray-400 uppercase tracking-wider whitespace-nowrap shrink-0">PAYOFF RATIO</p>
               <InfoTooltip
-                title="Avg RR (Payoff Ratio / อัตราผลตอบแทนเฉลี่ย)"
-                description="อัตราส่วนความคุ้มค่าระหว่างไม้ชนะเทียบกับไม้แพ้ บอกว่าเวลาชนะจะได้กำไรกี่เท่าของความเสี่ยงที่เสียไปต่อไม้ (เช่น 1:3 หมายถึงชนะได้ 3R เสียแค่ 1R)"
+                title="Payoff Ratio (อัตราส่วนความคุ้มค่า)"
+                description="กำไรเฉลี่ยต่อไม้ชนะ เป็น X เท่าของขาดทุนเฉลี่ยต่อไม้แพ้ บ่งบอกความได้เปรียบของกำไรเมื่อเทียบกับความเสียหายในแต่ละไม้"
                 formula="AVG WIN $ ÷ AVG LOSS $"
               />
               <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 whitespace-nowrap shrink-0">
@@ -631,10 +635,10 @@
               </span>
             </div>
             <p class="text-xl sm:text-2xl font-extrabold text-emerald-600 truncate">
-              {{ kpis.avgWinLossRr }}R
+              {{ kpis.avgWinLossRr }}
             </p>
-            <p class="text-xs text-gray-500 mt-1 font-medium truncate" title="กำไร ~{{ kpis.avgWinLossRr }} เท่าของความเสี่ยง (AVG WIN / AVG LOSS)">
-              กำไร ~{{ kpis.avgWinLossRr }} เท่าของความเสี่ยง (AVG WIN / AVG LOSS)
+            <p class="text-xs text-gray-500 mt-1 font-medium truncate" :title="`กำไรเฉลี่ยต่อไม้ชนะ เป็น ${kpis.avgWinLossRr} เท่าของขาดทุนเฉลี่ยต่อไม้แพ้`">
+              กำไรเฉลี่ยต่อไม้ชนะ เป็น {{ kpis.avgWinLossRr }} เท่าของขาดทุนเฉลี่ยต่อไม้แพ้
             </p>
           </div>
           <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-lg sm:text-xl shrink-0 group-hover:scale-105 transition-transform">
@@ -675,18 +679,18 @@
               <p class="text-xs font-bold text-gray-400 uppercase tracking-wider whitespace-nowrap shrink-0">AVG MAX RR</p>
               <InfoTooltip
                 title="Avg Max RR (ค่าเฉลี่ย RR สูงสุดที่ระบบไปถึง)"
-                description="ค่าเฉลี่ยของจุดสูงสุด (Maximum Favorable Excursion - MFE) ที่กราฟวิ่งไปถึงก่อนจะโดนปิดออเดอร์หรือโดน Trailing Stop ช่วยวิเคราะห์ว่าตั้ง TP ใกล้หรือไกลเกินไป"
-                formula="ผลรวม Max RR ของแต่ละไม้ ÷ จำนวนไม้"
+                description="ค่าเฉลี่ยของจุดสูงสุด (Maximum Favorable Excursion - MFE) ที่กราฟวิ่งไปถึงก่อนจะโดนปิดออเดอร์หรือโดน Trailing Stop คำนวณจากค่า MFE ที่บันทึกไว้ในแต่ละไม้เท่านั้น"
+                formula="ผลรวม Max RR ของไม้ที่มีข้อมูล MFE ÷ จำนวนไม้ที่มีข้อมูล MFE"
               />
               <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200 whitespace-nowrap shrink-0">
                 Potential MFE
               </span>
             </div>
             <p class="text-xl sm:text-2xl font-extrabold text-amber-600 truncate">
-              {{ kpis.avgMaxRr }}R
+              {{ kpis.avgMaxRr !== null ? `${kpis.avgMaxRr}R` : '–' }}
             </p>
-            <p class="text-xs text-amber-700/80 mt-1 font-medium truncate" title="ค่าเฉลี่ย RR สูงสุดที่ระบบไปถึงก่อนโดนปิดออเดอร์">
-              ค่าเฉลี่ย RR สูงสุดที่ระบบไปถึงก่อนโดนปิดออเดอร์
+            <p class="text-xs text-amber-700/80 mt-1 font-medium truncate" :title="kpis.countMaxRr > 0 ? `จาก ${kpis.countMaxRr}/${kpis.totalTrades} ไม้` : 'ยังไม่มีข้อมูล MFE'">
+              {{ kpis.countMaxRr > 0 ? `จาก ${kpis.countMaxRr}/${kpis.totalTrades} ไม้` : 'ยังไม่มีข้อมูล MFE' }}
             </p>
           </div>
           <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-lg sm:text-xl shrink-0 group-hover:scale-105 transition-transform">
@@ -836,7 +840,18 @@
         </div>
 
         <div class="flex items-center gap-2">
-          <span class="text-xs font-semibold text-gray-500 bg-white px-3 py-1.5 rounded-lg border border-gray-200">
+          <!-- Directional Bias Badge based on threshold -->
+          <span
+            class="text-xs font-bold px-3 py-1.5 rounded-xl border shadow-2xs transition-all"
+            :class="{
+              'bg-emerald-50 text-emerald-700 border-emerald-200': dominantBias.type === 'long',
+              'bg-rose-50 text-rose-700 border-rose-200': dominantBias.type === 'short',
+              'bg-gray-100 text-gray-700 border-gray-200': dominantBias.type === 'neutral'
+            }"
+          >
+            {{ dominantBias.label }}
+          </span>
+          <span class="text-xs font-semibold text-gray-500 bg-white px-3 py-1.5 rounded-xl border border-gray-200">
             Total {{ filteredTrades.length }} Trades
           </span>
         </div>
@@ -856,7 +871,7 @@
               </div>
             </div>
             <span class="text-xs font-bold px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
-              Long Bias
+              BUY
             </span>
           </div>
 
@@ -902,7 +917,7 @@
               </div>
             </div>
             <span class="text-xs font-bold px-2.5 py-1 rounded-full bg-rose-50 text-rose-700 border border-rose-200">
-              Short Bias
+              SELL
             </span>
           </div>
 
@@ -1036,7 +1051,7 @@
         <div class="flex items-center gap-2 text-xs font-semibold text-gray-500">
           <span class="inline-flex items-center gap-1.5 bg-gray-50 border border-gray-200/80 px-3 py-1.5 rounded-xl">
             <span class="w-2 h-2 rounded-full bg-sky-500"></span>
-            Asia · London · New York
+            {{ sessionMultiMetrics.activeSessionNames.length > 0 ? sessionMultiMetrics.activeSessionNames.join(' · ') : 'No Session Data' }}
           </span>
         </div>
       </div>
@@ -1048,6 +1063,7 @@
           title="Win Rate"
           :labels="sessionMultiMetrics.labels"
           :data="sessionMultiMetrics.winRateData"
+          :tradeCounts="sessionMultiMetrics.totalTradesData"
           unit="%"
           accentColor="#0284c7"
           infoTitle="Win Rate by Session"
@@ -1060,6 +1076,7 @@
           title="Total Trades"
           :labels="sessionMultiMetrics.labels"
           :data="sessionMultiMetrics.totalTradesData"
+          :tradeCounts="sessionMultiMetrics.totalTradesData"
           unit="trades"
           accentColor="#6366f1"
           infoTitle="Total Trades by Session"
@@ -1072,6 +1089,7 @@
           title="Avg RR"
           :labels="sessionMultiMetrics.labels"
           :data="sessionMultiMetrics.avgRrData"
+          :tradeCounts="sessionMultiMetrics.totalTradesData"
           unit="R"
           accentColor="#0d9488"
           infoTitle="Average RR by Session"
@@ -1084,6 +1102,7 @@
           title="Profit"
           :labels="sessionMultiMetrics.labels"
           :data="sessionMultiMetrics.profitData"
+          :tradeCounts="sessionMultiMetrics.totalTradesData"
           unit="$"
           accentColor="#10b981"
           infoTitle="Net Profit by Session"
@@ -1339,12 +1358,12 @@
     <div class="mt-8">
       <CalendarView
         :embedded="true"
-        :embedded-trades="allTrades"
+        :embedded-trades="filteredTrades"
         :initial-stat-mode="statMode"
         :initial-capital="simulation.initialBalance"
         :initial-risk-percent="simulation.riskPerTrade"
         :initial-return-calculation="simulation.returnCalculation"
-        :initial-trade-type="filters.tradeType"
+        :initial-trade-type="filters.includePaperTrades ? 'all' : 'real'"
         :initial-setup="filters.setup"
         :initial-symbol="filters.symbol"
         :initial-session="filters.session"
@@ -1406,6 +1425,13 @@ import BaseAlertDialog from '../ui/BaseAlertDialog.vue'
 import InfoTooltip from '../ui/InfoTooltip.vue'
 import CalendarView from '../ui/CalendarView.vue'
 import { calculateTradeDuration } from '../../utils/duration'
+import {
+  calculateKpis,
+  calculatePositionPerformance,
+  calculateSessionPerformance,
+  getTradeRr,
+  DIRECTION_BIAS_THRESHOLD
+} from '../../utils/statistics'
 
 // Dashboard DOM ref & Export state
 const dashboardRef = ref<HTMLElement | null>(null)
@@ -1678,12 +1704,13 @@ const filters = ref({
   setup: 'all',
   symbol: 'all',
   session: 'all',
-  tradeType: 'all', // 'all' | 'real' | 'test'
+  includePaperTrades: false, // Default = false (ไม่รวม paper trades)
   startDate: '',
   endDate: '',
   customFields: {} as Record<string, string>
 })
 const allReportCustomColumns = ref<any[]>([])
+const allSetupSessions = ref<string[]>([])
 const reportCustomColumns = computed(() => {
   if (filters.value.setup === 'all') return []
   return allReportCustomColumns.value.filter((c) => c.setupId.toString() === String(filters.value.setup))
@@ -1700,7 +1727,7 @@ const resetFilters = () => {
     setup: 'all',
     symbol: 'all',
     session: 'all',
-    tradeType: 'all',
+    includePaperTrades: false,
     startDate: '',
     endDate: '',
     customFields: {}
@@ -1711,13 +1738,16 @@ const allTrades = ref<any[]>([])
 const setups = ref<{ id: number; name: string }[]>([])
 const symbols = ref<{ id: number; name: string }[]>([])
 
-// Available Sessions (derived from trades + defaults)
+// Available Sessions (derived from trades + setups)
 const availableSessions = computed(() => {
   const sessionSet = new Set<string>()
   allTrades.value.forEach((t) => {
     if (t.sessionName && t.sessionName.trim()) {
       sessionSet.add(t.sessionName.trim())
     }
+  })
+  allSetupSessions.value.forEach((s) => {
+    if (s && s.trim()) sessionSet.add(s.trim())
   })
   if (sessionSet.size === 0) {
     ;['London', 'New York', 'Asia'].forEach((s) => sessionSet.add(s))
@@ -1727,22 +1757,6 @@ const availableSessions = computed(() => {
     ...Array.from(sessionSet).map((s) => ({ label: s, value: s }))
   ]
 })
-
-// Helper to get RR for a trade according to selected RR mode
-const getTradeRr = (trade: any, mode: 'normal' | 'be' | 'trail' = statMode.value): number => {
-  if (mode === 'normal') return Number(trade.normalRr ?? 0)
-  if (mode === 'be') return Number(trade.beRr ?? trade.normalRr ?? 0)
-  if (mode === 'trail') return Number(trade.trailRr ?? trade.normalRr ?? 0)
-  return 0
-}
-
-// Helper to get Max RR for a trade according to selected RR mode
-const getTradeMaxRr = (trade: any, mode: 'normal' | 'be' | 'trail' = statMode.value): number => {
-  if (mode === 'normal') return Number(trade.normalMaxRr ?? trade.normalRr ?? 0)
-  if (mode === 'be') return Number(trade.beMaxRr ?? trade.normalMaxRr ?? trade.beRr ?? trade.normalRr ?? 0)
-  if (mode === 'trail') return Number(trade.trailMaxRr ?? trade.normalMaxRr ?? trade.trailRr ?? trade.normalRr ?? 0)
-  return 0
-}
 
 // Single Source of Truth: Filter trades based on selected filters
 const filteredTrades = computed(() => {
@@ -1761,13 +1775,12 @@ const filteredTrades = computed(() => {
 
     if (
       filters.value.session !== 'all' &&
-      (!t.sessionName || t.sessionName.toLowerCase() !== filters.value.session.toLowerCase())
+      (!t.sessionName || t.sessionName.trim() !== filters.value.session.trim())
     )
       return false
 
-    // Trade Type filter (Real vs Paper/Test)
-    if (filters.value.tradeType === 'real' && t.isTest) return false
-    if (filters.value.tradeType === 'test' && !t.isTest) return false
+    // Paper trades toggle: default false excludes paper trades (t.isTest)
+    if (!filters.value.includePaperTrades && t.isTest) return false
 
     if (filters.value.startDate) {
       const [y, m, d] = filters.value.startDate.split('-').map(Number)
@@ -1826,230 +1839,88 @@ watch(
 
 // Reactive KPIs computed directly from filteredTrades (Exact Same Dataset)
 const kpis = computed(() => {
-  const trades = filteredTrades.value
-  const total = trades.length
-  const initialBalance = Number(simulation.value.initialBalance) || 10000
-
-  if (total === 0) {
-    return {
-      totalTrades: 0,
-      winRate: 0,
-      avgRr: 0,
-      maxDrawdown: 0,
-      wins: 0,
-      losses: 0,
-      breakEvens: 0,
-      grossProfit: 0,
-      grossLoss: 0,
-      netPnl: 0,
-      profitFactor: 0,
-      avgWin: 0,
-      avgLoss: 0,
-      finalBalance: initialBalance,
-      totalRr: 0,
-      avgWinLossRr: 0,
-      avgWinRr: 0,
-      maxRr: 0,
-      avgMaxRr: 0,
-      consecWins: 0,
-      consecLosses: 0
-    }
-  }
-
-  const isSimple = simulation.value.returnCalculation === 'simple'
-  const riskPercent = (Number(simulation.value.riskPerTrade) || 1) / 100
-  const fixedRiskAmount = initialBalance * riskPercent
-
-  let wins = 0
-  let losses = 0
-  let breakEvens = 0
-  let grossProfit = 0
-  let grossLoss = 0
-  let totalRr = 0
-  let winningRr = 0
-  let currentBalance = initialBalance
-  let peak = currentBalance
-  let maxDrawdown = 0
-
-  let consecWins = 0
-  let currentWins = 0
-  let consecLosses = 0
-  let currentLosses = 0
-
-  let maxSingleRr = 0
-  let sumMaxRr = 0
-  let countMaxRr = 0
-
-  for (const trade of trades) {
-    const rr = getTradeRr(trade, statMode.value)
-    const tMaxRr = getTradeMaxRr(trade, statMode.value)
-    const effectivePeakRr = Math.max(rr, tMaxRr)
-
-    totalRr += rr
-
-    const riskAmount = isSimple ? fixedRiskAmount : currentBalance * riskPercent
-    const pnl = riskAmount * rr
-    currentBalance += pnl
-
-    if (effectivePeakRr > maxSingleRr) {
-      maxSingleRr = effectivePeakRr
-    }
-
-    if (tMaxRr > 0) {
-      sumMaxRr += tMaxRr
-      countMaxRr++
-    } else if (rr > 0) {
-      sumMaxRr += rr
-      countMaxRr++
-    }
-
-    if (rr > 0) {
-      wins++
-      winningRr += rr
-      grossProfit += pnl
-      currentWins++
-      currentLosses = 0
-      if (currentWins > consecWins) consecWins = currentWins
-    } else if (rr < 0) {
-      losses++
-      grossLoss += Math.abs(pnl)
-      currentLosses++
-      currentWins = 0
-      if (currentLosses > consecLosses) consecLosses = currentLosses
-    } else {
-      breakEvens++
-      currentWins = 0
-      currentLosses = 0
-    }
-
-    if (currentBalance > peak) peak = currentBalance
-    const dd = peak > 0 ? ((peak - currentBalance) / peak) * 100 : 0
-    if (dd > maxDrawdown) maxDrawdown = dd
-  }
-
-  const netPnl = grossProfit - grossLoss
-
-  // PROFIT FACTOR: GROSS PROFIT / GROSS LOSS
-  let profitFactor = 0
-  if (grossLoss > 0) {
-    profitFactor = Number((grossProfit / grossLoss).toFixed(2))
-  } else if (grossProfit > 0) {
-    profitFactor = 999.00
-  }
-
-  // AVG WIN $: GROSS PROFIT / WINS
-  const avgWin = wins > 0 ? Number((grossProfit / wins).toFixed(2)) : 0
-
-  // AVG LOSS $: GROSS LOSS / LOSSES
-  const avgLoss = losses > 0 ? Number((grossLoss / losses).toFixed(2)) : 0
-
-  // FINAL BALANCE: ทุนเริ่มต้น + NET PNL
-  const finalBalance = Number((initialBalance + netPnl).toFixed(2))
-
-  // AVG RR (Win/Loss Payoff Ratio): AVG WIN $ / AVG LOSS $
-  const avgWinLossRr = avgLoss > 0 ? Number((avgWin / avgLoss).toFixed(2)) : (wins > 0 ? Number((winningRr / wins).toFixed(2)) : 0)
-  const avgWinRr = wins > 0 ? Number((winningRr / wins).toFixed(2)) : 0
-  const avgMaxRr = countMaxRr > 0 ? Number((sumMaxRr / countMaxRr).toFixed(2)) : 0
-
-  return {
-    totalTrades: total,
-    winRate: Number(((wins / total) * 100).toFixed(1)),
-    avgRr: Number((totalRr / total).toFixed(2)),
-    maxDrawdown: Number(maxDrawdown.toFixed(2)),
-    wins,
-    losses,
-    breakEvens,
-    grossProfit: Number(grossProfit.toFixed(2)),
-    grossLoss: Number(grossLoss.toFixed(2)),
-    netPnl: Number(netPnl.toFixed(2)),
-    profitFactor,
-    avgWin,
-    avgLoss,
-    finalBalance,
-    totalRr: Number(totalRr.toFixed(2)),
-    avgWinLossRr,
-    avgWinRr,
-    maxRr: Number(maxSingleRr.toFixed(2)),
-    avgMaxRr,
-    consecWins,
-    consecLosses
-  }
+  return calculateKpis(filteredTrades.value, statMode.value, simulation.value)
 })
 
 // Long vs Short Performance (Buy vs Sell)
 const positionPerformance = computed(() => {
-  const trades = filteredTrades.value
-  const isSimple = simulation.value.returnCalculation === 'simple'
-  const initialBalance = Number(simulation.value.initialBalance) || 10000
-  const riskPercent = (Number(simulation.value.riskPerTrade) || 1) / 100
-  const fixedRiskAmount = initialBalance * riskPercent
+  return calculatePositionPerformance(filteredTrades.value, statMode.value, simulation.value)
+})
 
-  const buy = {
-    total: 0,
-    wins: 0,
-    losses: 0,
-    breakEvens: 0,
-    grossProfit: 0,
-    grossLoss: 0,
-    netPnl: 0,
-    winRate: 0,
-    totalRr: 0,
-    avgRr: 0,
-    share: 0
+// Single Directional Bias Badge based on threshold
+const dominantBias = computed(() => {
+  const total = filteredTrades.value.length
+  if (total === 0) return { label: 'Neutral', type: 'neutral', share: 0 }
+  const buyShare = positionPerformance.value.buy.share
+  const sellShare = positionPerformance.value.sell.share
+  if (buyShare > DIRECTION_BIAS_THRESHOLD) {
+    return { label: `Long Bias (${buyShare}%)`, type: 'long', share: buyShare }
   }
-
-  const sell = {
-    total: 0,
-    wins: 0,
-    losses: 0,
-    breakEvens: 0,
-    grossProfit: 0,
-    grossLoss: 0,
-    netPnl: 0,
-    winRate: 0,
-    totalRr: 0,
-    avgRr: 0,
-    share: 0
+  if (sellShare > DIRECTION_BIAS_THRESHOLD) {
+    return { label: `Short Bias (${sellShare}%)`, type: 'short', share: sellShare }
   }
+  return { label: `Neutral (${Math.max(buyShare, sellShare)}%)`, type: 'neutral', share: Math.max(buyShare, sellShare) }
+})
 
-  let currentBalance = initialBalance
+// Previous period KPIs for badges comparison
+const previousPeriodKpis = computed(() => {
+  if (!filters.value.startDate || !filters.value.endDate) {
+    return null
+  }
+  const [startY, startM, startD] = filters.value.startDate.split('-').map(Number)
+  const [endY, endM, endD] = filters.value.endDate.split('-').map(Number)
+  const startTime = new Date(startY, startM - 1, startD, 0, 0, 0, 0).getTime()
+  const endTime = new Date(endY, endM - 1, endD, 23, 59, 59, 999).getTime()
+  if (isNaN(startTime) || isNaN(endTime) || endTime < startTime) return null
 
-  for (const trade of trades) {
-    const rr = getTradeRr(trade, statMode.value)
-    const riskAmount = isSimple ? fixedRiskAmount : currentBalance * riskPercent
-    const pnl = riskAmount * rr
-    currentBalance += pnl
+  const duration = endTime - startTime
+  const prevEndTime = startTime - 1
+  const prevStartTime = prevEndTime - duration
 
-    const pos = (trade.position || '').toLowerCase()
-    const isSell = pos === 'sell' || pos === 'short'
-    const target = isSell ? sell : buy
+  const prevTrades = allTrades.value.filter((t) => {
+    if (!filters.value.includePaperTrades && t.isTest) return false
+    if (filters.value.setup !== 'all' && t.setupId?.toString() !== String(filters.value.setup)) return false
+    if (filters.value.symbol !== 'all' && t.symbolId?.toString() !== String(filters.value.symbol)) return false
+    if (filters.value.session !== 'all' && (!t.sessionName || t.sessionName.trim() !== filters.value.session.trim())) return false
 
-    target.total++
-    target.totalRr += rr
-    if (rr > 0) {
-      target.wins++
-      target.grossProfit += pnl
-    } else if (rr < 0) {
-      target.losses++
-      target.grossLoss += Math.abs(pnl)
-    } else {
-      target.breakEvens++
+    const tTime = new Date(t.entryDatetime).getTime()
+    return tTime >= prevStartTime && tTime <= prevEndTime
+  })
+
+  if (prevTrades.length === 0) return null
+
+  return calculateKpis(prevTrades, statMode.value, simulation.value)
+})
+
+const kpiBadges = computed(() => {
+  const prev = previousPeriodKpis.value
+  if (!prev) {
+    return {
+      trades: null,
+      winRate: null,
+      expectancy: null,
+      drawdown: null
     }
   }
 
-  const totalCount = trades.length || 1
+  const tradesDelta = kpis.value.totalTrades - prev.totalTrades
+  const tradesText = tradesDelta >= 0 ? `+${tradesDelta}` : `${tradesDelta}`
 
-  buy.netPnl = Number((buy.grossProfit - buy.grossLoss).toFixed(2))
-  buy.winRate = buy.total > 0 ? Number(((buy.wins / buy.total) * 100).toFixed(1)) : 0
-  buy.avgRr = buy.total > 0 ? Number((buy.totalRr / buy.total).toFixed(2)) : 0
-  buy.share = Number(((buy.total / totalCount) * 100).toFixed(1))
+  const wrDelta = Number((kpis.value.winRate - prev.winRate).toFixed(1))
+  const wrText = (wrDelta >= 0 ? `+${wrDelta}` : `${wrDelta}`) + ' pp'
 
-  sell.netPnl = Number((sell.grossProfit - sell.grossLoss).toFixed(2))
-  sell.winRate = sell.total > 0 ? Number(((sell.wins / sell.total) * 100).toFixed(1)) : 0
-  sell.avgRr = sell.total > 0 ? Number((sell.totalRr / sell.total).toFixed(2)) : 0
-  sell.share = Number(((sell.total / totalCount) * 100).toFixed(1))
+  const expDelta = Number((kpis.value.avgRr - prev.avgRr).toFixed(2))
+  const expText = (expDelta >= 0 ? `+${expDelta}` : `${expDelta}`) + 'R'
 
-  return { buy, sell }
+  const ddDelta = Number((kpis.value.maxDrawdown - prev.maxDrawdown).toFixed(2))
+  const ddText = (ddDelta >= 0 ? `+${ddDelta}` : `${ddDelta}`) + ' pp'
+
+  return {
+    trades: { value: tradesDelta, text: tradesText },
+    winRate: { value: wrDelta, text: wrText },
+    expectancy: { value: expDelta, text: expText },
+    drawdown: { value: -ddDelta, text: ddText }
+  }
 })
 
 // Fetch all Trades, Setups, Symbols
@@ -2069,15 +1940,25 @@ const fetchData = async () => {
     const symbolsRes = await window.api.symbols.list()
     if (symbolsRes.success) symbols.value = symbolsRes.data
 
-    // Fetch report_filter custom columns
+    // Fetch report_filter custom columns and known sessions from setups
     const cols: any[] = []
+    const setupSessionsSet = new Set<string>()
     for (const setup of setups.value) {
       const details = await window.api.setups.getDetails(setup.id)
-      if (details.success && details.data.customColumns) {
-        cols.push(...details.data.customColumns.filter((c: any) => c.reportFilter))
+      if (details.success) {
+        if (details.data.customColumns) {
+          cols.push(...details.data.customColumns.filter((c: any) => c.reportFilter))
+        }
+        if (Array.isArray(details.data.sessions)) {
+          details.data.sessions.forEach((s: any) => {
+            const name = s.sessionName || (typeof s === 'string' ? s : s?.name)
+            if (name && name.trim()) setupSessionsSet.add(name.trim())
+          })
+        }
       }
     }
     allReportCustomColumns.value = cols
+    allSetupSessions.value = Array.from(setupSessionsSet)
   } catch (err) {
     console.error('Failed to fetch data:', err)
   }
@@ -2303,84 +2184,15 @@ const outcomeDistribution = computed(() => {
   }
 })
 
-// Helper to normalize session names
-const normalizeSessionName = (raw: string | null | undefined): string => {
-  if (!raw) return 'Unknown'
-  const trimmed = raw.trim()
-  const lower = trimmed.toLowerCase()
-  if (lower === 'asia' || lower === 'asian' || lower === 'tokyo') return 'Asia'
-  if (lower === 'london' || lower === 'london close') return 'London'
-  if (lower === 'new york' || lower === 'newyork' || lower === 'ny') return 'New York'
-  return trimmed
-}
-
 // Multi-Dimensional Session Performance (Win Rate, Total Trades, Avg RR, Profit)
+// Preserves user-defined sessions without unauthorized merging (e.g. AS vs Asia, LD vs London)
 const sessionMultiMetrics = computed(() => {
-  const trades = filteredTrades.value
-  // Order to match reference screenshot: Asia (top), New York (right), London (left)
-  const baseOrder = ['Asia', 'New York', 'London']
-  const stats: Record<
-    string,
-    {
-      wins: number
-      losses: number
-      be: number
-      total: number
-      sumRr: number
-      netPnl: number
-    }
-  > = {}
-
-  baseOrder.forEach((s) => {
-    stats[s] = { wins: 0, losses: 0, be: 0, total: 0, sumRr: 0, netPnl: 0 }
-  })
-
-  const isSimple = simulation.value.returnCalculation === 'simple'
-  const initialBalance = Number(simulation.value.initialBalance) || 10000
-  const riskPercent = (Number(simulation.value.riskPerTrade) || 1) / 100
-  const fixedRiskAmount = initialBalance * riskPercent
-
-  let runningBalance = initialBalance
-
-  trades.forEach((trade) => {
-    const rr = getTradeRr(trade, statMode.value)
-    const riskAmount = isSimple ? fixedRiskAmount : runningBalance * riskPercent
-    const pnl = riskAmount * rr
-    runningBalance += pnl
-
-    const s = normalizeSessionName(trade.sessionName)
-    if (!stats[s]) {
-      stats[s] = { wins: 0, losses: 0, be: 0, total: 0, sumRr: 0, netPnl: 0 }
-    }
-
-    stats[s].total++
-    stats[s].sumRr += rr
-    stats[s].netPnl += pnl
-    if (rr > 0) stats[s].wins++
-    else if (rr < 0) stats[s].losses++
-    else stats[s].be++
-  })
-
-  const extraSessions = Object.keys(stats).filter((s) => !baseOrder.includes(s) && s !== 'Unknown')
-  const labels = [...baseOrder, ...extraSessions]
-
-  const winRateData = labels.map((s) =>
-    stats[s].total > 0 ? Number(((stats[s].wins / stats[s].total) * 100).toFixed(1)) : 0
+  return calculateSessionPerformance(
+    filteredTrades.value,
+    statMode.value,
+    simulation.value,
+    allSetupSessions.value
   )
-  const totalTradesData = labels.map((s) => stats[s].total)
-  const avgRrData = labels.map((s) =>
-    stats[s].total > 0 ? Number((stats[s].sumRr / stats[s].total).toFixed(2)) : 0
-  )
-  const profitData = labels.map((s) => Number(stats[s].netPnl.toFixed(2)))
-
-  return {
-    labels,
-    stats,
-    winRateData,
-    totalTradesData,
-    avgRrData,
-    profitData
-  }
 })
 
 onMounted(() => {

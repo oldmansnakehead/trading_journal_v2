@@ -30,6 +30,13 @@ export default defineConfig({
             instances: [{ browser: 'chromium' }]
           }
         }
+      },
+      {
+        test: {
+          name: 'unit',
+          include: ['src/**/*.test.ts', 'src/**/*.spec.ts'],
+          environment: 'node'
+        }
       }
     ]
   }

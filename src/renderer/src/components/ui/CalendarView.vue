@@ -123,6 +123,9 @@ const fetchData = async () => {
 
 // Filtered trades based on selected Setup and Trade Type
 const filteredTrades = computed(() => {
+  if (props.embedded) {
+    return trades.value
+  }
   return trades.value.filter((t) => {
     // Setup filter
     if (selectedSetup.value !== 'all' && t.setupId?.toString() !== String(selectedSetup.value)) {

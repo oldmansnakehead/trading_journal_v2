@@ -17,7 +17,8 @@ ChartJS.register(RadialLinearScale, PointElement, LineElement, Filler, Tooltip, 
 interface Props {
   title: string
   labels: string[]
-  data: number[]
+  data: (number | null)[]
+  tradeCounts?: number[]
   unit?: string
   infoTitle?: string
   infoDescription?: string
@@ -43,27 +44,37 @@ function hexToRgba(hex: string, alpha = 0.15): string {
   return `rgba(${r}, ${g}, ${b}, ${alpha})`
 }
 
+const isZeroTrades = (idx: number): boolean => {
+  if (props.tradeCounts && props.tradeCounts[idx] === 0) return true
+  if (props.data[idx] === null) return true
+  return false
+}
+
 const chartData = computed(() => ({
   labels: props.labels,
   datasets: [
     {
       label: props.title,
-      // For radar geometry scaling, ensure values plotted on axes are >= 0
-      data: props.data.map((v) => Math.max(0, v)),
+      // Values plotted on axes are >= 0; 0 for inactive/zero trades
+      data: props.data.map((v, i) => {
+        if (isZeroTrades(i) || v === null) return 0
+        return Math.max(0, v)
+      }),
       backgroundColor: hexToRgba(props.accentColor, 0.16),
       borderColor: props.accentColor,
       borderWidth: 2,
-      pointBackgroundColor: '#ffffff',
-      pointBorderColor: props.accentColor,
-      pointBorderWidth: 2,
-      pointRadius: 4,
-      pointHoverRadius: 6.5
+      pointBackgroundColor: (ctx: any) => (isZeroTrades(ctx.dataIndex) ? 'transparent' : '#ffffff'),
+      pointBorderColor: (ctx: any) => (isZeroTrades(ctx.dataIndex) ? 'transparent' : props.accentColor),
+      pointBorderWidth: (ctx: any) => (isZeroTrades(ctx.dataIndex) ? 0 : 2),
+      pointRadius: (ctx: any) => (isZeroTrades(ctx.dataIndex) ? 0 : 4),
+      pointHoverRadius: (ctx: any) => (isZeroTrades(ctx.dataIndex) ? 0 : 6.5)
     }
   ]
 }))
 
 const chartOptions = computed(() => {
-  const maxVal = Math.max(...props.data, 1)
+  const validNums = props.data.filter((v, i) => !isZeroTrades(i) && v !== null) as number[]
+  const maxVal = validNums.length > 0 ? Math.max(...validNums, 1) : 1
   const isPercentage = props.unit === '%'
 
   return {
@@ -82,9 +93,14 @@ const chartOptions = computed(() => {
         titleFont: { family: "'Bai Jamjuree', sans-serif" },
         callbacks: {
           label: (context: any) => {
-            const raw = props.data[context.dataIndex]
+            const idx = context.dataIndex
+            if (isZeroTrades(idx)) {
+              return ` ${props.title}: – (0 trades)`
+            }
+            const raw = props.data[idx]
+            if (raw === null || raw === undefined) return ` ${props.title}: –`
             if (props.unit === '$') {
-              return ` ${props.title}: ${raw >= 0 ? '+$' : '-$'}${Math.abs(raw).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+              return ` ${props.title}: ${raw >= 0 ? '+$' : '-$'}${Math.abs(raw).toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}`
             }
             if (props.unit === '%') {
               return ` ${props.title}: ${raw}%`
@@ -103,15 +119,15 @@ const chartOptions = computed(() => {
         max: isPercentage ? 100 : undefined,
         suggestedMax: isPercentage ? 100 : Math.ceil(maxVal * 1.15),
         angleLines: {
-          color: 'rgba(203, 213, 225, 0.7)', // slate-300
+          color: 'rgba(203, 213, 225, 0.7)',
           lineWidth: 1
         },
         grid: {
-          color: 'rgba(226, 232, 240, 0.9)', // slate-200
+          color: 'rgba(226, 232, 240, 0.9)',
           circular: false
         },
         pointLabels: {
-          color: '#334155', // slate-700
+          color: '#334155',
           font: {
             family: "'Bai Jamjuree', sans-serif",
             size: 11,
@@ -157,7 +173,10 @@ const chartOptions = computed(() => {
     </div>
 
     <!-- Values Pill Breakdown -->
-    <div class="grid grid-cols-3 gap-1.5 pt-3 border-t border-gray-200/60 text-center">
+    <div
+      class="grid gap-1.5 pt-3 border-t border-gray-200/60 text-center"
+      :class="labels.length <= 3 ? 'grid-cols-3' : 'grid-cols-2 sm:grid-cols-3 xl:grid-cols-5'"
+    >
       <div
         v-for="(label, idx) in labels"
         :key="label"
@@ -167,16 +186,21 @@ const chartOptions = computed(() => {
         <p
           class="text-xs font-bold mt-0.5 truncate"
           :class="{
-            'text-emerald-600': unit === '$' && data[idx] > 0,
-            'text-rose-600': unit === '$' && data[idx] < 0,
-            'text-gray-900': unit === '$' && data[idx] === 0,
-            'text-sky-600': unit === '%',
+            'text-gray-400': isZeroTrades(idx) && unit !== 'trades',
+            'text-emerald-600': unit === '$' && !isZeroTrades(idx) && (data[idx] ?? 0) > 0,
+            'text-rose-600': unit === '$' && !isZeroTrades(idx) && (data[idx] ?? 0) < 0,
+            'text-gray-900': unit === '$' && !isZeroTrades(idx) && (data[idx] ?? 0) === 0,
+            'text-sky-600': unit === '%' && !isZeroTrades(idx),
             'text-indigo-600': unit === 'trades',
-            'text-teal-600': unit === 'R'
+            'text-teal-600': unit === 'R' && !isZeroTrades(idx)
           }"
         >
-          <template v-if="unit === '$'">
-            {{ data[idx] >= 0 ? '+$' : '-$' }}{{ Math.abs(data[idx]).toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 }) }}
+          <!-- 0 trades for Win Rate / Avg RR / Profit -> show '–' -->
+          <template v-if="isZeroTrades(idx) && unit !== 'trades'">
+            –
+          </template>
+          <template v-else-if="unit === '$'">
+            {{ (data[idx] ?? 0) >= 0 ? '+$' : '-$' }}{{ Math.abs(data[idx] ?? 0).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 1 }) }}
           </template>
           <template v-else-if="unit === '%'">
             {{ data[idx] }}%
@@ -185,7 +209,7 @@ const chartOptions = computed(() => {
             {{ data[idx] }}R
           </template>
           <template v-else>
-            {{ data[idx] }}
+            {{ data[idx] ?? 0 }}
           </template>
         </p>
       </div>

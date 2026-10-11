@@ -5,7 +5,8 @@ import InfoTooltip from './InfoTooltip.vue'
 interface Props {
   title: string
   value: string | number
-  trend?: number
+  trend?: number | null
+  trendText?: string | null
   icon: string
   color?: 'success' | 'info' | 'warning' | 'error' | 'primary'
   infoTitle?: string
@@ -14,22 +15,24 @@ interface Props {
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  trend: 0,
+  trend: null,
+  trendText: null,
   color: 'success',
   infoTitle: '',
   infoDescription: '',
   infoFormula: ''
 })
 
-const trendIcon = computed(() => {
-  if (props.trend > 0) return 'ph-trend-up'
-  if (props.trend < 0) return 'ph-trend-down'
-  return 'ph-minus'
+const showTrend = computed(() => {
+  return props.trendText !== null && props.trendText !== undefined && props.trendText !== ''
 })
 
-const trendFormatted = computed(() => {
-  if (props.trend > 0) return `+${props.trend}%`
-  return `${props.trend}%`
+const trendIcon = computed(() => {
+  if (props.trend !== null && props.trend !== undefined) {
+    if (props.trend > 0) return 'ph-trend-up'
+    if (props.trend < 0) return 'ph-trend-down'
+  }
+  return 'ph-minus'
 })
 
 const styles = computed(() => {
@@ -78,8 +81,8 @@ const styles = computed(() => {
       >
         <i class="ph-fill" :class="icon"></i>
       </div>
-      <div class="flex items-center text-sm font-bold" :class="styles.iconText">
-        <i class="ph mr-1" :class="trendIcon"></i> {{ trendFormatted }}
+      <div v-if="showTrend" class="flex items-center text-sm font-bold" :class="styles.iconText">
+        <i class="ph mr-1" :class="trendIcon"></i> {{ trendText }}
       </div>
     </div>
     <h3 class="text-3xl font-bold mb-1" :class="styles.text">{{ value }}</h3>
