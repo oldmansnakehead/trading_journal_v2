@@ -487,6 +487,219 @@
       </div>
     </div>
 
+    <!-- Risk:Reward (RR) Statistics Row -->
+    <div class="mb-8 bg-gradient-to-r from-gray-50 via-white to-gray-50 p-6 rounded-2xl border border-gray-200/80 shadow-2xs">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-xl bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold">
+            <i class="ph-bold ph-chart-line-up text-lg"></i>
+          </div>
+          <div>
+            <h2 class="text-base font-bold text-gray-900">
+              สถิติผลตอบแทนต่อความเสี่ยง (Risk:Reward - RR)
+            </h2>
+            <p class="text-xs text-gray-500">
+              ประเมินประสิทธิภาพความคุ้มค่าของการทำกำไรเทียบความเสี่ยงตามโหมด {{ statMode.toUpperCase() }}
+            </p>
+          </div>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2">
+          <span class="text-xs font-semibold text-gray-500 bg-white px-3 py-1.5 rounded-lg border border-gray-200">
+            TOTAL RR = Σ R (Net)
+          </span>
+          <span class="text-xs font-semibold text-gray-500 bg-white px-3 py-1.5 rounded-lg border border-gray-200">
+            AVG RR = AVG WIN / AVG LOSS
+          </span>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <!-- TOTAL RR -->
+        <div class="bg-white rounded-2xl p-5 border border-indigo-100 shadow-xs flex items-center justify-between relative overflow-hidden group hover:border-indigo-300 transition-all">
+          <div class="relative z-10">
+            <div class="flex items-center gap-2">
+              <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">TOTAL RR</p>
+              <span
+                class="text-[10px] font-bold px-2 py-0.5 rounded-full"
+                :class="kpis.totalRr >= 0 ? 'bg-indigo-50 text-indigo-700 border border-indigo-200' : 'bg-rose-50 text-rose-700 border border-rose-200'"
+              >
+                {{ kpis.totalRr >= 0 ? 'Net Positive' : 'Net Negative' }}
+              </span>
+            </div>
+            <p
+              class="text-2xl font-extrabold mt-1"
+              :class="kpis.totalRr >= 0 ? 'text-indigo-600' : 'text-rose-600'"
+            >
+              {{ kpis.totalRr >= 0 ? '+' : '' }}{{ kpis.totalRr }}R
+            </p>
+            <p class="text-xs text-gray-500 mt-1.5 font-medium">
+              ผลรวมของ RR สุทธิทั้งหมดในพอร์ต
+            </p>
+          </div>
+          <div class="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-xl shrink-0 group-hover:scale-105 transition-transform">
+            <i class="ph-bold ph-sigma"></i>
+          </div>
+        </div>
+
+        <!-- AVG RR -->
+        <div class="bg-white rounded-2xl p-5 border border-emerald-100 shadow-xs flex items-center justify-between relative overflow-hidden group hover:border-emerald-300 transition-all">
+          <div class="relative z-10">
+            <div class="flex items-center gap-2">
+              <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">AVG RR</p>
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+                1 : {{ kpis.avgWinLossRr }}
+              </span>
+            </div>
+            <p class="text-2xl font-extrabold text-emerald-600 mt-1">
+              {{ kpis.avgWinLossRr }}R
+            </p>
+            <p class="text-xs text-gray-500 mt-1.5 font-medium truncate">
+              กำไร ~{{ kpis.avgWinLossRr }} เท่าของความเสี่ยง (AVG WIN / AVG LOSS)
+            </p>
+          </div>
+          <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl shrink-0 group-hover:scale-105 transition-transform">
+            <i class="ph-bold ph-scales"></i>
+          </div>
+        </div>
+
+        <!-- MAX RR -->
+        <div class="bg-white rounded-2xl p-5 border border-purple-100 shadow-xs flex items-center justify-between relative overflow-hidden group hover:border-purple-300 transition-all">
+          <div class="relative z-10">
+            <div class="flex items-center gap-2">
+              <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">MAX RR</p>
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-purple-50 text-purple-700 border border-purple-200">
+                Peak Single Trade
+              </span>
+            </div>
+            <p class="text-2xl font-extrabold text-purple-600 mt-1">
+              +{{ kpis.maxRr }}R
+            </p>
+            <p class="text-xs text-purple-700/80 mt-1.5 font-medium truncate">
+              ออเดอร์ที่รีดกำไรได้สูงสุดแบบสุดขั้วในไม้เดียว
+            </p>
+          </div>
+          <div class="w-12 h-12 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center text-xl shrink-0 group-hover:scale-105 transition-transform">
+            <i class="ph-bold ph-rocket-launch"></i>
+          </div>
+        </div>
+
+        <!-- AVG MAX RR -->
+        <div class="bg-white rounded-2xl p-5 border border-amber-100 shadow-xs flex items-center justify-between relative overflow-hidden group hover:border-amber-300 transition-all">
+          <div class="relative z-10">
+            <div class="flex items-center gap-2">
+              <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">AVG MAX RR</p>
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200">
+                Potential MFE
+              </span>
+            </div>
+            <p class="text-2xl font-extrabold text-amber-600 mt-1">
+              {{ kpis.avgMaxRr }}R
+            </p>
+            <p class="text-xs text-amber-700/80 mt-1.5 font-medium truncate">
+              ค่าเฉลี่ย RR สูงสุดที่ระบบไปถึงก่อนโดนปิดออเดอร์
+            </p>
+          </div>
+          <div class="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-xl shrink-0 group-hover:scale-105 transition-transform">
+            <i class="ph-bold ph-target"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Streaks & Drawdown Statistics Row -->
+    <div class="mb-8 bg-gradient-to-r from-gray-50 via-white to-gray-50 p-6 rounded-2xl border border-gray-200/80 shadow-2xs">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-xl bg-rose-100 text-rose-700 flex items-center justify-center font-bold">
+            <i class="ph-bold ph-shield-warning text-lg"></i>
+          </div>
+          <div>
+            <h2 class="text-base font-bold text-gray-900">
+              สถิติความเสี่ยงและการติดลบ (Streaks & Drawdown)
+            </h2>
+            <p class="text-xs text-gray-500">
+              วิเคราะห์จุดอ่อน อัตราการแพ้/ชนะติดต่อกัน และภาวะพอร์ตยุบตัวสูงสุด (Peak to Trough)
+            </p>
+          </div>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2">
+          <span class="text-xs font-semibold text-gray-500 bg-white px-3 py-1.5 rounded-lg border border-gray-200">
+            WIN RATE: {{ kpis.winRate }}%
+          </span>
+          <span class="text-xs font-semibold text-gray-500 bg-white px-3 py-1.5 rounded-lg border border-gray-200">
+            PEAK TO TROUGH
+          </span>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <!-- CONSEC. WINS -->
+        <div class="bg-white rounded-2xl p-5 border border-emerald-100 shadow-xs flex items-center justify-between relative overflow-hidden group hover:border-emerald-300 transition-all">
+          <div class="relative z-10">
+            <div class="flex items-center gap-2">
+              <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">CONSEC. WINS</p>
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+                Winning Streak
+              </span>
+            </div>
+            <p class="text-2xl font-extrabold text-emerald-600 mt-1">
+              {{ kpis.consecWins }} ไม้
+            </p>
+            <p class="text-xs text-emerald-700/80 mt-1.5 font-medium">
+              จำนวนครั้งที่เทรดชนะติดต่อกันมากที่สุด
+            </p>
+          </div>
+          <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl shrink-0 group-hover:scale-105 transition-transform">
+            <i class="ph-bold ph-trophy"></i>
+          </div>
+        </div>
+
+        <!-- CONSEC. LOSSES -->
+        <div class="bg-white rounded-2xl p-5 border border-rose-100 shadow-xs flex items-center justify-between relative overflow-hidden group hover:border-rose-300 transition-all">
+          <div class="relative z-10">
+            <div class="flex items-center gap-2">
+              <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">CONSEC. LOSSES</p>
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-100 text-rose-800 border border-rose-200">
+                Losing Streak
+              </span>
+            </div>
+            <p class="text-2xl font-extrabold text-rose-600 mt-1">
+              {{ kpis.consecLosses }} ไม้
+            </p>
+            <p class="text-xs text-rose-700/80 mt-1.5 font-medium">
+              จำนวนครั้งที่เทรดแพ้ติดต่อกันมากที่สุด (จุดอ่อนความเสี่ยง)
+            </p>
+          </div>
+          <div class="w-12 h-12 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center text-xl shrink-0 group-hover:scale-105 transition-transform">
+            <i class="ph-bold ph-warning-circle"></i>
+          </div>
+        </div>
+
+        <!-- MAX DRAWDOWN -->
+        <div class="bg-white rounded-2xl p-5 border border-rose-100 shadow-xs flex items-center justify-between relative overflow-hidden group hover:border-rose-300 transition-all">
+          <div class="relative z-10">
+            <div class="flex items-center gap-2">
+              <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">MAX DRAWDOWN</p>
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-100 text-rose-800 border border-rose-200">
+                Peak to Trough
+              </span>
+            </div>
+            <p class="text-2xl font-extrabold text-rose-600 mt-1">
+              -{{ kpis.maxDrawdown }}%
+            </p>
+            <p class="text-xs text-rose-700/80 mt-1.5 font-medium">
+              เปอร์เซ็นต์พอร์ตยุบตัวลึกที่สุดจากจุดสูงสุด
+            </p>
+          </div>
+          <div class="w-12 h-12 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center text-xl shrink-0 group-hover:scale-105 transition-transform">
+            <i class="ph-bold ph-trend-down"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Charts Row -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
       <!-- Main Equity/PnL Curve -->
@@ -1099,6 +1312,14 @@ const getTradeRr = (trade: any, mode: 'normal' | 'be' | 'trail' = statMode.value
   return 0
 }
 
+// Helper to get Max RR for a trade according to selected RR mode
+const getTradeMaxRr = (trade: any, mode: 'normal' | 'be' | 'trail' = statMode.value): number => {
+  if (mode === 'normal') return Number(trade.normalMaxRr ?? trade.normalRr ?? 0)
+  if (mode === 'be') return Number(trade.beMaxRr ?? trade.normalMaxRr ?? trade.beRr ?? trade.normalRr ?? 0)
+  if (mode === 'trail') return Number(trade.trailMaxRr ?? trade.normalMaxRr ?? trade.trailRr ?? trade.normalRr ?? 0)
+  return 0
+}
+
 // Single Source of Truth: Filter trades based on selected filters
 const filteredTrades = computed(() => {
   return allTrades.value.filter((t) => {
@@ -1200,7 +1421,14 @@ const kpis = computed(() => {
       profitFactor: 0,
       avgWin: 0,
       avgLoss: 0,
-      finalBalance: initialBalance
+      finalBalance: initialBalance,
+      totalRr: 0,
+      avgWinLossRr: 0,
+      avgWinRr: 0,
+      maxRr: 0,
+      avgMaxRr: 0,
+      consecWins: 0,
+      consecLosses: 0
     }
   }
 
@@ -1214,26 +1442,60 @@ const kpis = computed(() => {
   let grossProfit = 0
   let grossLoss = 0
   let totalRr = 0
+  let winningRr = 0
   let currentBalance = initialBalance
   let peak = currentBalance
   let maxDrawdown = 0
 
+  let consecWins = 0
+  let currentWins = 0
+  let consecLosses = 0
+  let currentLosses = 0
+
+  let maxSingleRr = 0
+  let sumMaxRr = 0
+  let countMaxRr = 0
+
   for (const trade of trades) {
     const rr = getTradeRr(trade, statMode.value)
+    const tMaxRr = getTradeMaxRr(trade, statMode.value)
+    const effectivePeakRr = Math.max(rr, tMaxRr)
+
     totalRr += rr
 
     const riskAmount = isSimple ? fixedRiskAmount : currentBalance * riskPercent
     const pnl = riskAmount * rr
     currentBalance += pnl
 
+    if (effectivePeakRr > maxSingleRr) {
+      maxSingleRr = effectivePeakRr
+    }
+
+    if (tMaxRr > 0) {
+      sumMaxRr += tMaxRr
+      countMaxRr++
+    } else if (rr > 0) {
+      sumMaxRr += rr
+      countMaxRr++
+    }
+
     if (rr > 0) {
       wins++
+      winningRr += rr
       grossProfit += pnl
+      currentWins++
+      currentLosses = 0
+      if (currentWins > consecWins) consecWins = currentWins
     } else if (rr < 0) {
       losses++
       grossLoss += Math.abs(pnl)
+      currentLosses++
+      currentWins = 0
+      if (currentLosses > consecLosses) consecLosses = currentLosses
     } else {
       breakEvens++
+      currentWins = 0
+      currentLosses = 0
     }
 
     if (currentBalance > peak) peak = currentBalance
@@ -1260,6 +1522,11 @@ const kpis = computed(() => {
   // FINAL BALANCE: ทุนเริ่มต้น + NET PNL
   const finalBalance = Number((initialBalance + netPnl).toFixed(2))
 
+  // AVG RR (Win/Loss Payoff Ratio): AVG WIN $ / AVG LOSS $
+  const avgWinLossRr = avgLoss > 0 ? Number((avgWin / avgLoss).toFixed(2)) : (wins > 0 ? Number((winningRr / wins).toFixed(2)) : 0)
+  const avgWinRr = wins > 0 ? Number((winningRr / wins).toFixed(2)) : 0
+  const avgMaxRr = countMaxRr > 0 ? Number((sumMaxRr / countMaxRr).toFixed(2)) : 0
+
   return {
     totalTrades: total,
     winRate: Number(((wins / total) * 100).toFixed(1)),
@@ -1274,7 +1541,14 @@ const kpis = computed(() => {
     profitFactor,
     avgWin,
     avgLoss,
-    finalBalance
+    finalBalance,
+    totalRr: Number(totalRr.toFixed(2)),
+    avgWinLossRr,
+    avgWinRr,
+    maxRr: Number(maxSingleRr.toFixed(2)),
+    avgMaxRr,
+    consecWins,
+    consecLosses
   }
 })
 
