@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import BaseSelect from './BaseSelect.vue'
+import InfoTooltip from './InfoTooltip.vue'
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -39,6 +40,11 @@ interface Props {
   years?: string[]
   labels?: string[]
   datasets?: Dataset[]
+  infoTitle?: string
+  infoDescription?: string
+  infoFormula?: string
+  timeframe?: string
+  timeframeOptions?: { label: string; value: string }[]
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -66,16 +72,13 @@ const props = withDefaults(defineProps<Props>(), {
       borderColor: '#00a76f',
       backgroundColor: 'rgba(0, 167, 111, 0.1)',
       total: '1.23k'
-    },
-    {
-      label: 'Total expenses',
-      data: [50, 20, 30, 20, 70, 90, 60, 80, 80, 60, 50, 40],
-      borderColor: '#ffab00',
-      backgroundColor: 'rgba(255, 171, 0, 0.1)',
-      total: '6.79k'
     }
   ]
 })
+
+defineEmits<{
+  (e: 'update:timeframe', value: string): void
+}>()
 
 const data = computed(() => ({
   labels: props.labels,
@@ -85,9 +88,9 @@ const data = computed(() => ({
     borderColor: ds.borderColor,
     backgroundColor: ds.backgroundColor,
     fill: true,
-    tension: 0.4,
-    borderWidth: 2,
-    pointRadius: 0,
+    tension: 0.3,
+    borderWidth: 2.5,
+    pointRadius: props.labels && props.labels.length > 50 ? 0 : 3,
     pointHoverRadius: 6,
     pointBackgroundColor: '#fff',
     pointBorderColor: ds.borderColor,
@@ -95,7 +98,7 @@ const data = computed(() => ({
   }))
 }))
 
-const options = {
+const options = computed(() => ({
   responsive: true,
   maintainAspectRatio: false,
   plugins: {
@@ -107,31 +110,77 @@ const options = {
       padding: 10,
       cornerRadius: 8,
       bodyFont: { family: "'Bai Jamjuree', sans-serif" },
-      titleFont: { family: "'Bai Jamjuree', sans-serif" }
+      titleFont: { family: "'Bai Jamjuree', sans-serif" },
+      callbacks: {
+        label: (context: any) => {
+          const val = context.raw
+          return ` Balance: $${Number(val).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+        }
+      }
     }
   },
   scales: {
     x: {
       grid: { display: false, drawBorder: false },
-      ticks: { color: '#637381', font: { family: "'Bai Jamjuree', sans-serif" } }
+      ticks: {
+        color: '#637381',
+        font: { family: "'Bai Jamjuree', sans-serif" },
+        maxRotation: 45,
+        autoSkip: true,
+        maxTicksLimit: 15
+      }
     },
     y: {
       border: { dash: [4, 4] },
       grid: { color: '#f1f5f9', drawBorder: false, tickLength: 0 },
-      ticks: { color: '#637381', font: { family: "'Bai Jamjuree', sans-serif" }, padding: 10 }
+      ticks: {
+        color: '#637381',
+        font: { family: "'Bai Jamjuree', sans-serif" },
+        padding: 10,
+        callback: (value: any) => '$' + Number(value).toLocaleString()
+      }
     }
   }
-}
+}))
 </script>
 
 <template>
-  <div class="bg-white rounded-2xl p-6 shadow-card h-[400px] flex flex-col min-w-[500px]">
-    <div class="flex justify-between items-start mb-6">
+  <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 h-[460px] flex flex-col min-w-0">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
       <div>
-        <h6 class="text-lg font-bold text-textPrimary">{{ title }}</h6>
+        <div class="flex items-center gap-1.5">
+          <h6 class="text-lg font-bold text-textPrimary">{{ title }}</h6>
+          <InfoTooltip
+            v-if="infoTitle || infoDescription"
+            :title="infoTitle"
+            :description="infoDescription"
+            :formula="infoFormula"
+          />
+        </div>
         <p class="text-sm text-textSecondary">{{ subtitle }}</p>
       </div>
-      <BaseSelect :modelValue="years[0]" :options="years" />
+
+      <!-- Timeframe Toggle Buttons (Per Trade, Hourly, Daily, Monthly, Yearly) -->
+      <div
+        v-if="timeframeOptions && timeframeOptions.length"
+        class="inline-flex items-center bg-gray-100 p-1 rounded-xl text-xs font-semibold border border-gray-200/80 shrink-0"
+      >
+        <button
+          v-for="opt in timeframeOptions"
+          :key="opt.value"
+          type="button"
+          @click="$emit('update:timeframe', opt.value)"
+          :class="[
+            'px-2.5 py-1 rounded-lg transition-all duration-150 cursor-pointer',
+            timeframe === opt.value
+              ? 'bg-white text-gray-900 shadow-xs font-bold'
+              : 'text-gray-500 hover:text-gray-800'
+          ]"
+        >
+          {{ opt.label }}
+        </button>
+      </div>
+      <BaseSelect v-else-if="years && years.length > 1" :modelValue="years[0]" :options="years" />
     </div>
 
     <!-- Custom Legend -->

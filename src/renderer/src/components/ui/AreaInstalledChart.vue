@@ -18,7 +18,8 @@ ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend)
 interface Dataset {
   label: string
   data: number[]
-  color: string
+  color?: string | string[]
+  backgroundColor?: string | string[]
   total: string
 }
 
@@ -31,6 +32,8 @@ interface Props {
   infoTitle?: string
   infoDescription?: string
   infoFormula?: string
+  timeframe?: string
+  timeframeOptions?: { label: string; value: string }[]
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -57,35 +60,31 @@ const props = withDefaults(defineProps<Props>(), {
       data: [12, 54, 42, 27, 60, 18, 65, 57, 65, 45, 24, 51],
       color: '#00a76f',
       total: '1.23k'
-    },
-    {
-      label: 'Europe',
-      data: [8, 36, 28, 18, 40, 12, 44, 38, 44, 30, 16, 34],
-      color: '#ffab00',
-      total: '6.79k'
-    },
-    {
-      label: 'Americas',
-      data: [5, 18, 14, 9, 20, 6, 22, 19, 22, 15, 8, 17],
-      color: '#00b8d9',
-      total: '1.01k'
     }
   ]
 })
+
+defineEmits<{
+  (e: 'update:timeframe', value: string): void
+}>()
 
 const data = computed(() => ({
   labels: props.labels,
   datasets: props.datasets.map((ds) => ({
     label: ds.label,
     data: ds.data,
-    backgroundColor: ds.color,
+    backgroundColor:
+      ds.backgroundColor ||
+      (Array.isArray(ds.color)
+        ? ds.color
+        : ds.data.map((v) => (v >= 0 ? '#00a76f' : '#ff5630'))),
     borderRadius: 4,
     barPercentage: 0.6,
-    categoryPercentage: 0.4
+    categoryPercentage: 0.6
   }))
 }))
 
-const options = {
+const options = computed(() => ({
   responsive: true,
   maintainAspectRatio: false,
   plugins: {
@@ -97,28 +96,39 @@ const options = {
       padding: 10,
       cornerRadius: 8,
       bodyFont: { family: "'Bai Jamjuree', sans-serif" },
-      titleFont: { family: "'Bai Jamjuree', sans-serif" }
+      titleFont: { family: "'Bai Jamjuree', sans-serif" },
+      callbacks: {
+        label: (context: any) => {
+          const val = context.raw
+          return ` Net PnL: ${val >= 0 ? '+$' : '-$'}${Math.abs(val).toFixed(2)}`
+        }
+      }
     }
   },
   scales: {
     x: {
-      stacked: true,
+      stacked: false,
       grid: { display: false, drawBorder: false },
       ticks: { color: '#637381', font: { family: "'Bai Jamjuree', sans-serif" } }
     },
     y: {
-      stacked: true,
+      stacked: false,
       border: { dash: [4, 4] },
       grid: { color: '#f1f5f9', drawBorder: false, tickLength: 0 },
-      ticks: { color: '#637381', font: { family: "'Bai Jamjuree', sans-serif" }, padding: 10 }
+      ticks: {
+        color: '#637381',
+        font: { family: "'Bai Jamjuree', sans-serif" },
+        padding: 10,
+        callback: (value: any) => (value >= 0 ? '+$' : '-$') + Math.abs(value).toLocaleString()
+      }
     }
   }
-}
+}))
 </script>
 
 <template>
-  <div class="bg-white rounded-2xl p-6 shadow-card h-[400px] flex flex-col min-w-[500px]">
-    <div class="flex justify-between items-start mb-6">
+  <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 h-[420px] flex flex-col min-w-0">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
       <div>
         <div class="flex items-center gap-1.5">
           <h6 class="text-lg font-bold text-textPrimary">{{ title }}</h6>
@@ -131,15 +141,38 @@ const options = {
         </div>
         <p class="text-sm text-textSecondary">{{ subtitle }}</p>
       </div>
-      <BaseSelect :modelValue="years[0]" :options="years" />
+
+      <!-- Timeframe Toggle Buttons (Hourly, Daily, Monthly, Yearly) -->
+      <div
+        v-if="timeframeOptions && timeframeOptions.length"
+        class="inline-flex items-center bg-gray-100 p-1 rounded-xl text-xs font-semibold border border-gray-200/80 shrink-0"
+      >
+        <button
+          v-for="opt in timeframeOptions"
+          :key="opt.value"
+          type="button"
+          @click="$emit('update:timeframe', opt.value)"
+          :class="[
+            'px-2.5 py-1 rounded-lg transition-all duration-150 cursor-pointer',
+            timeframe === opt.value
+              ? 'bg-white text-gray-900 shadow-xs font-bold'
+              : 'text-gray-500 hover:text-gray-800'
+          ]"
+        >
+          {{ opt.label }}
+        </button>
+      </div>
+      <BaseSelect v-else-if="years && years.length > 1" :modelValue="years[0]" :options="years" />
     </div>
 
     <!-- Custom Legend -->
     <div class="flex flex-wrap gap-6 mb-4 px-4">
       <div v-for="ds in datasets" :key="ds.label">
         <div class="flex items-center text-xs font-semibold text-textSecondary mb-1">
-          <span class="w-3 h-3 rounded-full mr-2" :style="{ backgroundColor: ds.color }"></span
-          >{{ ds.label }}
+          <span
+            class="w-3 h-3 rounded-full mr-2"
+            :style="{ backgroundColor: Array.isArray(ds.color) ? ds.color[0] : (ds.color || '#00a76f') }"
+          ></span>{{ ds.label }}
         </div>
         <div class="text-lg font-bold text-textPrimary">{{ ds.total }}</div>
       </div>

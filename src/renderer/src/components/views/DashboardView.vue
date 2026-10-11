@@ -811,33 +811,22 @@
       </div>
     </div>
 
-    <!-- Charts Row -->
+    <!-- Charts Row 1: Equity Curve & Trade Outcomes -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-      <!-- Main Equity/PnL Curve -->
-      <div class="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-        <div class="flex justify-between items-center mb-6">
-          <div>
-            <div class="flex items-center gap-1.5">
-              <h2 class="text-lg font-bold text-gray-900">Simulated Equity Curve</h2>
-              <InfoTooltip
-                title="Simulated Equity Curve (กราฟการเติบโตของพอร์ต)"
-                description="กราฟจำลองเส้นทางการเติบโตของเงินทุนตามลำดับเวลาและผลการเทรดจริง โดยคำนวณตามเงินทุนเริ่มต้น, Risk %, และโหมดที่เลือก (Simple หรือ Log Compounded)"
-                formula="ยอดเงินสะสมต่อเนื่องในแต่ละไม้ตามลำดับเวลา"
-              />
-            </div>
-            <p class="text-sm text-gray-500">
-              Projected balance based on {{ statMode.toUpperCase() }} mode and current filters
-            </p>
-          </div>
-        </div>
-        <YearlySalesChart
-          title="Equity Curve"
-          subtitle="Simulated Balance over time"
-          :labels="equityCurveData.labels"
-          :datasets="equityCurveData.datasets"
-          :years="['All Time']"
-        />
-      </div>
+      <!-- Main Equity Curve (with timeframe filters) -->
+      <YearlySalesChart
+        class="lg:col-span-2"
+        title="Simulated Equity Curve"
+        :subtitle="`Projected balance (${equityCurveTimeframeLabel})`"
+        infoTitle="Simulated Equity Curve (กราฟการเติบโตของพอร์ต)"
+        infoDescription="กราฟจำลองเส้นทางการเติบโตของเงินทุนตามลำดับเวลาและผลการเทรดจริง สามารถปรับดูตามรายไม้ รายชั่วโมง รายวัน รายเดือน หรือรายปีได้อิสระ"
+        infoFormula="ยอดเงินสะสมต่อเนื่องในแต่ละช่วงเวลา"
+        :labels="equityCurveData.labels"
+        :datasets="equityCurveData.datasets"
+        :timeframe="equityCurveTimeframe"
+        :timeframeOptions="equityCurveTimeframeOptions"
+        @update:timeframe="handleEquityCurveTimeframeChange"
+      />
 
       <!-- Win/Loss Ratio Doughnut -->
       <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col justify-between">
@@ -878,29 +867,98 @@
       </div>
     </div>
 
-    <!-- Secondary Charts Row -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-        <AreaInstalledChart
-          title="Net PnL (Daily)"
-          subtitle="Simulated daily profit/loss"
-          infoTitle="Net PnL Daily (กำไร/ขาดทุนรายวัน)"
-          infoDescription="กราฟแท่งแสดงผลกำไรขาดทุนสุทธิรวมในแต่ละวัน ช่วยให้เห็นว่าวันไหนทำกำไรได้ดี หรือวันไหนที่ตลาดไม่เป็นใจ"
-          infoFormula="ผลรวม PnL ของออเดอร์ในแต่ละวัน"
-          :labels="dailyPnlData.labels"
-          :datasets="dailyPnlData.datasets"
-          :years="['All Time']"
-        />
+    <!-- Charts Row 2: Net PnL (Full Width with Timeframe Filters) -->
+    <div class="mb-8">
+      <AreaInstalledChart
+        :title="`Net PnL (${netPnlTimeframeLabel})`"
+        :subtitle="`Simulated profit/loss (${netPnlTimeframeLabel})`"
+        infoTitle="Net PnL (กำไร/ขาดทุนสุทธิ)"
+        infoDescription="กราฟแท่งแสดงผลกำไรขาดทุนสุทธิรวมตามช่วงเวลาที่เลือก สามารถปรับดูแบบรายชั่วโมง รายวัน รายเดือน หรือรายปีได้อิสระ"
+        infoFormula="ผลรวม PnL ของออเดอร์ในแต่ละช่วงเวลา"
+        :labels="netPnlChartData.labels"
+        :datasets="netPnlChartData.datasets"
+        :timeframe="netPnlTimeframe"
+        :timeframeOptions="netPnlTimeframeOptions"
+        @update:timeframe="handleNetPnlTimeframeChange"
+      />
+    </div>
+
+    <!-- Charts Row 3: Performance by Session (Multi-Dimensional Radars) -->
+    <div class="mb-8 bg-gray-950 text-white rounded-3xl p-6 border border-gray-800 shadow-xl">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-6">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-xl bg-sky-500/10 text-sky-400 flex items-center justify-center font-bold border border-sky-500/20">
+            <i class="ph-bold ph-radar text-lg"></i>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h2 class="text-base sm:text-lg font-bold text-white tracking-wide">
+                Performance by session
+              </h2>
+              <InfoTooltip
+                title="Performance by Session (ประสิทธิภาพตามช่วงเวลาตลาด)"
+                description="วิเคราะห์ประสิทธิภาพการเทรดในแต่ละช่วงเวลาตลาด (Asia, London, New York) ครอบคลุม 4 มิติสำคัญ: Win Rate, Total Trades, Avg RR, และ Profit"
+                formula="เปรียบเทียบสถิติแยกตาม Session"
+              />
+            </div>
+            <p class="text-xs text-gray-400">
+              วิเคราะห์หลายมิติ (Win Rate, Total Trades, Avg RR, Profit) ตามโหมด {{ statMode.toUpperCase() }}
+            </p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2 text-xs font-semibold text-gray-400">
+          <span class="inline-flex items-center gap-1.5 bg-gray-900 border border-gray-800 px-3 py-1.5 rounded-xl">
+            <span class="w-2 h-2 rounded-full bg-sky-400"></span>
+            Asia · London · New York
+          </span>
+        </div>
       </div>
 
-      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-        <RadarChart
-          title="Performance by Session"
-          subtitle="Win Rate per session"
-          infoTitle="Session Performance (ประสิทธิภาพตามช่วงเวลาตลาด)"
-          infoDescription="กราฟเรดาร์เปรียบเทียบอัตราการชนะ (Win Rate %) ในแต่ละเซสชันของตลาด ช่วยให้โฟกัสเทรดเฉพาะช่วงเวลาที่ระบบทำผลงานได้ดีที่สุด"
+      <!-- 4 Radar Cards Grid (Exactly like reference screenshot) -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <!-- 1. Win Rate -->
+        <SessionRadarCard
+          title="Win Rate"
+          :labels="sessionMultiMetrics.labels"
+          :data="sessionMultiMetrics.winRateData"
+          unit="%"
+          infoTitle="Win Rate by Session"
+          infoDescription="อัตราการชนะ (Win Rate %) ของแต่ละช่วงเวลาตลาด ช่วยวิเคราะห์ว่าระบบเทรดได้เปรียบที่สุดในเซสชันใด"
           infoFormula="(ไม้ชนะใน Session ÷ ไม้ทั้งหมดใน Session) × 100%"
-          :chartData="sessionPerformance"
+        />
+
+        <!-- 2. Total Trades -->
+        <SessionRadarCard
+          title="Total Trades"
+          :labels="sessionMultiMetrics.labels"
+          :data="sessionMultiMetrics.totalTradesData"
+          unit="trades"
+          infoTitle="Total Trades by Session"
+          infoDescription="จำนวนครั้งที่เข้าเทรดทั้งหมดในแต่ละช่วงเวลาตลาด ช่วยดูว่าเราออกออเดอร์ในเซสชันไหนบ่อยที่สุด"
+          infoFormula="นับจำนวนไม้ที่เปิดใน Session นั้นๆ"
+        />
+
+        <!-- 3. Avg RR -->
+        <SessionRadarCard
+          title="Avg RR"
+          :labels="sessionMultiMetrics.labels"
+          :data="sessionMultiMetrics.avgRrData"
+          unit="R"
+          infoTitle="Average RR by Session"
+          infoDescription="ผลตอบแทนต่อความเสี่ยงเฉลี่ย (Average RR) ต่อไม้ในแต่ละช่วงเวลาตลาด บอกว่าเซสชันไหนให้กำไรเฉลี่ยต่อความเสี่ยงคุ้มค่าที่สุด"
+          infoFormula="ผลรวม RR ใน Session ÷ จำนวนไม้ใน Session"
+        />
+
+        <!-- 4. Profit -->
+        <SessionRadarCard
+          title="Profit"
+          :labels="sessionMultiMetrics.labels"
+          :data="sessionMultiMetrics.profitData"
+          unit="$"
+          infoTitle="Net Profit by Session"
+          infoDescription="กำไรสุทธิ ($) รวมในแต่ละช่วงเวลาตลาด แสดงว่าเงินกำไรของพอร์ตมาจากเซสชันไหนเป็นหลัก"
+          infoFormula="ผลรวม PnL ($) ของทุกออเดอร์ใน Session นั้น"
         />
       </div>
     </div>
@@ -1165,7 +1223,7 @@ import PastelStatCard from '../ui/PastelStatCard.vue'
 import YearlySalesChart from '../ui/YearlySalesChart.vue'
 import CurrentDownloadChart from '../ui/CurrentDownloadChart.vue'
 import AreaInstalledChart from '../ui/AreaInstalledChart.vue'
-import RadarChart from '../ui/RadarChart.vue'
+import SessionRadarCard from '../ui/SessionRadarCard.vue'
 import BaseSelect from '../ui/BaseSelect.vue'
 import TradeDetailsModal from '../ui/TradeDetailsModal.vue'
 import TradeScreenshotsModal from '../ui/TradeScreenshotsModal.vue'
@@ -1179,6 +1237,62 @@ const isCapturing = ref(false)
 
 // Stat Mode: 'normal' | 'be' | 'trail'
 const statMode = ref<'normal' | 'be' | 'trail'>('normal')
+
+// Timeframe Filters for Equity Curve and Net PnL
+const equityCurveTimeframe = ref<'trade' | 'hourly' | 'daily' | 'monthly' | 'yearly'>('trade')
+const equityCurveTimeframeOptions = [
+  { label: 'Per Trade (รายไม้)', value: 'trade' },
+  { label: 'Hourly (รายชั่วโมง)', value: 'hourly' },
+  { label: 'Daily (รายวัน)', value: 'daily' },
+  { label: 'Monthly (รายเดือน)', value: 'monthly' },
+  { label: 'Yearly (รายปี)', value: 'yearly' }
+]
+const equityCurveTimeframeLabel = computed(() => {
+  switch (equityCurveTimeframe.value) {
+    case 'trade':
+      return 'Per Trade / รายไม้'
+    case 'hourly':
+      return 'Hourly / รายชั่วโมง'
+    case 'daily':
+      return 'Daily / รายวัน'
+    case 'monthly':
+      return 'Monthly / รายเดือน'
+    case 'yearly':
+      return 'Yearly / รายปี'
+    default:
+      return 'All Time'
+  }
+})
+
+const netPnlTimeframe = ref<'hourly' | 'daily' | 'monthly' | 'yearly'>('daily')
+const netPnlTimeframeOptions = [
+  { label: 'Hourly (รายชั่วโมง)', value: 'hourly' },
+  { label: 'Daily (รายวัน)', value: 'daily' },
+  { label: 'Monthly (รายเดือน)', value: 'monthly' },
+  { label: 'Yearly (รายปี)', value: 'yearly' }
+]
+const netPnlTimeframeLabel = computed(() => {
+  switch (netPnlTimeframe.value) {
+    case 'hourly':
+      return 'Hourly / รายชั่วโมง'
+    case 'daily':
+      return 'Daily / รายวัน'
+    case 'monthly':
+      return 'Monthly / รายเดือน'
+    case 'yearly':
+      return 'Yearly / รายปี'
+    default:
+      return 'Daily / รายวัน'
+  }
+})
+
+const handleEquityCurveTimeframeChange = (val: string) => {
+  equityCurveTimeframe.value = val as 'trade' | 'hourly' | 'daily' | 'monthly' | 'yearly'
+}
+
+const handleNetPnlTimeframeChange = (val: string) => {
+  netPnlTimeframe.value = val as 'hourly' | 'daily' | 'monthly' | 'yearly'
+}
 
 // Trade Details Modal State
 const showTradeDetails = ref(false)
@@ -1720,9 +1834,6 @@ const fetchData = async () => {
 // Compute Equity Curve Data (Directly from filteredTrades - Exact Same Dataset)
 const equityCurveData = computed(() => {
   const trades = filteredTrades.value
-  const labels: string[] = []
-  const data: number[] = []
-
   const isSimple = simulation.value.returnCalculation === 'simple'
   const initialBalance = Number(simulation.value.initialBalance) || 10000
   const riskPercent = (Number(simulation.value.riskPerTrade) || 1) / 100
@@ -1730,46 +1841,45 @@ const equityCurveData = computed(() => {
 
   let currentBalance = initialBalance
 
-  // Point 0: Start
-  labels.push('Start')
-  data.push(Number(currentBalance.toFixed(2)))
+  if (equityCurveTimeframe.value === 'trade') {
+    const labels: string[] = ['Start']
+    const data: number[] = [Number(initialBalance.toFixed(2))]
 
-  trades.forEach((trade, index) => {
-    const rr = getTradeRr(trade, statMode.value)
-    const riskAmount = isSimple ? fixedRiskAmount : currentBalance * riskPercent
-    const pnl = riskAmount * rr
-    currentBalance += pnl
+    trades.forEach((trade, index) => {
+      const rr = getTradeRr(trade, statMode.value)
+      const riskAmount = isSimple ? fixedRiskAmount : currentBalance * riskPercent
+      const pnl = riskAmount * rr
+      currentBalance += pnl
 
-    const dateStr = new Date(trade.entryDatetime).toLocaleDateString([], { month: 'numeric', day: 'numeric' })
-    labels.push(`#${index + 1} (${dateStr})`)
-    data.push(Number(currentBalance.toFixed(2)))
-  })
+      const dateStr = new Date(trade.entryDatetime).toLocaleDateString([], {
+        month: 'numeric',
+        day: 'numeric'
+      })
+      labels.push(`#${index + 1} (${dateStr})`)
+      data.push(Number(currentBalance.toFixed(2)))
+    })
 
-  return {
-    labels: labels.length > 0 ? labels : ['No Data'],
-    datasets: [
-      {
-        label: `Balance ($) [${statMode.value.toUpperCase()} - ${isSimple ? 'SIMPLE' : 'LOG'}]`,
-        data: data.length > 0 ? data : [Number(simulation.value.initialBalance) || 10000],
-        borderColor: '#00a76f',
-        backgroundColor: 'rgba(0, 167, 111, 0.1)',
-        total: '$' + currentBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-      }
-    ]
+    return {
+      labels: labels.length > 0 ? labels : ['No Data'],
+      datasets: [
+        {
+          label: `Balance ($) [${statMode.value.toUpperCase()} - ${isSimple ? 'SIMPLE' : 'LOG'}]`,
+          data: data.length > 0 ? data : [initialBalance],
+          borderColor: '#00a76f',
+          backgroundColor: 'rgba(0, 167, 111, 0.1)',
+          total:
+            '$' +
+            currentBalance.toLocaleString(undefined, {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2
+            })
+        }
+      ]
+    }
   }
-})
 
-// Compute Daily PnL (Directly from filteredTrades - Exact Same Dataset)
-const dailyPnlData = computed(() => {
-  const trades = filteredTrades.value
-  const dailyPnl: Record<string, number> = {}
-
-  const isSimple = simulation.value.returnCalculation === 'simple'
-  const initialBalance = Number(simulation.value.initialBalance) || 10000
-  const riskPercent = (Number(simulation.value.riskPerTrade) || 1) / 100
-  const fixedRiskAmount = initialBalance * riskPercent
-
-  let currentBalance = initialBalance
+  // Aggregated Timeframe: hourly | daily | monthly | yearly
+  const tradePoints: { key: string; label: string; balance: number }[] = []
 
   trades.forEach((trade) => {
     const rr = getTradeRr(trade, statMode.value)
@@ -1777,14 +1887,129 @@ const dailyPnlData = computed(() => {
     const pnl = riskAmount * rr
     currentBalance += pnl
 
-    const dateKey = new Date(trade.entryDatetime).toLocaleDateString([], { month: 'numeric', day: 'numeric' })
-    if (!dailyPnl[dateKey]) dailyPnl[dateKey] = 0
-    dailyPnl[dateKey] += pnl
+    const d = new Date(trade.entryDatetime)
+    let key = ''
+    let label = ''
+
+    if (equityCurveTimeframe.value === 'hourly') {
+      const yyyy = d.getFullYear()
+      const mm = String(d.getMonth() + 1).padStart(2, '0')
+      const dd = String(d.getDate()).padStart(2, '0')
+      const hh = String(d.getHours()).padStart(2, '0') + ':00'
+      key = `${yyyy}-${mm}-${dd} ${hh}`
+      label = `${dd}/${mm} ${hh}`
+    } else if (equityCurveTimeframe.value === 'daily') {
+      const yyyy = d.getFullYear()
+      const mm = String(d.getMonth() + 1).padStart(2, '0')
+      const dd = String(d.getDate()).padStart(2, '0')
+      key = `${yyyy}-${mm}-${dd}`
+      label = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+    } else if (equityCurveTimeframe.value === 'monthly') {
+      const yyyy = d.getFullYear()
+      const mm = String(d.getMonth() + 1).padStart(2, '0')
+      key = `${yyyy}-${mm}`
+      label = d.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
+    } else if (equityCurveTimeframe.value === 'yearly') {
+      key = String(d.getFullYear())
+      label = String(d.getFullYear())
+    }
+
+    tradePoints.push({
+      key,
+      label,
+      balance: currentBalance
+    })
   })
 
-  const labels = Object.keys(dailyPnl)
-  const data = Object.values(dailyPnl).map((v) => Number(v.toFixed(2)))
+  // Group by key, taking the LAST balance for each period
+  const bucketMap: Record<string, { label: string; balance: number }> = {}
+  tradePoints.forEach((pt) => {
+    bucketMap[pt.key] = { label: pt.label, balance: pt.balance }
+  })
+
+  const sortedKeys = Object.keys(bucketMap).sort()
+  const labels: string[] = ['Start', ...sortedKeys.map((k) => bucketMap[k].label)]
+  const data: number[] = [
+    Number(initialBalance.toFixed(2)),
+    ...sortedKeys.map((k) => Number(bucketMap[k].balance.toFixed(2)))
+  ]
+
+  return {
+    labels: labels.length > 0 ? labels : ['No Data'],
+    datasets: [
+      {
+        label: `Balance ($) [${statMode.value.toUpperCase()} - ${isSimple ? 'SIMPLE' : 'LOG'}]`,
+        data: data.length > 0 ? data : [initialBalance],
+        borderColor: '#00a76f',
+        backgroundColor: 'rgba(0, 167, 111, 0.1)',
+        total:
+          '$' +
+          currentBalance.toLocaleString(undefined, {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+          })
+      }
+    ]
+  }
+})
+
+// Compute Net PnL (Directly from filteredTrades - Exact Same Dataset)
+const netPnlChartData = computed(() => {
+  const trades = filteredTrades.value
+  const buckets: Record<string, { label: string; pnl: number; count: number }> = {}
+
+  const isSimple = simulation.value.returnCalculation === 'simple'
+  const initialBalance = Number(simulation.value.initialBalance) || 10000
+  const riskPercent = (Number(simulation.value.riskPerTrade) || 1) / 100
+  const fixedRiskAmount = initialBalance * riskPercent
+
+  let runningBalance = initialBalance
+
+  trades.forEach((trade) => {
+    const rr = getTradeRr(trade, statMode.value)
+    const riskAmount = isSimple ? fixedRiskAmount : runningBalance * riskPercent
+    const pnl = riskAmount * rr
+    runningBalance += pnl
+
+    const d = new Date(trade.entryDatetime)
+    let key = ''
+    let label = ''
+
+    if (netPnlTimeframe.value === 'hourly') {
+      const yyyy = d.getFullYear()
+      const mm = String(d.getMonth() + 1).padStart(2, '0')
+      const dd = String(d.getDate()).padStart(2, '0')
+      const hh = String(d.getHours()).padStart(2, '0') + ':00'
+      key = `${yyyy}-${mm}-${dd} ${hh}`
+      label = `${dd}/${mm} ${hh}`
+    } else if (netPnlTimeframe.value === 'daily') {
+      const yyyy = d.getFullYear()
+      const mm = String(d.getMonth() + 1).padStart(2, '0')
+      const dd = String(d.getDate()).padStart(2, '0')
+      key = `${yyyy}-${mm}-${dd}`
+      label = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+    } else if (netPnlTimeframe.value === 'monthly') {
+      const yyyy = d.getFullYear()
+      const mm = String(d.getMonth() + 1).padStart(2, '0')
+      key = `${yyyy}-${mm}`
+      label = d.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
+    } else if (netPnlTimeframe.value === 'yearly') {
+      key = String(d.getFullYear())
+      label = String(d.getFullYear())
+    }
+
+    if (!buckets[key]) {
+      buckets[key] = { label, pnl: 0, count: 0 }
+    }
+    buckets[key].pnl += pnl
+    buckets[key].count++
+  })
+
+  const sortedKeys = Object.keys(buckets).sort()
+  const labels = sortedKeys.map((k) => buckets[k].label)
+  const data = sortedKeys.map((k) => Number(buckets[k].pnl.toFixed(2)))
   const totalNet = data.reduce((a, b) => a + b, 0)
+  const bgColors = data.map((v) => (v >= 0 ? '#00a76f' : '#ff5630'))
 
   return {
     labels: labels.length > 0 ? labels : ['No Data'],
@@ -1792,8 +2017,14 @@ const dailyPnlData = computed(() => {
       {
         label: `Net PnL [${statMode.value.toUpperCase()}]`,
         data: data.length > 0 ? data : [0],
+        backgroundColor: bgColors,
         color: '#ffab00',
-        total: (totalNet >= 0 ? '+$' : '-$') + Math.abs(totalNet).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+        total:
+          (totalNet >= 0 ? '+$' : '-$') +
+          Math.abs(totalNet).toLocaleString(undefined, {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+          })
       }
     ]
   }
@@ -1820,46 +2051,83 @@ const outcomeDistribution = computed(() => {
   }
 })
 
-// Session Performance Radar (Directly from filteredTrades - Exact Same Dataset)
-const sessionPerformance = computed(() => {
-  const trades = filteredTrades.value
-  const defaultSessions = ['London', 'New York', 'Asia']
-  const sessionStats: Record<string, { wins: number; total: number }> = {}
+// Helper to normalize session names
+const normalizeSessionName = (raw: string | null | undefined): string => {
+  if (!raw) return 'Unknown'
+  const trimmed = raw.trim()
+  const lower = trimmed.toLowerCase()
+  if (lower === 'asia' || lower === 'asian' || lower === 'tokyo') return 'Asia'
+  if (lower === 'london' || lower === 'london close') return 'London'
+  if (lower === 'new york' || lower === 'newyork' || lower === 'ny') return 'New York'
+  return trimmed
+}
 
-  defaultSessions.forEach((s) => {
-    sessionStats[s] = { wins: 0, total: 0 }
+// Multi-Dimensional Session Performance (Win Rate, Total Trades, Avg RR, Profit)
+const sessionMultiMetrics = computed(() => {
+  const trades = filteredTrades.value
+  // Order to match reference screenshot: Asia (top), New York (right), London (left)
+  const baseOrder = ['Asia', 'New York', 'London']
+  const stats: Record<
+    string,
+    {
+      wins: number
+      losses: number
+      be: number
+      total: number
+      sumRr: number
+      netPnl: number
+    }
+  > = {}
+
+  baseOrder.forEach((s) => {
+    stats[s] = { wins: 0, losses: 0, be: 0, total: 0, sumRr: 0, netPnl: 0 }
   })
+
+  const isSimple = simulation.value.returnCalculation === 'simple'
+  const initialBalance = Number(simulation.value.initialBalance) || 10000
+  const riskPercent = (Number(simulation.value.riskPerTrade) || 1) / 100
+  const fixedRiskAmount = initialBalance * riskPercent
+
+  let runningBalance = initialBalance
 
   trades.forEach((trade) => {
     const rr = getTradeRr(trade, statMode.value)
-    const rawSession = trade.sessionName || 'Unknown'
-    const matched = defaultSessions.find(
-      (s) => s.toLowerCase() === rawSession.toLowerCase()
-    ) || rawSession
+    const riskAmount = isSimple ? fixedRiskAmount : runningBalance * riskPercent
+    const pnl = riskAmount * rr
+    runningBalance += pnl
 
-    if (!sessionStats[matched]) sessionStats[matched] = { wins: 0, total: 0 }
+    const s = normalizeSessionName(trade.sessionName)
+    if (!stats[s]) {
+      stats[s] = { wins: 0, losses: 0, be: 0, total: 0, sumRr: 0, netPnl: 0 }
+    }
 
-    sessionStats[matched].total++
-    if (rr > 0) sessionStats[matched].wins++
+    stats[s].total++
+    stats[s].sumRr += rr
+    stats[s].netPnl += pnl
+    if (rr > 0) stats[s].wins++
+    else if (rr < 0) stats[s].losses++
+    else stats[s].be++
   })
 
-  const labels = Object.keys(sessionStats)
-  const data = labels.map((l) => {
-    const stat = sessionStats[l]
-    return stat.total > 0 ? Number(((stat.wins / stat.total) * 100).toFixed(1)) : 0
-  })
+  const extraSessions = Object.keys(stats).filter((s) => !baseOrder.includes(s) && s !== 'Unknown')
+  const labels = [...baseOrder, ...extraSessions]
+
+  const winRateData = labels.map((s) =>
+    stats[s].total > 0 ? Number(((stats[s].wins / stats[s].total) * 100).toFixed(1)) : 0
+  )
+  const totalTradesData = labels.map((s) => stats[s].total)
+  const avgRrData = labels.map((s) =>
+    stats[s].total > 0 ? Number((stats[s].sumRr / stats[s].total).toFixed(2)) : 0
+  )
+  const profitData = labels.map((s) => Number(stats[s].netPnl.toFixed(2)))
 
   return {
     labels,
-    datasets: [
-      {
-        label: `Win Rate % [${statMode.value.toUpperCase()}]`,
-        data,
-        backgroundColor: 'rgba(0, 184, 217, 0.2)',
-        borderColor: '#00b8d9',
-        pointBackgroundColor: '#00b8d9'
-      }
-    ]
+    stats,
+    winRateData,
+    totalTradesData,
+    avgRrData,
+    profitData
   }
 })
 
