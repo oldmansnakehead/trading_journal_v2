@@ -17,9 +17,9 @@ interface Props {
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  title: 'Current download',
-  subtitle: 'Downloaded by operating system',
-  total: '188,245',
+  title: '',
+  subtitle: '',
+  total: '0',
   chartData: () => ({
     labels: ['Mac', 'Window', 'iOS', 'Android'],
     data: [40, 25, 20, 15],
@@ -63,11 +63,11 @@ const options = {
 </script>
 
 <template>
-  <div class="bg-white rounded-2xl p-6 shadow-card h-[400px] flex flex-col min-w-[320px]">
-    <h6 class="text-lg font-bold text-textPrimary">{{ title }}</h6>
-    <p class="text-sm text-textSecondary mb-6">{{ subtitle }}</p>
+  <div class="h-full flex flex-col min-w-0">
+    <h6 v-if="title" class="text-lg font-bold text-textPrimary mb-1">{{ title }}</h6>
+    <p v-if="subtitle" class="text-sm text-textSecondary mb-6">{{ subtitle }}</p>
 
-    <div class="flex-1 relative flex items-center justify-center min-h-0">
+    <div class="flex-1 relative flex items-center justify-center min-h-[200px]">
       <Doughnut :data="data" :options="options" />
       <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
         <span class="text-sm text-textSecondary font-semibold">Total</span>

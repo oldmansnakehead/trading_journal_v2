@@ -65,7 +65,7 @@
           <button
             @click="statMode = 'normal'"
             :class="[
-              'px-4 py-2 rounded-lg transition-colors cursor-pointer',
+              'px-4 py-2 rounded-lg transition-colors cursor-pointer whitespace-nowrap',
               statMode === 'normal'
                 ? 'bg-gray-900 text-white shadow-sm'
                 : 'text-gray-500 hover:text-gray-900'
@@ -76,7 +76,7 @@
           <button
             @click="statMode = 'be'"
             :class="[
-              'px-4 py-2 rounded-lg transition-colors cursor-pointer',
+              'px-4 py-2 rounded-lg transition-colors cursor-pointer whitespace-nowrap',
               statMode === 'be'
                 ? 'bg-gray-900 text-white shadow-sm'
                 : 'text-gray-500 hover:text-gray-900'
@@ -87,7 +87,7 @@
           <button
             @click="statMode = 'trail'"
             :class="[
-              'px-4 py-2 rounded-lg transition-colors cursor-pointer',
+              'px-4 py-2 rounded-lg transition-colors cursor-pointer whitespace-nowrap',
               statMode === 'trail'
                 ? 'bg-gray-900 text-white shadow-sm'
                 : 'text-gray-500 hover:text-gray-900'
@@ -338,11 +338,11 @@
         <!-- GROSS PROFIT -->
         <div class="bg-white rounded-2xl p-5 border border-emerald-100 shadow-xs flex items-center justify-between relative overflow-hidden group hover:border-emerald-300 transition-all">
           <div class="relative z-10">
-            <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">GROSS PROFIT</p>
+            <p class="text-xs font-bold text-gray-400 uppercase tracking-wider whitespace-nowrap">GROSS PROFIT</p>
             <p class="text-2xl font-extrabold text-emerald-600 mt-1">
               +${{ kpis.grossProfit.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
             </p>
-            <p class="text-xs text-emerald-700/80 mt-1.5 font-medium flex items-center gap-1.5">
+            <p class="text-xs text-emerald-700/80 mt-1 font-medium flex items-center gap-1.5">
               <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
               กำไรรวมจากไม้ชนะ ({{ kpis.wins }} ไม้)
             </p>
@@ -355,11 +355,11 @@
         <!-- GROSS LOSS -->
         <div class="bg-white rounded-2xl p-5 border border-rose-100 shadow-xs flex items-center justify-between relative overflow-hidden group hover:border-rose-300 transition-all">
           <div class="relative z-10">
-            <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">GROSS LOSS</p>
+            <p class="text-xs font-bold text-gray-400 uppercase tracking-wider whitespace-nowrap">GROSS LOSS</p>
             <p class="text-2xl font-extrabold text-rose-600 mt-1">
               -${{ kpis.grossLoss.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
             </p>
-            <p class="text-xs text-rose-700/80 mt-1.5 font-medium flex items-center gap-1.5">
+            <p class="text-xs text-rose-700/80 mt-1 font-medium flex items-center gap-1.5">
               <span class="w-2 h-2 rounded-full bg-rose-500"></span>
               ขาดทุนรวมจากไม้แพ้ ({{ kpis.losses }} ไม้)
             </p>
@@ -375,22 +375,22 @@
           :class="kpis.netPnl >= 0 ? 'border-emerald-200 bg-emerald-50/20 hover:border-emerald-300' : 'border-rose-200 bg-rose-50/20 hover:border-rose-300'"
         >
           <div class="relative z-10">
-            <div class="flex items-center gap-2">
-              <p class="text-xs font-bold text-gray-500 uppercase tracking-wider">NET PNL</p>
+            <div class="flex flex-wrap items-center gap-1.5 mb-1">
+              <p class="text-xs font-bold text-gray-500 uppercase tracking-wider whitespace-nowrap">NET PNL</p>
               <span
-                class="text-[10px] font-bold px-2 py-0.5 rounded-full"
+                class="text-[10px] font-bold px-2 py-0.5 rounded-full whitespace-nowrap shrink-0"
                 :class="kpis.netPnl >= 0 ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'"
               >
                 Profit - Loss
               </span>
             </div>
             <p
-              class="text-2xl font-extrabold mt-1"
+              class="text-2xl font-extrabold"
               :class="kpis.netPnl >= 0 ? 'text-emerald-600' : 'text-rose-600'"
             >
               {{ kpis.netPnl >= 0 ? '+' : '-' }}${{ Math.abs(kpis.netPnl).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
             </p>
-            <p class="text-xs text-gray-500 mt-1.5 font-medium truncate">
+            <p class="text-xs text-gray-500 mt-1 font-medium truncate">
               ${{ kpis.grossProfit.toFixed(2) }} - ${{ kpis.grossLoss.toFixed(2) }}
             </p>
           </div>
@@ -405,16 +405,16 @@
         <!-- FINAL BALANCE -->
         <div class="bg-white rounded-2xl p-5 border border-indigo-100 shadow-xs flex items-center justify-between relative overflow-hidden group hover:border-indigo-300 transition-all">
           <div class="relative z-10">
-            <div class="flex items-center gap-2">
-              <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">FINAL BALANCE</p>
-              <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">
+            <div class="flex flex-wrap items-center gap-1.5 mb-1">
+              <p class="text-xs font-bold text-gray-400 uppercase tracking-wider whitespace-nowrap">FINAL BALANCE</p>
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200 whitespace-nowrap shrink-0">
                 Capital + Net PnL
               </span>
             </div>
-            <p class="text-2xl font-extrabold text-indigo-600 mt-1">
+            <p class="text-2xl font-extrabold text-indigo-600">
               ${{ kpis.finalBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
             </p>
-            <p class="text-xs text-indigo-700/80 mt-1.5 font-medium flex items-center gap-1.5 truncate">
+            <p class="text-xs text-indigo-700/80 mt-1 font-medium flex items-center gap-1.5 truncate">
               <span class="w-2 h-2 rounded-full bg-indigo-500"></span>
               ทุน ${{ (Number(simulation.initialBalance) || 10000).toLocaleString() }} {{ kpis.netPnl >= 0 ? '+' : '-' }} ${{ Math.abs(kpis.netPnl).toFixed(2) }}
             </p>
@@ -430,19 +430,19 @@
         <!-- PROFIT FACTOR -->
         <div class="bg-white rounded-2xl p-5 border border-amber-100 shadow-xs flex items-center justify-between relative overflow-hidden group hover:border-amber-300 transition-all">
           <div class="relative z-10">
-            <div class="flex items-center gap-2">
-              <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">PROFIT FACTOR</p>
+            <div class="flex flex-wrap items-center gap-1.5 mb-1">
+              <p class="text-xs font-bold text-gray-400 uppercase tracking-wider whitespace-nowrap">PROFIT FACTOR</p>
               <span
-                class="text-[10px] font-bold px-2 py-0.5 rounded-full"
+                class="text-[10px] font-bold px-2 py-0.5 rounded-full whitespace-nowrap shrink-0"
                 :class="kpis.profitFactor >= 1.0 ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' : 'bg-amber-100 text-amber-800 border border-amber-200'"
               >
                 {{ kpis.profitFactor >= 1.0 ? '≥ 1.0 ทำกำไรได้' : '< 1.0 ยังไม่คุ้มทุน' }}
               </span>
             </div>
-            <p class="text-2xl font-extrabold text-amber-600 mt-1">
+            <p class="text-2xl font-extrabold text-amber-600">
               {{ kpis.grossLoss === 0 && kpis.grossProfit > 0 ? '∞ (MAX)' : kpis.profitFactor.toFixed(2) }}
             </p>
-            <p class="text-xs text-gray-500 mt-1.5 font-medium">
+            <p class="text-xs text-gray-500 mt-1 font-medium">
               ได้กำไร {{ kpis.grossLoss === 0 && kpis.grossProfit > 0 ? '∞' : kpis.profitFactor.toFixed(2) }} เท่าของที่เสียไป (Profit / Loss)
             </p>
           </div>
@@ -454,11 +454,11 @@
         <!-- AVG WIN $ -->
         <div class="bg-white rounded-2xl p-5 border border-emerald-100 shadow-xs flex items-center justify-between relative overflow-hidden group hover:border-emerald-300 transition-all">
           <div class="relative z-10">
-            <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">AVG WIN $</p>
+            <p class="text-xs font-bold text-gray-400 uppercase tracking-wider whitespace-nowrap">AVG WIN $</p>
             <p class="text-2xl font-extrabold text-emerald-600 mt-1">
               +${{ kpis.avgWin.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
             </p>
-            <p class="text-xs text-emerald-700/80 mt-1.5 font-medium flex items-center gap-1.5">
+            <p class="text-xs text-emerald-700/80 mt-1 font-medium flex items-center gap-1.5">
               <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
               กำไรเฉลี่ยต่อไม้ชนะ (Profit / {{ kpis.wins }} Wins)
             </p>
@@ -471,11 +471,11 @@
         <!-- AVG LOSS $ -->
         <div class="bg-white rounded-2xl p-5 border border-rose-100 shadow-xs flex items-center justify-between relative overflow-hidden group hover:border-rose-300 transition-all">
           <div class="relative z-10">
-            <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">AVG LOSS $</p>
+            <p class="text-xs font-bold text-gray-400 uppercase tracking-wider whitespace-nowrap">AVG LOSS $</p>
             <p class="text-2xl font-extrabold text-rose-600 mt-1">
               -${{ kpis.avgLoss.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
             </p>
-            <p class="text-xs text-rose-700/80 mt-1.5 font-medium flex items-center gap-1.5">
+            <p class="text-xs text-rose-700/80 mt-1 font-medium flex items-center gap-1.5">
               <span class="w-2 h-2 rounded-full bg-rose-500"></span>
               ขาดทุนเฉลี่ยต่อไม้แพ้ (Loss / {{ kpis.losses }} Losses)
             </p>
@@ -518,22 +518,22 @@
         <!-- TOTAL RR -->
         <div class="bg-white rounded-2xl p-5 border border-indigo-100 shadow-xs flex items-center justify-between relative overflow-hidden group hover:border-indigo-300 transition-all">
           <div class="relative z-10">
-            <div class="flex items-center gap-2">
-              <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">TOTAL RR</p>
+            <div class="flex flex-wrap items-center gap-1.5 mb-1">
+              <p class="text-xs font-bold text-gray-400 uppercase tracking-wider whitespace-nowrap">TOTAL RR</p>
               <span
-                class="text-[10px] font-bold px-2 py-0.5 rounded-full"
+                class="text-[10px] font-bold px-2 py-0.5 rounded-full whitespace-nowrap shrink-0"
                 :class="kpis.totalRr >= 0 ? 'bg-indigo-50 text-indigo-700 border border-indigo-200' : 'bg-rose-50 text-rose-700 border border-rose-200'"
               >
                 {{ kpis.totalRr >= 0 ? 'Net Positive' : 'Net Negative' }}
               </span>
             </div>
             <p
-              class="text-2xl font-extrabold mt-1"
+              class="text-2xl font-extrabold"
               :class="kpis.totalRr >= 0 ? 'text-indigo-600' : 'text-rose-600'"
             >
               {{ kpis.totalRr >= 0 ? '+' : '' }}{{ kpis.totalRr }}R
             </p>
-            <p class="text-xs text-gray-500 mt-1.5 font-medium">
+            <p class="text-xs text-gray-500 mt-1 font-medium">
               ผลรวมของ RR สุทธิทั้งหมดในพอร์ต
             </p>
           </div>
@@ -545,16 +545,16 @@
         <!-- AVG RR -->
         <div class="bg-white rounded-2xl p-5 border border-emerald-100 shadow-xs flex items-center justify-between relative overflow-hidden group hover:border-emerald-300 transition-all">
           <div class="relative z-10">
-            <div class="flex items-center gap-2">
-              <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">AVG RR</p>
-              <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+            <div class="flex flex-wrap items-center gap-1.5 mb-1">
+              <p class="text-xs font-bold text-gray-400 uppercase tracking-wider whitespace-nowrap">AVG RR</p>
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 whitespace-nowrap shrink-0">
                 1 : {{ kpis.avgWinLossRr }}
               </span>
             </div>
-            <p class="text-2xl font-extrabold text-emerald-600 mt-1">
+            <p class="text-2xl font-extrabold text-emerald-600">
               {{ kpis.avgWinLossRr }}R
             </p>
-            <p class="text-xs text-gray-500 mt-1.5 font-medium truncate">
+            <p class="text-xs text-gray-500 mt-1 font-medium truncate">
               กำไร ~{{ kpis.avgWinLossRr }} เท่าของความเสี่ยง (AVG WIN / AVG LOSS)
             </p>
           </div>
@@ -566,16 +566,16 @@
         <!-- MAX RR -->
         <div class="bg-white rounded-2xl p-5 border border-purple-100 shadow-xs flex items-center justify-between relative overflow-hidden group hover:border-purple-300 transition-all">
           <div class="relative z-10">
-            <div class="flex items-center gap-2">
-              <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">MAX RR</p>
-              <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-purple-50 text-purple-700 border border-purple-200">
+            <div class="flex flex-wrap items-center gap-1.5 mb-1">
+              <p class="text-xs font-bold text-gray-400 uppercase tracking-wider whitespace-nowrap">MAX RR</p>
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-purple-50 text-purple-700 border border-purple-200 whitespace-nowrap shrink-0">
                 Peak Single Trade
               </span>
             </div>
-            <p class="text-2xl font-extrabold text-purple-600 mt-1">
+            <p class="text-2xl font-extrabold text-purple-600">
               +{{ kpis.maxRr }}R
             </p>
-            <p class="text-xs text-purple-700/80 mt-1.5 font-medium truncate">
+            <p class="text-xs text-purple-700/80 mt-1 font-medium truncate">
               ออเดอร์ที่รีดกำไรได้สูงสุดแบบสุดขั้วในไม้เดียว
             </p>
           </div>
@@ -587,16 +587,16 @@
         <!-- AVG MAX RR -->
         <div class="bg-white rounded-2xl p-5 border border-amber-100 shadow-xs flex items-center justify-between relative overflow-hidden group hover:border-amber-300 transition-all">
           <div class="relative z-10">
-            <div class="flex items-center gap-2">
-              <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">AVG MAX RR</p>
-              <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200">
+            <div class="flex flex-wrap items-center gap-1.5 mb-1">
+              <p class="text-xs font-bold text-gray-400 uppercase tracking-wider whitespace-nowrap">AVG MAX RR</p>
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200 whitespace-nowrap shrink-0">
                 Potential MFE
               </span>
             </div>
-            <p class="text-2xl font-extrabold text-amber-600 mt-1">
+            <p class="text-2xl font-extrabold text-amber-600">
               {{ kpis.avgMaxRr }}R
             </p>
-            <p class="text-xs text-amber-700/80 mt-1.5 font-medium truncate">
+            <p class="text-xs text-amber-700/80 mt-1 font-medium truncate">
               ค่าเฉลี่ย RR สูงสุดที่ระบบไปถึงก่อนโดนปิดออเดอร์
             </p>
           </div>
@@ -638,16 +638,16 @@
         <!-- CONSEC. WINS -->
         <div class="bg-white rounded-2xl p-5 border border-emerald-100 shadow-xs flex items-center justify-between relative overflow-hidden group hover:border-emerald-300 transition-all">
           <div class="relative z-10">
-            <div class="flex items-center gap-2">
-              <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">CONSEC. WINS</p>
-              <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+            <div class="flex flex-wrap items-center gap-1.5 mb-1">
+              <p class="text-xs font-bold text-gray-400 uppercase tracking-wider whitespace-nowrap">CONSEC. WINS</p>
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 whitespace-nowrap shrink-0">
                 Winning Streak
               </span>
             </div>
-            <p class="text-2xl font-extrabold text-emerald-600 mt-1">
+            <p class="text-2xl font-extrabold text-emerald-600">
               {{ kpis.consecWins }} ไม้
             </p>
-            <p class="text-xs text-emerald-700/80 mt-1.5 font-medium">
+            <p class="text-xs text-emerald-700/80 mt-1 font-medium">
               จำนวนครั้งที่เทรดชนะติดต่อกันมากที่สุด
             </p>
           </div>
@@ -659,16 +659,16 @@
         <!-- CONSEC. LOSSES -->
         <div class="bg-white rounded-2xl p-5 border border-rose-100 shadow-xs flex items-center justify-between relative overflow-hidden group hover:border-rose-300 transition-all">
           <div class="relative z-10">
-            <div class="flex items-center gap-2">
-              <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">CONSEC. LOSSES</p>
-              <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-100 text-rose-800 border border-rose-200">
+            <div class="flex flex-wrap items-center gap-1.5 mb-1">
+              <p class="text-xs font-bold text-gray-400 uppercase tracking-wider whitespace-nowrap">CONSEC. LOSSES</p>
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-100 text-rose-800 border border-rose-200 whitespace-nowrap shrink-0">
                 Losing Streak
               </span>
             </div>
-            <p class="text-2xl font-extrabold text-rose-600 mt-1">
+            <p class="text-2xl font-extrabold text-rose-600">
               {{ kpis.consecLosses }} ไม้
             </p>
-            <p class="text-xs text-rose-700/80 mt-1.5 font-medium">
+            <p class="text-xs text-rose-700/80 mt-1 font-medium">
               จำนวนครั้งที่เทรดแพ้ติดต่อกันมากที่สุด (จุดอ่อนความเสี่ยง)
             </p>
           </div>
@@ -680,16 +680,16 @@
         <!-- MAX DRAWDOWN -->
         <div class="bg-white rounded-2xl p-5 border border-rose-100 shadow-xs flex items-center justify-between relative overflow-hidden group hover:border-rose-300 transition-all">
           <div class="relative z-10">
-            <div class="flex items-center gap-2">
-              <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">MAX DRAWDOWN</p>
-              <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-100 text-rose-800 border border-rose-200">
+            <div class="flex flex-wrap items-center gap-1.5 mb-1">
+              <p class="text-xs font-bold text-gray-400 uppercase tracking-wider whitespace-nowrap">MAX DRAWDOWN</p>
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-100 text-rose-800 border border-rose-200 whitespace-nowrap shrink-0">
                 Peak to Trough
               </span>
             </div>
-            <p class="text-2xl font-extrabold text-rose-600 mt-1">
+            <p class="text-2xl font-extrabold text-rose-600">
               -{{ kpis.maxDrawdown }}%
             </p>
-            <p class="text-xs text-rose-700/80 mt-1.5 font-medium">
+            <p class="text-xs text-rose-700/80 mt-1 font-medium">
               เปอร์เซ็นต์พอร์ตยุบตัวลึกที่สุดจากจุดสูงสุด
             </p>
           </div>
@@ -747,8 +747,6 @@
         </div>
 
         <CurrentDownloadChart
-          title="Win/Loss Ratio"
-          subtitle="Based on selected RR mode"
           :total="outcomeDistribution.data.reduce((a, b) => a + b, 0)"
           :chartData="outcomeDistribution"
         />
@@ -1134,8 +1132,12 @@ const captureDashboard = async () => {
 
   try {
     const element = dashboardRef.value
+    // Wait for all fonts (including icon fonts) to be ready
+    if (document.fonts) {
+      await document.fonts.ready
+    }
     // Short delay to let any UI animations settle
-    await new Promise((resolve) => setTimeout(resolve, 150))
+    await new Promise((resolve) => setTimeout(resolve, 200))
 
     const width = element.scrollWidth
     const height = element.scrollHeight
