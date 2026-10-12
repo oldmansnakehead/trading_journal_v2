@@ -99,6 +99,9 @@ test('fill trade and save', async () => {
     await expect(window.locator('[data-testid="base-pagination"]')).toBeVisible({ timeout: 5000 })
     await expect(window.locator('[data-testid="pagination-page-size-select"]')).toBeVisible({ timeout: 5000 })
 
+    // Verify Export Excel button is visible and active on Dashboard
+    await expect(window.locator('.export-excel-btn').first()).toBeVisible({ timeout: 5000 })
+
     await window.screenshot({ path: 'e2e/screenshots/dashboard-verified.png' })
   })
 })

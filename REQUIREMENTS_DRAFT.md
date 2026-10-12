@@ -255,6 +255,22 @@ src/
 - **Performance by Time:** กราฟแท่งกระจายตามช่วงเวลาของวัน
 - **Calendar (ปฏิทินการเทรด):** ปฏิทินแสดงสรุปข้อมูลรายวัน ว่าในวันนั้นๆ ได้กำไรเท่าไหร่ หรือเสียเท่าไหร่ เพื่อดูความต่อเนื่องของการเทรด
 
+### 13.4. การส่งออกข้อมูล (Data Export - Excel, AI Markdown, JSON & Image)
+
+- **Export to Excel (.xlsx) และ CSV (.csv):**
+  - มีปุ่ม Export Data ในส่วน Header Actions ด้านบน และส่วนหัวตาราง Recent Trades
+  - รองรับการ Export เป็นไฟล์ `.xlsx` (OpenXML ECMA-376) 2 แผ่นงาน:
+    1. `Trades`: รายการเทรดละเอียด (ID, Date, Setup, Symbol, Position, Session, RR, PnL, Quality, Notes)
+    2. `KPI Summary`: สรุปตัวชี้วัด (Total Trades, Win Rate, Profit Factor, Net PnL, Gross Profit, Gross Loss, Drawdown)
+  - รองรับการ Export เป็น `.csv` พร้อม UTF-8 Byte Order Mark (`\uFEFF`) เพื่อให้อ่านภาษาไทยบน Windows Excel ได้ถูกต้องสมบูรณ์
+  - รองรับการ Export เฉพาะรายการที่ถูกเลือก (Export Selected) ในตาราง หรือทั้งหมดตามตัวกรอง
+  - สร้างไฟล์ OpenXML ZIP ด้วยแพ็กเกจ `archiver` ที่มีอยู่เดิมในโปรเจกต์โดยไม่เพิ่ม third-party library ตามเงื่อนไข Prohibitions
+- **Export for AI Analysis (Markdown & 1-Click Copy & JSON):**
+  - **AI-Ready Markdown (`.md`):** ส่งออกรายงานประสิทธิภาพที่มีโครงสร้างพร้อมสำหรับการวิเคราะห์ของโมเดล AI (LLMs) ประกอบด้วย System Prompt Instructions สำหรับ AI Trading Coach, ตาราง KPIs Summary, ตารางวิเคราะห์ Sub-segment (Setup, Session, Buy/Sell), และตาราง Trade Log ละเอียด
+  - **1-Click Copy AI Prompt:** ปุ่มลัดคัดลอก Prompt และข้อมูลสรุปทั้งหมดลง Clipboard ทันที เพื่อนำไป Paste ใน ChatGPT, Claude, หรือ Gemini ได้ในคลิกเดียว
+  - **Machine-Readable JSON (`.json`):** ส่งออกข้อมูลแบบมีโครงสร้างระบุ schemaVersion สำหรับเชื่อมต่อกับระบบอัตโนมัติหรือ AI Agents
+- **Export Image:** จับภาพหน้าจอแดชบอร์ดความละเอียดสูงเป็น PNG (ตัดปุ่มที่กำกับด้วย class `export-exclude` ออกจากภาพโดยอัตโนมัติ)
+
 ---
 
 ## 14. ระบบจำลอง Monte Carlo Simulation

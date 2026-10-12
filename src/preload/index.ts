@@ -33,7 +33,29 @@ const api = {
     kpi: (mode: string) => ipcRenderer.invoke('journal:kpi', mode),
     create: (data: any) => ipcRenderer.invoke('journal:create', data),
     delete: (id: number) => ipcRenderer.invoke('journal:delete', id),
-    deleteMany: (ids: number[]) => ipcRenderer.invoke('journal:deleteMany', ids)
+    deleteMany: (ids: number[]) => ipcRenderer.invoke('journal:deleteMany', ids),
+    exportExcel: (data: {
+      trades: any[]
+      kpis?: any
+      statMode?: string
+      filters?: any
+      defaultName?: string
+    }) => ipcRenderer.invoke('journal:exportExcel', data),
+    exportAi: (data: {
+      trades: any[]
+      kpis?: any
+      statMode?: string
+      filters?: any
+      format?: 'md' | 'json'
+      defaultName?: string
+    }) => ipcRenderer.invoke('journal:exportAi', data),
+    generateAiReport: (data: {
+      trades: any[]
+      kpis?: any
+      statMode?: string
+      filters?: any
+      format?: 'md' | 'json'
+    }) => ipcRenderer.invoke('journal:generateAiReport', data)
   },
   customColumns: {
     list: (setupId: number) => ipcRenderer.invoke('customColumns:list', setupId),

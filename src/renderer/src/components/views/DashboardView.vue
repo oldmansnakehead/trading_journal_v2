@@ -9,6 +9,17 @@
 
       <!-- Header Actions -->
       <div class="flex flex-wrap items-center gap-3">
+        <!-- Export Data Button (Excel / AI Markdown / JSON) -->
+        <ExportExcelButton
+          :trades="filteredTrades"
+          :kpis="kpis"
+          :stat-mode="statMode"
+          :filters="filters"
+          label="Export Data"
+          default-name="trading_journal_dashboard"
+          class="export-exclude"
+        />
+
         <!-- Export Image Button -->
         <button
           @click="captureDashboard"
@@ -972,54 +983,68 @@
           <p class="text-sm text-gray-500">List of trades matching current filters</p>
         </div>
 
-        <!-- Multiple Delete Batch Actions -->
-        <Transition name="fade">
-          <div
-            v-if="selectedTradeIds.length > 0"
-            class="flex flex-wrap items-center gap-3 bg-red-50 text-red-700 px-4 py-2 rounded-xl border border-red-100"
-          >
-            <span class="text-sm font-bold flex items-center gap-2">
-              <span class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
-              {{ selectedTradeIds.length }} {{ selectedTradeIds.length === 1 ? 'trade' : 'trades' }} selected
-            </span>
-            <button
-              v-if="!isAllFilteredSelected && filteredTrades.length > paginatedTrades.length"
-              @click="selectAllFilteredTrades"
-              class="text-xs font-semibold text-red-700 underline hover:text-red-900 transition-colors cursor-pointer"
+        <div class="flex flex-wrap items-center gap-3">
+          <!-- Export Trades Button -->
+          <ExportExcelButton
+            :trades="selectedTradeIds.length > 0 ? selectedTrades : filteredTrades"
+            :kpis="kpis"
+            :stat-mode="statMode"
+            :filters="filters"
+            variant="outline"
+            :label="selectedTradeIds.length > 0 ? `Export Selected (${selectedTradeIds.length})` : 'Export Trades'"
+            default-name="trading_journal_trades"
+            class="export-exclude"
+          />
+
+          <!-- Multiple Delete Batch Actions -->
+          <Transition name="fade">
+            <div
+              v-if="selectedTradeIds.length > 0"
+              class="flex flex-wrap items-center gap-3 bg-red-50 text-red-700 px-4 py-2 rounded-xl border border-red-100"
             >
-              Select all {{ filteredTrades.length }} matching trades
-            </button>
-            <button
-              @click="openDeleteBatchModal"
-              class="bg-red-600 hover:bg-red-700 text-white px-3.5 py-1.5 rounded-lg text-xs font-bold transition-colors flex items-center gap-1.5 shadow-sm cursor-pointer"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="14"
-                height="14"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
+              <span class="text-sm font-bold flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
+                {{ selectedTradeIds.length }} {{ selectedTradeIds.length === 1 ? 'trade' : 'trades' }} selected
+              </span>
+              <button
+                v-if="!isAllFilteredSelected && filteredTrades.length > paginatedTrades.length"
+                @click="selectAllFilteredTrades"
+                class="text-xs font-semibold text-red-700 underline hover:text-red-900 transition-colors cursor-pointer"
               >
-                <path d="M3 6h18" />
-                <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
-                <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
-                <line x1="10" y1="11" x2="10" y2="17" />
-                <line x1="14" y1="11" x2="14" y2="17" />
-              </svg>
-              Delete Selected
-            </button>
-            <button
-              @click="selectedTradeIds = []"
-              class="text-xs font-semibold text-gray-500 hover:text-gray-800 transition-colors px-2 py-1 cursor-pointer"
-            >
-              Cancel
-            </button>
-          </div>
-        </Transition>
+                Select all {{ filteredTrades.length }} matching trades
+              </button>
+              <button
+                @click="openDeleteBatchModal"
+                class="bg-red-600 hover:bg-red-700 text-white px-3.5 py-1.5 rounded-lg text-xs font-bold transition-colors flex items-center gap-1.5 shadow-sm cursor-pointer"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M3 6h18" />
+                  <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+                  <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+                  <line x1="10" y1="11" x2="10" y2="17" />
+                  <line x1="14" y1="11" x2="14" y2="17" />
+                </svg>
+                Delete Selected
+              </button>
+              <button
+                @click="selectedTradeIds = []"
+                class="text-xs font-semibold text-gray-500 hover:text-gray-800 transition-colors px-2 py-1 cursor-pointer"
+              >
+                Cancel
+              </button>
+            </div>
+          </Transition>
+        </div>
       </div>
 
       <div class="overflow-x-auto">
@@ -1293,6 +1318,7 @@ import TradeFiltersBar from '../ui/TradeFiltersBar.vue'
 import InfoTooltip from '../ui/InfoTooltip.vue'
 import CalendarView from '../ui/CalendarView.vue'
 import BasePagination from '../ui/BasePagination.vue'
+import ExportExcelButton from '../ui/ExportExcelButton.vue'
 import { calculateTradeDuration } from '../../utils/duration'
 import { filterTrades } from '../../utils/tradeFilters'
 import {
@@ -1373,6 +1399,12 @@ const selectedTradeId = ref<number | null>(null)
 
 // Multiple Selection State
 const selectedTradeIds = ref<number[]>([])
+
+const selectedTrades = computed(() => {
+  if (selectedTradeIds.value.length === 0) return []
+  const idSet = new Set(selectedTradeIds.value)
+  return allTrades.value.filter((t) => idSet.has(t.id))
+})
 
 // Check if all trades on CURRENT page are selected
 const isPageSelected = computed(() => {

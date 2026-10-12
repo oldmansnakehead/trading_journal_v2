@@ -121,7 +121,7 @@
                   "workerIndex": 0,
                   "parallelIndex": 0,
                   "status": "passed",
-                  "duration": 1914,
+                  "duration": 3401,
                   "errors": [],
                   "stdout": [],
                   "stderr": [],
@@ -129,26 +129,26 @@
                   "steps": [
                     {
                       "title": "Launch Electron app and get main window",
-                      "duration": 163
+                      "duration": 180
                     },
                     {
                       "title": "Wait for application root to mount",
-                      "duration": 596
+                      "duration": 167
                     },
                     {
                       "title": "Verify navigation elements are accessible at default width 900px",
-                      "duration": 47
+                      "duration": 2011
                     },
                     {
                       "title": "Verify responsive navigation when window is narrowed",
-                      "duration": 911
+                      "duration": 826
                     },
                     {
                       "title": "Capture main window screenshot",
-                      "duration": 195
+                      "duration": 212
                     }
                   ],
-                  "startTime": "2026-10-12T14:38:43.867Z",
+                  "startTime": "2026-10-12T16:46:09.838Z",
                   "annotations": [],
                   "attachments": []
                 }
@@ -185,7 +185,7 @@
                   "workerIndex": 0,
                   "parallelIndex": 0,
                   "status": "passed",
-                  "duration": 2373,
+                  "duration": 3945,
                   "errors": [],
                   "stdout": [],
                   "stderr": [],
@@ -193,38 +193,38 @@
                   "steps": [
                     {
                       "title": "Wait for application ready at 900px default width",
-                      "duration": 528
-                    },
-                    {
-                      "title": "Navigate to Settings via sidebar UI",
-                      "duration": 246
-                    },
-                    {
-                      "title": "Create a new Trading Setup",
-                      "duration": 420
-                    },
-                    {
-                      "title": "Create a new Trading Symbol",
-                      "duration": 184
-                    },
-                    {
-                      "title": "Navigate to New Trade via sidebar UI",
-                      "duration": 96
-                    },
-                    {
-                      "title": "Fill trade details with created Setup, Symbol, Date, and RR values",
-                      "duration": 374
-                    },
-                    {
-                      "title": "Save trade entry and verify success notification",
                       "duration": 126
                     },
                     {
+                      "title": "Navigate to Settings via sidebar UI",
+                      "duration": 2230
+                    },
+                    {
+                      "title": "Create a new Trading Setup",
+                      "duration": 390
+                    },
+                    {
+                      "title": "Create a new Trading Symbol",
+                      "duration": 188
+                    },
+                    {
+                      "title": "Navigate to New Trade via sidebar UI",
+                      "duration": 91
+                    },
+                    {
+                      "title": "Fill trade details with created Setup, Symbol, Date, and RR values",
+                      "duration": 361
+                    },
+                    {
+                      "title": "Save trade entry and verify success notification",
+                      "duration": 120
+                    },
+                    {
                       "title": "Verify saved trade data in Dashboard UI",
-                      "duration": 395
+                      "duration": 437
                     }
                   ],
-                  "startTime": "2026-10-12T14:38:46.503Z",
+                  "startTime": "2026-10-12T16:46:15.903Z",
                   "annotations": [],
                   "attachments": []
                 }
@@ -242,8 +242,8 @@
   ],
   "errors": [],
   "stats": {
-    "startTime": "2026-10-12T14:38:43.357Z",
-    "duration": 6427.728,
+    "startTime": "2026-10-12T16:46:09.442Z",
+    "duration": 13178.083999999999,
     "expected": 2,
     "skipped": 0,
     "unexpected": 0,

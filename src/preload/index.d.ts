@@ -37,6 +37,45 @@ declare global {
         create: (data: any) => Promise<any>
         delete: (id: number) => Promise<any>
         deleteMany: (ids: number[]) => Promise<any>
+        exportExcel: (data: {
+          trades: any[]
+          kpis?: any
+          statMode?: string
+          filters?: any
+          defaultName?: string
+        }) => Promise<{
+          success: boolean
+          canceled?: boolean
+          format?: 'xlsx' | 'csv'
+          filePath?: string
+          error?: string
+        }>
+        exportAi: (data: {
+          trades: any[]
+          kpis?: any
+          statMode?: string
+          filters?: any
+          format?: 'md' | 'json'
+          defaultName?: string
+        }) => Promise<{
+          success: boolean
+          canceled?: boolean
+          format?: 'md' | 'json'
+          filePath?: string
+          error?: string
+        }>
+        generateAiReport: (data: {
+          trades: any[]
+          kpis?: any
+          statMode?: string
+          filters?: any
+          format?: 'md' | 'json'
+        }) => Promise<{
+          success: boolean
+          content?: string
+          format?: 'md' | 'json'
+          error?: string
+        }>
       }
       customColumns: {
         list: (setupId: number) => Promise<any>

@@ -1,7 +1,14 @@
-import { ipcMain } from 'electron'
+import { ipcMain, BrowserWindow } from 'electron'
 import { getDb } from '../db/client'
 import { journalEntries, symbols, setups } from '../db/schema'
 import { eq, sql, desc, inArray } from 'drizzle-orm'
+import { exportTradesToExcel } from '../services/excelExport'
+import {
+  exportAiReportToFile,
+  generateAiMarkdownReport,
+  generateAiJsonReport,
+  AiExportPayload
+} from '../services/aiExport'
 
 export const registerJournalHandlers = () => {
   ipcMain.handle('journal:get', async (_, id: number) => {
@@ -157,4 +164,46 @@ export const registerJournalHandlers = () => {
       return { success: false, error: error.message }
     }
   })
+
+  // Export filtered trades and KPIs to Excel / CSV
+  ipcMain.handle(
+    'journal:exportExcel',
+    async (
+      event,
+      payload: {
+        trades: any[]
+        kpis?: any
+        statMode?: string
+        filters?: any
+        defaultName?: string
+      }
+    ) => {
+      const window = BrowserWindow.fromWebContents(event.sender)
+      if (!window) return { success: false, error: 'No active window found' }
+      return await exportTradesToExcel(window, payload)
+    }
+  )
+
+  // Export filtered trades and KPIs to AI Markdown / JSON
+  ipcMain.handle('journal:exportAi', async (event, payload: AiExportPayload) => {
+    const window = BrowserWindow.fromWebContents(event.sender)
+    if (!window) return { success: false, error: 'No active window found' }
+    return await exportAiReportToFile(window, payload)
+  })
+
+  // Generate AI Markdown or JSON report content string (e.g. for Copy to Clipboard)
+  ipcMain.handle(
+    'journal:generateAiReport',
+    async (_, payload: AiExportPayload & { format?: 'md' | 'json' }) => {
+      try {
+        const isJson = payload.format === 'json'
+        const content = isJson
+          ? generateAiJsonReport(payload)
+          : generateAiMarkdownReport(payload)
+        return { success: true, content, format: isJson ? 'json' : 'md' }
+      } catch (error: any) {
+        return { success: false, error: error?.message || 'Failed to generate AI report' }
+      }
+    }
+  )
 }
