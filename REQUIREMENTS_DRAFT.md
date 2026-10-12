@@ -277,3 +277,39 @@ src/
 - Max Consecutive Losses Distribution Bar Chart
 - Detailed Percentile Statistics Table (P5, P25, P50, P75, P95)
 
+---
+
+## 15. ระบบวิเคราะห์ Edge (Edge Analysis)
+
+หน้าวิเคราะห์ความได้เปรียบทางสถิติของระบบเทรด แยกเป็นหน้า `/edge`:
+
+### 15.1. Performance by Setup (เปรียบเทียบโมเดล Setup แบบ Multi-Cohort)
+- **ระบบเพิ่มตัวกรองเปรียบเทียบ Setup ได้ไม่จำกัด:** มีปุ่ม `+ เพิ่ม Setup เปรียบเทียบ` เพื่อให้ผู้ใช้เลือกเพิ่ม Setup ที่ต้องการเปรียบเทียบได้ตามต้องการ (เช่น เพิ่ม 2 ตัวเพื่อเทียบ 2 Setup หรือเพิ่ม 3, 4 Setup ได้ไม่จำกัด)
+- แต่ละ Setup Filter Card สามารถกำหนดเงื่อนไขเฉพาะของตัวเองได้อย่างอิสระ: Setup Name, Symbol, Session, Date Range, Paper Trades Toggle, และ Custom Columns เฉพาะของ Setup นั้น
+- **Head-to-Head Hero Card:** เมื่อเลือกเปรียบเทียบ 2 Setup (เช่น HA Model vs SMC Classic) ระบบจะแสดงการเปรียบเทียบตัวต่อตัวพร้อมสรุปผลต่าง (Delta): Expectancy Diff, Win Rate Diff, Profit Factor Diff, Net R Diff, และระบุ Setup ที่มี Edge สูงกว่า
+- **ตัวชี้วัดหลักในตาราง:** Win Rate (WR %), Expectancy (Avg R per trade), Profit Factor (PF), จำนวนไม้ (Trades) & % Share, Total Net R, Avg Win R / Avg Loss R, Avg Potential MFE (Max RR), และ Kelly Criterion %
+- ระบบจัดเรียง (Sorting) ตามตัวชี้วัดใดก็ได้ พร้อม Highlight ระบุ "Top Edge Setup" และ "Best Profit Factor"
+- สลับโหมด RR ได้: Normal RR, Break Even (BE), Trail + BE
+
+### 15.2. R-Multiple Distribution (การกระจายตัวของผลการเทรด)
+- กราฟแท่ง Histogram แสดงจำนวนและความถี่ของ R-Multiples แต่ละไม้ (-1R, 1R, 2R, 3.5R...)
+- แยกสีชัดเจน: แดง (Losses), เทา (BE / 0R), เขียว (Wins)
+- วิเคราะห์ **Profit Concentration (Pareto Test)**: ตรวจสอบว่ากำไรมาจากไม้ใหญ่ไม่กี่ไม้ (Top 3 trades share > 60%) หรือกระจายตัวสม่ำเสมอ
+- แสดงค่าสถิติเชิงพรรณนา: Mean Expectancy, Median Outcome, Standard Deviation, และ Distribution Skewness (Right-skewed vs Left-skewed)
+
+### 15.3. Heatmap วัน × ชั่วโมง (Trading Time Performance)
+- ตาราง Heatmap เมทริกซ์ 7 วัน (จันทร์ - อาทิตย์) × 24 ชั่วโมง (00:00 - 23:00)
+- สลับ Metric การแสดงผลได้: Net R, Win Rate %, Trade Count, Expectancy (Avg R)
+- สรุปขอบตาราง (Margin Totals) รายวัน (Day Total) และรายชั่วโมง (Hour Total)
+- ระบุ **Prime Trading Window** (ช่วงเวลาที่ทำกำไรได้ดีที่สุด) และ **Danger Zone** (ช่วงเวลาที่มีผลขาดทุนสะสมมากที่สุด)
+
+### 15.4. MAE / MFE Analysis (กราฟ Scatter วิเคราะห์ Excursion)
+- กราฟ Scatter Plot ต่อยอดจากข้อมูล Potential MFE:
+  - **Realized RR vs Potential MFE:** ตรวจสอบว่า "ปิด TP เร็วไปไหม" พร้อมเส้นอ้างอิง $Y = X$ (Peak Exit Efficiency)
+  - **MAE vs MFE:** ตรวจสอบว่า "วาง SL แน่นไปไหม" วิเคราะห์ความสัมพันธ์ระหว่างการย่อลึก (Drawdown) กับการวิ่งไปถึงเป้าหมาย
+- ตัวชี้วัด Excursion:
+  - Exit Capture Efficiency (%) เฉลี่ยของไม้ชนะ
+  - Total Profit Left on Table (R ที่เหลือทิ้งไว้หลังปิดออเดอร์)
+  - Reversal Losses: ตรวจจับไม้ที่เคยบวก $\ge 1R$ แต่ปล่อยให้กลับมาแพ้ เพื่อแนะนำการตั้ง Break Even (BE)
+
+

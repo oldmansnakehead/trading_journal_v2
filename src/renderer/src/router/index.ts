@@ -24,6 +24,11 @@ const router = createRouter({
       component: () => import('../components/views/MonteCarloView.vue')
     },
     {
+      path: '/edge',
+      name: 'edge',
+      component: () => import('../components/views/EdgeAnalysisView.vue')
+    },
+    {
       path: '/calendar',
       name: 'calendar',
       component: () => import('../components/ui/CalendarView.vue')
