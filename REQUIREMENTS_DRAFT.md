@@ -145,11 +145,15 @@ src/
 - target: ระบุใน requirement (Windows / macOS / Linux)
 - ระบบอัปเดตอัตโนมัติ: ต้องมีระบบ Auto Update ของ Electron โดยหลักจะอัปเดตผ่าน GitHub Releases
 
-## 11. Testing (E2E)
+## 11. Testing (E2E) & Dynamic PDF Reporting
 
-- ใช้ Playwright สำหรับรัน Automated E2E Test
-- เมื่อรัน Test เสร็จสิ้น ต้องสามารถสร้างรายงานผลลัพธ์ออกมาเป็นไฟล์ **PDF**
-- ในรายงาน PDF ต้องประกอบด้วยรูปภาพ (Screenshots) และคำอธิบายอย่างละเอียดในแต่ละสเต็ปของการทดสอบ
+- ใช้ Playwright สำหรับรัน Automated E2E Test ครอบคลุมการเปิดแอป, Responsive Navigation ที่ 900px, Settings, การสร้าง Setup/Symbol, การบันทึก Trade, และการตรวจสอบตาราง Dashboard
+- เมื่อรัน Test เสร็จสิ้น ต้องสร้างรายงานผลลัพธ์ออกมาเป็นไฟล์ **PDF** (`e2e/report.pdf`) อัตโนมัติจากผลลัพธ์จริง (ไม่ใช่ Mock) แม้การทดสอบจะล้มเหลว
+- ในรายงาน PDF ต้องประกอบด้วย:
+  - สรุปภาพรวม (Total Tests, Passed, Failed, Skipped, Duration, Timestamp)
+  - รายละเอียดแต่ละขั้นตอน (Step breakdown พร้อมสถานะและระยะเวลา)
+  - รูปภาพ (Screenshots) จริงจากการทดสอบทุกขั้นตอน (`main-window`, `setup-created`, `symbol-created`, `trade-entry-filled`, `toast-success`, `dashboard-verified`)
+  - ข้อความแจ้งเตือน Error อย่างละเอียด (หากมีข้อผิดพลาดเกิดขึ้น)
 
 ## 12. กฎสำหรับ AI agent
 
@@ -225,9 +229,16 @@ src/
   - `Return Calculation` (Enum): `Simple`, `Log (compounded)`
 
 ### 13.2. การแสดงผลสถิติและตัวเลข (Metrics & KPIs)
-
-- มีตารางโชว์ข้อมูลการเทรดตามรายการที่ Filter
-- **RR Mode Toggle:** ต้องมีปุ่มให้สลับมุมมองสถิติระหว่าง `Normal`, `BE`, `Trail+BE` ซึ่งเมื่อสลับ ค่าสถิติเฉลี่ยต่างๆ (เช่น AVG RR) จะเปลี่ยนไปตามประเภทที่เลือก
+ 
+ - มีตารางโชว์ข้อมูลการเทรดตามรายการที่ Filter (ตาราง Recent Trades)
+ - **ระบบแบ่งหน้า (Table Pagination):**
+   - มีระบบ Pagination ผ่านคอมโพเนนต์ส่วนกลาง `BasePagination` รองรับการปรับเปลี่ยนจำนวนแถวต่อหน้า (Rows per page: 10, 25, 50, 100)
+   - ปุ่มเปลี่ยนหน้า: First (`<<`), Previous (`<`), ปุ่มหมายเลขหน้าพร้อม Smart Ellipsis, Next (`>`), Last (`>>`)
+   - แสดงข้อความสรุปช่วงรายการ เช่น `Showing 1 to 10 of 45 trades`
+   - **ความถูกต้องของสถิติ:** ตัวชี้วัด KPIs ภาพรวม (Win Rate, Total Trades, Net PnL, Drawdown ฯลฯ) และกราฟทั้งหมดยังคงคำนวณจาก `filteredTrades` เต็มชุดข้อมูลเสมอ (ไม่ถูกตัดทอนตามหน้าตาราง)
+   - **ระบบเลือกข้อมูล (Selection):** Checkbox บนหัวตารางรองรับการเลือกไม้ในหน้าปัจจุบัน พร้อมตัวเลือก *"Select all matching trades"* สำหรับเลือกไม้ทั้งหมดข้ามหน้า
+   - รีเซ็ตกลับไปหน้า 1 อัตโนมัติเมื่อผู้ใช้เปลี่ยนตัวกรองข้อมูล
+ - **RR Mode Toggle:** ต้องมีปุ่มให้สลับมุมมองสถิติระหว่าง `Normal`, `BE`, `Trail+BE` ซึ่งเมื่อสลับ ค่าสถิติเฉลี่ยต่างๆ (เช่น AVG RR) จะเปลี่ยนไปตามประเภทที่เลือก
 - **ข้อมูลสถิติที่แสดงด้านบน (อ้างอิงตาม UI):**
   - ข้อมูลรวม: Total trades (จำนวนที่ค้นหาเจอ), Wins, Losses, Net PnL, Gross Profit, Gross Loss, Profit Factor
   - ข้อมูล RR: AVG RR, MAX RR, AVG MAX RR, Total RR (RR ที่เก็บได้ทั้งหมด)

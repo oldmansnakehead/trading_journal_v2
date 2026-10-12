@@ -121,7 +121,7 @@
                   "workerIndex": 0,
                   "parallelIndex": 0,
                   "status": "passed",
-                  "duration": 3216,
+                  "duration": 1914,
                   "errors": [],
                   "stdout": [],
                   "stderr": [],
@@ -129,26 +129,26 @@
                   "steps": [
                     {
                       "title": "Launch Electron app and get main window",
-                      "duration": 215
+                      "duration": 163
                     },
                     {
                       "title": "Wait for application root to mount",
-                      "duration": 1316
+                      "duration": 596
                     },
                     {
                       "title": "Verify navigation elements are accessible at default width 900px",
-                      "duration": 109
+                      "duration": 47
                     },
                     {
                       "title": "Verify responsive navigation when window is narrowed",
-                      "duration": 1339
+                      "duration": 911
                     },
                     {
                       "title": "Capture main window screenshot",
-                      "duration": 234
+                      "duration": 195
                     }
                   ],
-                  "startTime": "2026-10-12T08:52:06.321Z",
+                  "startTime": "2026-10-12T14:38:43.867Z",
                   "annotations": [],
                   "attachments": []
                 }
@@ -185,7 +185,7 @@
                   "workerIndex": 0,
                   "parallelIndex": 0,
                   "status": "passed",
-                  "duration": 4993,
+                  "duration": 2373,
                   "errors": [],
                   "stdout": [],
                   "stderr": [],
@@ -193,38 +193,38 @@
                   "steps": [
                     {
                       "title": "Wait for application ready at 900px default width",
-                      "duration": 1280
+                      "duration": 528
                     },
                     {
                       "title": "Navigate to Settings via sidebar UI",
-                      "duration": 748
+                      "duration": 246
                     },
                     {
                       "title": "Create a new Trading Setup",
-                      "duration": 372
+                      "duration": 420
                     },
                     {
                       "title": "Create a new Trading Symbol",
-                      "duration": 244
+                      "duration": 184
                     },
                     {
                       "title": "Navigate to New Trade via sidebar UI",
-                      "duration": 84
+                      "duration": 96
                     },
                     {
                       "title": "Fill trade details with created Setup, Symbol, Date, and RR values",
-                      "duration": 700
+                      "duration": 374
                     },
                     {
                       "title": "Save trade entry and verify success notification",
-                      "duration": 125
+                      "duration": 126
                     },
                     {
                       "title": "Verify saved trade data in Dashboard UI",
-                      "duration": 1431
+                      "duration": 395
                     }
                   ],
-                  "startTime": "2026-10-12T08:52:10.403Z",
+                  "startTime": "2026-10-12T14:38:46.503Z",
                   "annotations": [],
                   "attachments": []
                 }
@@ -242,8 +242,8 @@
   ],
   "errors": [],
   "stats": {
-    "startTime": "2026-10-12T08:52:05.770Z",
-    "duration": 10614.695,
+    "startTime": "2026-10-12T14:38:43.357Z",
+    "duration": 6427.728,
     "expected": 2,
     "skipped": 0,
     "unexpected": 0,

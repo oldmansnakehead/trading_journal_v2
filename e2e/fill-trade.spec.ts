@@ -95,6 +95,10 @@ test('fill trade and save', async () => {
     await expect(window.locator(`td:has-text("${symbolName}")`).first()).toBeVisible({ timeout: 5000 })
     await expect(window.locator(`td:has-text("${setupName}")`).first()).toBeVisible({ timeout: 5000 })
 
+    // Verify pagination controls are visible on Recent Trades table
+    await expect(window.locator('[data-testid="base-pagination"]')).toBeVisible({ timeout: 5000 })
+    await expect(window.locator('[data-testid="pagination-page-size-select"]')).toBeVisible({ timeout: 5000 })
+
     await window.screenshot({ path: 'e2e/screenshots/dashboard-verified.png' })
   })
 })

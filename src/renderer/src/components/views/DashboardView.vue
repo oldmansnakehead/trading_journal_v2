@@ -976,12 +976,19 @@
         <Transition name="fade">
           <div
             v-if="selectedTradeIds.length > 0"
-            class="flex items-center gap-3 bg-red-50 text-red-700 px-4 py-2 rounded-xl border border-red-100"
+            class="flex flex-wrap items-center gap-3 bg-red-50 text-red-700 px-4 py-2 rounded-xl border border-red-100"
           >
             <span class="text-sm font-bold flex items-center gap-2">
               <span class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
               {{ selectedTradeIds.length }} {{ selectedTradeIds.length === 1 ? 'trade' : 'trades' }} selected
             </span>
+            <button
+              v-if="!isAllFilteredSelected && filteredTrades.length > paginatedTrades.length"
+              @click="selectAllFilteredTrades"
+              class="text-xs font-semibold text-red-700 underline hover:text-red-900 transition-colors cursor-pointer"
+            >
+              Select all {{ filteredTrades.length }} matching trades
+            </button>
             <button
               @click="openDeleteBatchModal"
               class="bg-red-600 hover:bg-red-700 text-white px-3.5 py-1.5 rounded-lg text-xs font-bold transition-colors flex items-center gap-1.5 shadow-sm cursor-pointer"
@@ -1023,12 +1030,12 @@
               <th class="py-4 px-4 w-12 text-center">
                 <input
                   type="checkbox"
-                  :checked="isAllSelected"
+                  :checked="isPageSelected"
                   :indeterminate.prop="isPartiallySelected"
                   @change="toggleSelectAll"
                   :disabled="filteredTrades.length === 0"
                   class="rounded border-gray-300 text-blue-600 focus:ring-blue-500 w-4 h-4 cursor-pointer align-middle"
-                  title="Select all trades"
+                  title="Select all trades on this page"
                 />
               </th>
               <th class="py-4 px-4">Date</th>
@@ -1053,7 +1060,7 @@
           </thead>
           <tbody class="text-sm font-medium">
             <tr
-              v-for="trade in displayTrades"
+              v-for="trade in paginatedTrades"
               :key="trade.id"
               :class="[
                 selectedTradeIds.includes(trade.id) ? 'bg-blue-50/50' : 'hover:bg-gray-50',
@@ -1203,6 +1210,16 @@
           </tbody>
         </table>
       </div>
+
+      <!-- Pagination Controls -->
+      <BasePagination
+        v-if="filteredTrades.length > 0"
+        v-model:currentPage="currentPage"
+        v-model:pageSize="pageSize"
+        :totalItems="filteredTrades.length"
+        itemLabel="trades"
+        class="mt-4 border-t border-gray-100"
+      />
     </div>
 
     <!-- Calendar View Section -->
@@ -1275,6 +1292,7 @@ import BaseAlertDialog from '../ui/BaseAlertDialog.vue'
 import TradeFiltersBar from '../ui/TradeFiltersBar.vue'
 import InfoTooltip from '../ui/InfoTooltip.vue'
 import CalendarView from '../ui/CalendarView.vue'
+import BasePagination from '../ui/BasePagination.vue'
 import { calculateTradeDuration } from '../../utils/duration'
 import { filterTrades } from '../../utils/tradeFilters'
 import {
@@ -1356,26 +1374,37 @@ const selectedTradeId = ref<number | null>(null)
 // Multiple Selection State
 const selectedTradeIds = ref<number[]>([])
 
-const isAllSelected = computed(() => {
+// Check if all trades on CURRENT page are selected
+const isPageSelected = computed(() => {
+  if (paginatedTrades.value.length === 0) return false
+  return paginatedTrades.value.every((t) => selectedTradeIds.value.includes(t.id))
+})
+
+// Check if all filtered trades across all pages are selected
+const isAllFilteredSelected = computed(() => {
   if (filteredTrades.value.length === 0) return false
   return filteredTrades.value.every((t) => selectedTradeIds.value.includes(t.id))
 })
 
 const isPartiallySelected = computed(() => {
-  if (filteredTrades.value.length === 0) return false
-  const someSelected = filteredTrades.value.some((t) => selectedTradeIds.value.includes(t.id))
-  return someSelected && !isAllSelected.value
+  if (paginatedTrades.value.length === 0) return false
+  const someSelected = paginatedTrades.value.some((t) => selectedTradeIds.value.includes(t.id))
+  return someSelected && !isPageSelected.value
 })
 
 const toggleSelectAll = () => {
-  if (isAllSelected.value) {
-    const visibleIds = new Set(filteredTrades.value.map((t) => t.id))
-    selectedTradeIds.value = selectedTradeIds.value.filter((id) => !visibleIds.has(id))
+  if (isPageSelected.value) {
+    const pageIds = new Set(paginatedTrades.value.map((t) => t.id))
+    selectedTradeIds.value = selectedTradeIds.value.filter((id) => !pageIds.has(id))
   } else {
     const currentSet = new Set(selectedTradeIds.value)
-    filteredTrades.value.forEach((t) => currentSet.add(t.id))
+    paginatedTrades.value.forEach((t) => currentSet.add(t.id))
     selectedTradeIds.value = Array.from(currentSet)
   }
+}
+
+const selectAllFilteredTrades = () => {
+  selectedTradeIds.value = filteredTrades.value.map((t) => t.id)
 }
 
 // Deletion State & Modals
@@ -1639,13 +1668,35 @@ const filteredTrades = computed(() => {
 // Display trades in Recent Trades table with newest entries on top
 const displayTrades = computed(() => [...filteredTrades.value].reverse())
 
-// Reset selected trades when filters change
+// Pagination State
+const currentPage = ref(1)
+const pageSize = ref(10)
+
+// Paginated slice for current page
+const paginatedTrades = computed(() => {
+  const start = (currentPage.value - 1) * pageSize.value
+  return displayTrades.value.slice(start, start + pageSize.value)
+})
+
+// Reset selected trades and return to page 1 when filters change
 watch(
   filters,
   () => {
     selectedTradeIds.value = []
+    currentPage.value = 1
   },
   { deep: true }
+)
+
+// Ensure currentPage is not out of range if filteredTrades shrinks
+watch(
+  filteredTrades,
+  (newVal) => {
+    const maxPage = Math.max(1, Math.ceil(newVal.length / pageSize.value))
+    if (currentPage.value > maxPage) {
+      currentPage.value = maxPage
+    }
+  }
 )
 
 // Reactive KPIs computed directly from filteredTrades (Exact Same Dataset)
