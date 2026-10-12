@@ -204,7 +204,7 @@ const closePicker = () => {
         type="text"
         :disabled="disabled"
         :error="error"
-        inputClass="pointer-events-none cursor-pointer"
+        inputClass="cursor-pointer"
         wrapperClass="cursor-pointer"
         placeholder="Select a date"
       >

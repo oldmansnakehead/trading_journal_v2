@@ -1,106 +1,12 @@
 <script setup lang="ts">
 import { RouterView } from 'vue-router'
+import AppSidebar from './components/ui/AppSidebar.vue'
 </script>
 
 <template>
-  <div class="flex h-screen overflow-hidden w-full">
-    <!-- 1. Layout Elements: Sidebar -->
-    <aside
-      class="w-72 flex-shrink-0 bg-white border-r border-gray-200 border-dashed h-full hidden lg:flex flex-col z-20"
-    >
-      <!-- Logo Area -->
-      <div class="h-20 flex items-center px-6">
-        <div class="flex items-center gap-2 cursor-pointer">
-          <div
-            class="w-10 h-10 bg-primary text-white rounded-xl flex items-center justify-center font-bold text-xl"
-          >
-            M.
-          </div>
-          <span class="font-bold text-lg tracking-tight">Trading Journal</span>
-        </div>
-      </div>
-
-      <!-- Scrollable Menu -->
-      <div class="flex-1 overflow-y-auto no-scrollbar px-4 pb-8">
-        <div class="mb-4 mt-2 px-2 text-xs font-bold text-textSecondary uppercase tracking-wider">
-          Overview
-        </div>
-
-        <nav class="space-y-1">
-          <router-link
-            to="/"
-            active-class="bg-primary/10 text-primary font-semibold"
-            class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-textSecondary hover:bg-gray-100 hover:text-textPrimary font-medium transition-colors"
-          >
-            <i class="ph ph-app-window text-xl"></i>
-            <span>Dashboard</span>
-          </router-link>
-          <router-link
-            to="/reports"
-            active-class="bg-primary/10 text-primary font-semibold"
-            class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-textSecondary hover:bg-gray-100 hover:text-textPrimary font-medium transition-colors"
-          >
-            <i class="ph ph-chart-pie text-xl"></i>
-            <span>Win/Loss Report</span>
-          </router-link>
-          <router-link
-            to="/monte-carlo"
-            active-class="bg-primary/10 text-primary font-semibold"
-            class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-textSecondary hover:bg-gray-100 hover:text-textPrimary font-medium transition-colors"
-          >
-            <i class="ph ph-dice-five text-xl"></i>
-            <span>Monte Carlo</span>
-          </router-link>
-          <router-link
-            to="/edge"
-            active-class="bg-primary/10 text-primary font-semibold"
-            class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-textSecondary hover:bg-gray-100 hover:text-textPrimary font-medium transition-colors"
-          >
-            <i class="ph ph-crosshair text-xl"></i>
-            <span>Edge Analysis</span>
-          </router-link>
-          <router-link
-            to="/calendar"
-            active-class="bg-primary/10 text-primary font-semibold"
-            class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-textSecondary hover:bg-gray-100 hover:text-textPrimary font-medium transition-colors"
-          >
-            <i class="ph ph-calendar text-xl"></i>
-            <span>Calendar</span>
-          </router-link>
-          <router-link
-            to="/journal"
-            active-class="bg-primary/10 text-primary font-semibold"
-            class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-textSecondary hover:bg-gray-100 hover:text-textPrimary font-medium transition-colors"
-          >
-            <i class="ph ph-plus-circle text-xl"></i>
-            <span>New Trade</span>
-          </router-link>
-        </nav>
-
-        <div class="mt-8 mb-4 px-2 text-xs font-bold text-textSecondary uppercase tracking-wider">
-          Management
-        </div>
-
-        <nav class="space-y-1">
-          <router-link
-            to="/data"
-            active-class="bg-primary/10 text-primary font-semibold"
-            class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-textSecondary hover:bg-gray-100 hover:text-textPrimary font-medium transition-colors"
-          >
-            <i class="ph ph-database text-xl"></i>
-            <span>Data Management</span>
-          </router-link>
-          <router-link
-            to="/settings"
-            active-class="bg-primary/10 text-primary font-semibold"
-            class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-textSecondary hover:bg-gray-100 hover:text-textPrimary font-medium transition-colors"
-          >
-            <i class="ph ph-gear text-xl"></i>
-            <span>Settings</span>
-          </router-link>
-        </nav>
-      </div>
-    </aside>
+  <div class="flex flex-col md:flex-row h-screen overflow-hidden w-full bg-gray-50/50">
+    <!-- Responsive Navigation: Sidebar & Mobile Drawer -->
+    <AppSidebar />
 
     <!-- Main Content Wrapper -->
     <div class="flex-1 flex flex-col min-w-0 overflow-hidden">

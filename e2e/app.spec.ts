@@ -8,19 +8,44 @@ test.beforeAll(async () => {
 })
 
 test.afterAll(async () => {
-  await electronApp.close()
+  if (electronApp) {
+    await electronApp.close()
+  }
 })
 
 test('app opens and shows main window', async () => {
-  const window = await electronApp.firstWindow()
-  const title = await window.title()
+  const window = await test.step('Launch Electron app and get main window', async () => {
+    return await electronApp.firstWindow()
+  })
 
-  // Wait for Vue to mount
-  await window.waitForSelector('#app', { state: 'attached' })
+  await test.step('Wait for application root to mount', async () => {
+    await window.waitForSelector('#app', { state: 'attached' })
+    expect(await window.locator('#app').count()).toBe(1)
+  })
 
-  // Take a screenshot for the PDF report later
-  await window.screenshot({ path: 'e2e/screenshots/main-window.png' })
+  await test.step('Verify navigation elements are accessible at default width 900px', async () => {
+    await expect(window.locator('aside').locator('text=Trading Journal')).toBeVisible()
+    await expect(window.locator('aside').locator('text=Dashboard')).toBeVisible()
+    await expect(window.locator('aside').locator('text=Settings')).toBeVisible()
+    await expect(window.locator('aside').locator('text=New Trade')).toBeVisible()
+  })
 
-  // Basic validation that the app loaded without white screen of death
-  expect(await window.locator('#app').count()).toBe(1)
+  await test.step('Verify responsive navigation when window is narrowed', async () => {
+    await window.setViewportSize({ width: 600, height: 700 })
+    await expect(window.locator('[data-testid="mobile-menu-btn"]')).toBeVisible()
+    // Open mobile menu drawer
+    await window.click('[data-testid="mobile-menu-btn"]')
+    await expect(window.locator('[data-testid="mobile-drawer"]')).toBeVisible()
+    await expect(window.locator('[data-testid="mobile-drawer"]').locator('text=Settings')).toBeVisible()
+    await expect(window.locator('[data-testid="mobile-drawer"]').locator('text=New Trade')).toBeVisible()
+    // Close mobile menu drawer
+    await window.click('[data-testid="close-menu-btn"]')
+    await expect(window.locator('[data-testid="mobile-drawer"]')).not.toBeVisible()
+    // Reset to default 900px
+    await window.setViewportSize({ width: 900, height: 670 })
+  })
+
+  await test.step('Capture main window screenshot', async () => {
+    await window.screenshot({ path: 'e2e/screenshots/main-window.png' })
+  })
 })

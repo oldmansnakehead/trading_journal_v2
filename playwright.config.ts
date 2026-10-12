@@ -10,7 +10,12 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
   workers: 1, // Electron tests must run sequentially
-  reporter: [['list'], ['html', { open: 'never' }]],
+  reporter: [
+    ['list'],
+    ['html', { open: 'never' }],
+    ['json', { outputFile: 'e2e/test-results.json' }],
+    ['./scripts/generate-pdf-report.js']
+  ],
   use: {
     actionTimeout: 0,
     trace: 'on-first-retry'

@@ -265,6 +265,7 @@
             <div>
               <label class="block text-sm font-semibold text-gray-700 mb-1.5">Setup</label>
               <BaseSelect
+                data-testid="setup-select"
                 v-model="form.setupId"
                 :options="setups.map((s) => ({ label: s.name, value: s.id }))"
                 placeholder="Select a Setup"
@@ -275,6 +276,7 @@
             <div>
               <label class="block text-sm font-semibold text-gray-700 mb-1.5">Symbol</label>
               <BaseSelect
+                data-testid="symbol-select"
                 v-model="form.symbolId"
                 :options="symbols.map((s) => ({ label: s.name, value: s.id }))"
                 placeholder="Select a Symbol"
@@ -382,7 +384,9 @@
               <label class="block text-sm font-semibold text-gray-700 mb-1.5"
                 >Entry Date & Time</label
               >
-              <BaseDateInput v-model="form.entryDatetime" :withTime="true" />
+              <div data-testid="entry-date-picker">
+                <BaseDateInput v-model="form.entryDatetime" :withTime="true" />
+              </div>
             </div>
             <div>
               <label class="block text-sm font-semibold text-gray-700 mb-1.5"
@@ -443,6 +447,7 @@
                 <div>
                   <label class="block text-xs font-semibold text-gray-500 mb-1">SL Points</label>
                   <input
+                    data-testid="normal-sl-points"
                     type="number"
                     step="any"
                     v-model="form.normalSlPoints"
@@ -453,6 +458,7 @@
                 <div>
                   <label class="block text-xs font-semibold text-gray-500 mb-1">RR</label>
                   <input
+                    data-testid="normal-rr"
                     type="number"
                     step="any"
                     v-model="form.normalRr"
@@ -463,6 +469,7 @@
                 <div>
                   <label class="block text-xs font-semibold text-gray-500 mb-1">Max RR</label>
                   <input
+                    data-testid="normal-max-rr"
                     type="number"
                     step="any"
                     v-model="form.normalMaxRr"

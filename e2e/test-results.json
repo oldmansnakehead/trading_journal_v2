@@ -1,0 +1,252 @@
+{
+  "config": {
+    "argv": [
+      "C:\\Program Files\\nodejs\\node.exe",
+      "I:\\projects\\trading_journal_v2\\node_modules\\@playwright\\test\\cli.js",
+      "test"
+    ],
+    "configFile": "I:\\projects\\trading_journal_v2\\playwright.config.ts",
+    "rootDir": "I:/projects/trading_journal_v2/e2e",
+    "failOnFlakyTests": false,
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "I:/projects/trading_journal_v2/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "",
+        "name": "",
+        "testDir": "I:/projects/trading_journal_v2/e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 30000
+      }
+    ],
+    "filteredProjects": [
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "I:\\projects\\trading_journal_v2\\test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "",
+        "testDir": "I:\\projects\\trading_journal_v2\\e2e",
+        "snapshotDir": "I:\\projects\\trading_journal_v2\\e2e",
+        "testIgnore": [],
+        "testMatch": "**/*.@(spec|test).?(c|m)[jt]s?(x)",
+        "timeout": 30000,
+        "use": {
+          "actionTimeout": 0,
+          "trace": "on-first-retry"
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": ""
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "list",
+        null
+      ],
+      [
+        "html",
+        {
+          "open": "never"
+        }
+      ],
+      [
+        "json",
+        {
+          "outputFile": "e2e/test-results.json"
+        }
+      ],
+      [
+        "I:\\projects\\trading_journal_v2\\scripts\\generate-pdf-report.js",
+        null
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "default",
+    "updateSourceMethod": "patch",
+    "version": "1.64.0",
+    "workers": 1,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "app.spec.ts",
+      "file": "app.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "app opens and shows main window",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3216,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "steps": [
+                    {
+                      "title": "Launch Electron app and get main window",
+                      "duration": 215
+                    },
+                    {
+                      "title": "Wait for application root to mount",
+                      "duration": 1316
+                    },
+                    {
+                      "title": "Verify navigation elements are accessible at default width 900px",
+                      "duration": 109
+                    },
+                    {
+                      "title": "Verify responsive navigation when window is narrowed",
+                      "duration": 1339
+                    },
+                    {
+                      "title": "Capture main window screenshot",
+                      "duration": 234
+                    }
+                  ],
+                  "startTime": "2026-10-12T08:52:06.321Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "c31ff144dc4fee3acd0a-e2ceaf9f7e040d029778",
+          "file": "app.spec.ts",
+          "line": 16,
+          "column": 5
+        }
+      ]
+    },
+    {
+      "title": "fill-trade.spec.ts",
+      "file": "fill-trade.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "fill trade and save",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 4993,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "steps": [
+                    {
+                      "title": "Wait for application ready at 900px default width",
+                      "duration": 1280
+                    },
+                    {
+                      "title": "Navigate to Settings via sidebar UI",
+                      "duration": 748
+                    },
+                    {
+                      "title": "Create a new Trading Setup",
+                      "duration": 372
+                    },
+                    {
+                      "title": "Create a new Trading Symbol",
+                      "duration": 244
+                    },
+                    {
+                      "title": "Navigate to New Trade via sidebar UI",
+                      "duration": 84
+                    },
+                    {
+                      "title": "Fill trade details with created Setup, Symbol, Date, and RR values",
+                      "duration": 700
+                    },
+                    {
+                      "title": "Save trade entry and verify success notification",
+                      "duration": 125
+                    },
+                    {
+                      "title": "Verify saved trade data in Dashboard UI",
+                      "duration": 1431
+                    }
+                  ],
+                  "startTime": "2026-10-12T08:52:10.403Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "ea14aa358746de505fb2-8506a68d7bee7a2f0de7",
+          "file": "fill-trade.spec.ts",
+          "line": 18,
+          "column": 5
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-10-12T08:52:05.770Z",
+    "duration": 10614.695,
+    "expected": 2,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  }
+}
