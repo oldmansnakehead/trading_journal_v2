@@ -1,0 +1,423 @@
+[
+  {
+    "sha": "5522c1102aa9966b8ded6c70eea997f5a4df8865",
+    "short": "5522c11",
+    "subject": "Initial commit",
+    "dependencyMode": "shared installed dependencies; not historical lockfile install",
+    "checks": [],
+    "e2e": "not run: existing fixtures use real userData"
+  },
+  {
+    "sha": "9042991d10256fb8f9b663ce4a3281deaf57abe5",
+    "short": "9042991",
+    "subject": "Initial commit with AI context structure",
+    "dependencyMode": "shared installed dependencies; not historical lockfile install",
+    "checks": [],
+    "e2e": "not run: existing fixtures use real userData"
+  },
+  {
+    "sha": "e25ee0777a4dfb0335e6b9ad996c2f4f1da1bf4c",
+    "short": "e25ee07",
+    "subject": "Add .gitignore file",
+    "dependencyMode": "shared installed dependencies; not historical lockfile install",
+    "checks": [],
+    "e2e": "not run: existing fixtures use real userData"
+  },
+  {
+    "sha": "d0a0e8cec4b79f156c1219b55f16a88c4557140a",
+    "short": "d0a0e8c",
+    "subject": "docs: add initial requirements draft and update agent guidelines",
+    "dependencyMode": "shared installed dependencies; not historical lockfile install",
+    "checks": [],
+    "e2e": "not run: existing fixtures use real userData"
+  },
+  {
+    "sha": "179c7a68f468b4fff4174dd4dfdfc1500d76cf24",
+    "short": "179c7a6",
+    "subject": "docs: extract requirements stack into plan.md",
+    "dependencyMode": "shared installed dependencies; not historical lockfile install",
+    "checks": [],
+    "e2e": "not run: existing fixtures use real userData"
+  },
+  {
+    "sha": "f71a088c183a2fac9c76e037554196b5b82c6436",
+    "short": "f71a088",
+    "subject": "docs: switch UI framework to shadcn-vue",
+    "dependencyMode": "shared installed dependencies; not historical lockfile install",
+    "checks": [],
+    "e2e": "not run: existing fixtures use real userData"
+  },
+  {
+    "sha": "5f7d974f8e04488279fe2cde27555b54367fdb37",
+    "short": "5f7d974",
+    "subject": "chore: complete phase 1 project setup",
+    "dependencyMode": "shared installed dependencies; not historical lockfile install",
+    "checks": [
+      {
+        "name": "typecheck:node",
+        "exitCode": 0,
+        "seconds": 1.28,
+        "log": "docs/reviews/logs/5f7d974-node.txt"
+      },
+      {
+        "name": "typecheck:web",
+        "exitCode": 0,
+        "seconds": 1.43,
+        "log": "docs/reviews/logs/5f7d974-web.txt"
+      }
+    ],
+    "e2e": "not run: existing fixtures use real userData"
+  },
+  {
+    "sha": "7d431770adcf4446811f95c1f5472d4469725e0d",
+    "short": "7d43177",
+    "subject": "chore: add playwright to stack",
+    "dependencyMode": "shared installed dependencies; not historical lockfile install",
+    "checks": [
+      {
+        "name": "typecheck:node",
+        "exitCode": 0,
+        "seconds": 1.03,
+        "log": "docs/reviews/logs/7d43177-node.txt"
+      },
+      {
+        "name": "typecheck:web",
+        "exitCode": 0,
+        "seconds": 1.37,
+        "log": "docs/reviews/logs/7d43177-web.txt"
+      }
+    ],
+    "e2e": "not run: existing fixtures use real userData"
+  },
+  {
+    "sha": "a62846219ae9a6c33bd02046611f0de782205643",
+    "short": "a628462",
+    "subject": "chore: clean reinstall for Node 24.21.0 compatibility",
+    "dependencyMode": "shared installed dependencies; not historical lockfile install",
+    "checks": [
+      {
+        "name": "typecheck:node",
+        "exitCode": 0,
+        "seconds": 1.58,
+        "log": "docs/reviews/logs/a628462-node.txt"
+      },
+      {
+        "name": "typecheck:web",
+        "exitCode": 0,
+        "seconds": 1.95,
+        "log": "docs/reviews/logs/a628462-web.txt"
+      }
+    ],
+    "e2e": "not run: existing fixtures use real userData"
+  },
+  {
+    "sha": "e9f59845fefee692c49c604f4139a8f49b77ae81",
+    "short": "e9f5984",
+    "subject": "docs: add E2E PDF reporting requirement",
+    "dependencyMode": "shared installed dependencies; not historical lockfile install",
+    "checks": [],
+    "e2e": "not run: existing fixtures use real userData"
+  },
+  {
+    "sha": "64b5552295f91e0b40e765dadd54165c827d355c",
+    "short": "64b5552",
+    "subject": "feat: complete Phase 2 database & core models setup",
+    "dependencyMode": "shared installed dependencies; not historical lockfile install",
+    "checks": [
+      {
+        "name": "typecheck:node",
+        "exitCode": 2,
+        "seconds": 2.64,
+        "log": "docs/reviews/logs/64b5552-node.txt"
+      },
+      {
+        "name": "typecheck:web",
+        "exitCode": 0,
+        "seconds": 1.38,
+        "log": "docs/reviews/logs/64b5552-web.txt"
+      }
+    ],
+    "e2e": "not run: existing fixtures use real userData"
+  },
+  {
+    "sha": "e1e7b5c0c8aca2971ff4b15c64b7b62d24b1aa02",
+    "short": "e1e7b5c",
+    "subject": "feat: implement image upload service and custom protocol",
+    "dependencyMode": "shared installed dependencies; not historical lockfile install",
+    "checks": [
+      {
+        "name": "typecheck:node",
+        "exitCode": 2,
+        "seconds": 2.04,
+        "log": "docs/reviews/logs/e1e7b5c-node.txt"
+      },
+      {
+        "name": "typecheck:web",
+        "exitCode": 0,
+        "seconds": 1.65,
+        "log": "docs/reviews/logs/e1e7b5c-web.txt"
+      }
+    ],
+    "e2e": "not run: existing fixtures use real userData"
+  },
+  {
+    "sha": "727bb3a70efaef1985e790390fe325a4073f43b6",
+    "short": "727bb3a",
+    "subject": "fix: add shadcn theme variables to tailwind config",
+    "dependencyMode": "shared installed dependencies; not historical lockfile install",
+    "checks": [
+      {
+        "name": "typecheck:node",
+        "exitCode": 2,
+        "seconds": 2.39,
+        "log": "docs/reviews/logs/727bb3a-node.txt"
+      },
+      {
+        "name": "typecheck:web",
+        "exitCode": 0,
+        "seconds": 1.77,
+        "log": "docs/reviews/logs/727bb3a-web.txt"
+      }
+    ],
+    "e2e": "not run: existing fixtures use real userData"
+  },
+  {
+    "sha": "72e6cd591d7c3785d90558113898ad98eb55a60a",
+    "short": "72e6cd5",
+    "subject": "feat: add Storybook configuration, UI components, and test setup",
+    "dependencyMode": "shared installed dependencies; not historical lockfile install",
+    "checks": [
+      {
+        "name": "typecheck:node",
+        "exitCode": 2,
+        "seconds": 2.05,
+        "log": "docs/reviews/logs/72e6cd5-node.txt"
+      },
+      {
+        "name": "typecheck:web",
+        "exitCode": 0,
+        "seconds": 1.68,
+        "log": "docs/reviews/logs/72e6cd5-web.txt"
+      }
+    ],
+    "e2e": "not run: existing fixtures use real userData"
+  },
+  {
+    "sha": "922f50ead364e3eead471dc566a122da3714c2ea",
+    "short": "922f50e",
+    "subject": "docs: update agent guidelines and instructions in AGENTS.md",
+    "dependencyMode": "shared installed dependencies; not historical lockfile install",
+    "checks": [],
+    "e2e": "not run: existing fixtures use real userData"
+  },
+  {
+    "sha": "6fdb1409c3e7e1748cc24971eaa3e41c54883db2",
+    "short": "6fdb140",
+    "subject": "feat: add UI component library with Storybook stories and Vue Flow nodes",
+    "dependencyMode": "shared installed dependencies; not historical lockfile install",
+    "checks": [
+      {
+        "name": "typecheck:node",
+        "exitCode": 2,
+        "seconds": 1.99,
+        "log": "docs/reviews/logs/6fdb140-node.txt"
+      },
+      {
+        "name": "typecheck:web",
+        "exitCode": 2,
+        "seconds": 2.42,
+        "log": "docs/reviews/logs/6fdb140-web.txt"
+      }
+    ],
+    "e2e": "not run: existing fixtures use real userData"
+  },
+  {
+    "sha": "d3d27ed6cd2f5d2b3ad1f56254ff8a9f9a17ca93",
+    "short": "d3d27ed",
+    "subject": "feat: implement trading setup settings, journal entry form, db schema, UI components, and toast notifications",
+    "dependencyMode": "shared installed dependencies; not historical lockfile install",
+    "checks": [
+      {
+        "name": "typecheck:node",
+        "exitCode": 2,
+        "seconds": 2.38,
+        "log": "docs/reviews/logs/d3d27ed-node.txt"
+      },
+      {
+        "name": "typecheck:web",
+        "exitCode": 2,
+        "seconds": 5.16,
+        "log": "docs/reviews/logs/d3d27ed-web.txt"
+      }
+    ],
+    "e2e": "not run: existing fixtures use real userData"
+  },
+  {
+    "sha": "8bbb1a8ca46bff7d517c4e89f62646f57239a54d",
+    "short": "8bbb1a8",
+    "subject": "feat: add trading journal UI components, database configuration, and IPC handlers",
+    "dependencyMode": "shared installed dependencies; not historical lockfile install",
+    "checks": [
+      {
+        "name": "typecheck:node",
+        "exitCode": 0,
+        "seconds": 2.62,
+        "log": "docs/reviews/logs/8bbb1a8-node.txt"
+      },
+      {
+        "name": "typecheck:web",
+        "exitCode": 0,
+        "seconds": 4.54,
+        "log": "docs/reviews/logs/8bbb1a8-web.txt"
+      }
+    ],
+    "e2e": "not run: existing fixtures use real userData"
+  },
+  {
+    "sha": "f7d329a58ef4ddd673e4ca37724b95a893f66219",
+    "short": "f7d329a",
+    "subject": "feat: add dashboard export image and calendar filters (setup, rr type, capital, risk)",
+    "dependencyMode": "shared installed dependencies; not historical lockfile install",
+    "checks": [
+      {
+        "name": "typecheck:node",
+        "exitCode": 0,
+        "seconds": 2.49,
+        "log": "docs/reviews/logs/f7d329a-node.txt"
+      },
+      {
+        "name": "typecheck:web",
+        "exitCode": 0,
+        "seconds": 4.45,
+        "log": "docs/reviews/logs/f7d329a-web.txt"
+      }
+    ],
+    "e2e": "not run: existing fixtures use real userData"
+  },
+  {
+    "sha": "310c21aae2174322716e06e7be8dd558e386ce13",
+    "short": "310c21a",
+    "subject": "feat: add return calculation toggle (simple vs log compounded) in dashboard and calendar",
+    "dependencyMode": "shared installed dependencies; not historical lockfile install",
+    "checks": [
+      {
+        "name": "typecheck:node",
+        "exitCode": 0,
+        "seconds": 2.68,
+        "log": "docs/reviews/logs/310c21a-node.txt"
+      },
+      {
+        "name": "typecheck:web",
+        "exitCode": 0,
+        "seconds": 3.88,
+        "log": "docs/reviews/logs/310c21a-web.txt"
+      }
+    ],
+    "e2e": "not run: existing fixtures use real userData"
+  },
+  {
+    "sha": "e2f36b9ab5add5817a05c89d405a30f3cbe46b86",
+    "short": "e2f36b9",
+    "subject": "feat: add Profit Factor, Avg Win, Avg Loss, and Final Balance metrics to dashboard",
+    "dependencyMode": "shared installed dependencies; not historical lockfile install",
+    "checks": [
+      {
+        "name": "typecheck:node",
+        "exitCode": 0,
+        "seconds": 2.09,
+        "log": "docs/reviews/logs/e2f36b9-node.txt"
+      },
+      {
+        "name": "typecheck:web",
+        "exitCode": 0,
+        "seconds": 4.08,
+        "log": "docs/reviews/logs/e2f36b9-web.txt"
+      }
+    ],
+    "e2e": "not run: existing fixtures use real userData"
+  },
+  {
+    "sha": "cbbac9bd61a89589c9541977ff7f99f576106acc",
+    "short": "cbbac9b",
+    "subject": "feat: add Risk:Reward (RR) and Streaks & Drawdown statistics to dashboard",
+    "dependencyMode": "shared installed dependencies; not historical lockfile install",
+    "checks": [
+      {
+        "name": "typecheck:node",
+        "exitCode": 0,
+        "seconds": 2.2,
+        "log": "docs/reviews/logs/cbbac9b-node.txt"
+      },
+      {
+        "name": "typecheck:web",
+        "exitCode": 0,
+        "seconds": 4.12,
+        "log": "docs/reviews/logs/cbbac9b-web.txt"
+      }
+    ],
+    "e2e": "not run: existing fixtures use real userData"
+  },
+  {
+    "sha": "6da901f9dd69b3ba47773b894e3b017c50b4e685",
+    "short": "6da901f",
+    "subject": "fix: bundle phosphor icons locally and fix UI text wrapping and overlapping in dashboard capture",
+    "dependencyMode": "shared installed dependencies; not historical lockfile install",
+    "checks": [
+      {
+        "name": "typecheck:node",
+        "exitCode": 0,
+        "seconds": 2.16,
+        "log": "docs/reviews/logs/6da901f-node.txt"
+      },
+      {
+        "name": "typecheck:web",
+        "exitCode": 0,
+        "seconds": 4.08,
+        "log": "docs/reviews/logs/6da901f-web.txt"
+      }
+    ],
+    "e2e": "not run: existing fixtures use real userData"
+  },
+  {
+    "sha": "e692f1c5dcde18859698e72b37dfbc4fbf005c8a",
+    "short": "e692f1c",
+    "subject": "feat: add info tooltips with Thai explanations and formulas to all dashboard cards, charts and calendar metrics",
+    "dependencyMode": "shared installed dependencies; not historical lockfile install",
+    "checks": [
+      {
+        "name": "typecheck:node",
+        "exitCode": 0,
+        "seconds": 2.72,
+        "log": "docs/reviews/logs/e692f1c-node.txt"
+      },
+      {
+        "name": "typecheck:web",
+        "exitCode": 0,
+        "seconds": 4.23,
+        "log": "docs/reviews/logs/e692f1c-web.txt"
+      }
+    ],
+    "e2e": "not run: existing fixtures use real userData"
+  },
+  {
+    "sha": "2dcf9a5bc5b3cbdd4ad9ac5029ce0aaa2f4539e2",
+    "short": "2dcf9a5",
+    "subject": "feat: add multi-dimension session radar charts and timeframe controls for equity curve and net pnl",
+    "dependencyMode": "shared installed dependencies; not historical lockfile install",
+    "checks": [
+      {
+        "name": "typecheck:node",
+        "exitCode": 0,
+        "seconds": 2.21,
+        "log": "docs/reviews/logs/2dcf9a5-node.txt"
+      },
+      {
+        "name": "typecheck:web",
+        "exitCode": 0,
+        "seconds": 4.41,
+        "log": "docs/reviews/logs/2dcf9a5-web.txt"
+      }
+    ],
+    "e2e": "not run: existing fixtures use real userData"
+  }
+]

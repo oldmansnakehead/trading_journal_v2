@@ -21,6 +21,8 @@
     "build:linux": "npm run build && electron-builder --linux",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
+    "seed": "node scripts/seed.js",
+    "seed:generate": "node scripts/generate-seed-json.js",
     "test": "vitest run --project=unit",
     "test:unit": "vitest run --project=unit",
     "test:e2e": "playwright test && node scripts/generate-pdf-report.js"

@@ -7,10 +7,67 @@ import {
   customColumns,
   journalEntries
 } from './schema'
+import fs from 'fs'
+import path from 'path'
 
-export async function seed() {
+export interface SeedJsonStructure {
+  symbols: Array<{ name: string }>
+  setups: Array<{
+    name: string
+    type?: string
+    description?: string
+    sessions?: Array<{ sessionName: string; startTime: string; endTime: string }>
+    playbook?: string
+    customColumns?: Array<{
+      name: string
+      type: string
+      options?: string[]
+      reportFilter?: boolean
+    }>
+  }>
+  journalEntries: Array<{
+    setupName: string
+    symbol: string
+    entryDatetime: string
+    exitDatetime?: string
+    sessionName?: string
+    position?: string
+    directionBias?: string
+    entryTimeframe?: string
+    news?: boolean
+    quality?: string
+    isTest?: boolean
+    images?: string[] | null
+    notes?: string
+    normalSlPoints?: number
+    normalRr?: number
+    normalMaxRr?: number
+    normalTpPoints?: number
+    beSlPoints?: number | null
+    beRr?: number | null
+    beMaxRr?: number | null
+    beTpPoints?: number | null
+    trailSlPoints?: number | null
+    trailRr?: number | null
+    trailMaxRr?: number | null
+    trailTpPoints?: number | null
+    customData?: Record<string, any>
+  }>
+}
+
+export async function seed(customSeedFilePath?: string) {
   const db = getDb()
-  // Note: getDb() handles pragma and WAL mode
+  if (!db) throw new Error('Database not initialized')
+
+  const seedFilePath =
+    customSeedFilePath || path.resolve(__dirname, '../../src/main/db/seed-data.json')
+
+  if (!fs.existsSync(seedFilePath)) {
+    console.warn(`Seed data file not found at ${seedFilePath}. Skipping seed.`)
+    return
+  }
+
+  const seedData: SeedJsonStructure = JSON.parse(fs.readFileSync(seedFilePath, 'utf-8'))
 
   try {
     console.log('Clearing existing data...')
@@ -21,132 +78,127 @@ export async function seed() {
     db.delete(setups).run()
     db.delete(symbols).run()
 
-    console.log('Inserting symbols...')
-    const insertedSymbols = db
-      .insert(symbols)
-      .values([
-        { name: 'XAUUSD' },
-        { name: 'EURUSD' },
-        { name: 'GBPUSD' },
-        { name: 'USDJPY' },
-        { name: 'BTCUSD' }
-      ])
-      .returning()
-      .all()
+    console.log(`Inserting ${seedData.symbols?.length || 0} symbols...`)
+    const symbolMap = new Map<string, number>()
+    if (seedData.symbols && seedData.symbols.length > 0) {
+      const inserted = db
+        .insert(symbols)
+        .values(seedData.symbols.map((s) => ({ name: s.name })))
+        .returning()
+        .all()
+      inserted.forEach((s) => symbolMap.set(s.name, s.id))
+    }
 
-    console.log('Inserting setups...')
-    const insertedSetups = db
-      .insert(setups)
-      .values([
-        {
-          name: 'ICT / SMC Classic',
-          type: 'real',
-          description: 'Focus on FVG, Liquidity sweeps, and Order Blocks in London & NY sessions.'
-        },
-        {
-          name: 'Breakout Strategy',
-          type: 'demo',
-          description: 'Testing high-momentum breakout on Asian range high/low.'
+    console.log(`Inserting ${seedData.setups?.length || 0} setups...`)
+    const setupMap = new Map<string, number>()
+    const customColMap = new Map<string, number>() // `${setupId}:${colName}` -> colId
+
+    for (const setupItem of seedData.setups || []) {
+      const insertedSetup = db
+        .insert(setups)
+        .values({
+          name: setupItem.name,
+          type: setupItem.type || 'real',
+          description: setupItem.description
+        })
+        .returning()
+        .get()
+
+      setupMap.set(setupItem.name, insertedSetup.id)
+
+      if (setupItem.sessions && setupItem.sessions.length > 0) {
+        db.insert(setupSessions)
+          .values(
+            setupItem.sessions.map((sess) => ({
+              setupId: insertedSetup.id,
+              sessionName: sess.sessionName,
+              startTime: sess.startTime,
+              endTime: sess.endTime
+            }))
+          )
+          .run()
+      }
+
+      if (setupItem.playbook) {
+        db.insert(setupPlaybooks)
+          .values({
+            setupId: insertedSetup.id,
+            content: setupItem.playbook
+          })
+          .run()
+      }
+
+      if (setupItem.customColumns && setupItem.customColumns.length > 0) {
+        for (const col of setupItem.customColumns) {
+          const insertedCol = db
+            .insert(customColumns)
+            .values({
+              setupId: insertedSetup.id,
+              name: col.name,
+              type: col.type,
+              options: col.options || null,
+              reportFilter: !!col.reportFilter
+            })
+            .returning()
+            .get()
+          customColMap.set(`${insertedSetup.id}:${col.name}`, insertedCol.id)
         }
-      ])
-      .returning()
-      .all()
+      }
+    }
 
-    console.log('Inserting sessions, playbooks & custom columns...')
-    for (const setup of insertedSetups) {
-      db.insert(setupSessions)
-        .values([
-          { setupId: setup.id, sessionName: 'London', startTime: '08:00', endTime: '16:00' },
-          { setupId: setup.id, sessionName: 'New York', startTime: '13:00', endTime: '21:00' }
-        ])
-        .run()
+    console.log(`Inserting ${seedData.journalEntries?.length || 0} journal entries...`)
+    for (const entry of seedData.journalEntries || []) {
+      const setupId = setupMap.get(entry.setupName)
+      const symbolId = symbolMap.get(entry.symbol)
 
-      db.insert(setupPlaybooks)
-        .values([
-          {
-            setupId: setup.id,
-            content:
-              '# Entry Rules\n1. Wait for Asian Range high/low sweep\n2. M5 MSS with displacement\n3. Enter on FVG retracement'
+      if (!setupId || !symbolId) continue
+
+      const dbCustomData: Record<string, any> = {}
+      if (entry.customData && typeof entry.customData === 'object') {
+        for (const [key, val] of Object.entries(entry.customData)) {
+          const colId = customColMap.get(`${setupId}:${key}`)
+          if (colId !== undefined) {
+            dbCustomData[colId] = val
           }
-        ])
-        .run()
+          dbCustomData[key] = val
+        }
+      }
 
-      db.insert(customColumns)
-        .values([
-          { setupId: setup.id, name: 'Confluence Count', type: 'number', reportFilter: true },
-          { setupId: setup.id, name: 'Emotional State', type: 'string', reportFilter: false }
-        ])
+      db.insert(journalEntries)
+        .values({
+          setupId,
+          symbolId,
+          entryDatetime: entry.entryDatetime,
+          exitDatetime: entry.exitDatetime,
+          sessionName: entry.sessionName,
+          position: entry.position,
+          directionBias: entry.directionBias,
+          entryTimeframe: entry.entryTimeframe,
+          news: !!entry.news,
+          quality: entry.quality,
+          isTest: !!entry.isTest,
+          images: entry.images || null,
+          notes: entry.notes,
+          normalSlPoints: entry.normalSlPoints,
+          normalRr: entry.normalRr,
+          normalMaxRr: entry.normalMaxRr,
+          normalTpPoints: entry.normalTpPoints,
+          beSlPoints: entry.beSlPoints,
+          beRr: entry.beRr,
+          beMaxRr: entry.beMaxRr,
+          beTpPoints: entry.beTpPoints,
+          trailSlPoints: entry.trailSlPoints,
+          trailRr: entry.trailRr,
+          trailMaxRr: entry.trailMaxRr,
+          trailTpPoints: entry.trailTpPoints,
+          customData: Object.keys(dbCustomData).length > 0 ? dbCustomData : null
+        })
         .run()
     }
 
-    console.log('Inserting journal entries (Mock trades)...')
-    db.insert(journalEntries)
-      .values([
-        {
-          setupId: insertedSetups[0].id,
-          symbolId: insertedSymbols[0].id, // XAUUSD
-          entryDatetime: new Date(Date.now() - 86400000 * 2).toISOString(), // 2 days ago
-          exitDatetime: new Date(Date.now() - 86400000 * 2 + 3600000).toISOString(),
-          sessionName: 'London',
-          position: 'Buy',
-          directionBias: 'Bullish',
-          entryTimeframe: 'M5',
-          news: false,
-          quality: 'Green',
-          isTest: false,
-          images: JSON.stringify([
-            'https://placehold.co/800x450/e2e8f0/64748b?text=Chart+1',
-            'https://placehold.co/800x450/e2e8f0/64748b?text=Chart+2'
-          ]),
-          notes:
-            'Great setup, followed the plan perfectly. Waited for the London open liquidity sweep and entered on M5 CHOCH.',
-          normalSlPoints: 20,
-          normalRr: 3.5,
-          normalMaxRr: 4.0,
-          normalTpPoints: 70,
-          beSlPoints: null,
-          beRr: null,
-          beMaxRr: null,
-          beTpPoints: null,
-          trailSlPoints: 20,
-          trailRr: 4.0,
-          trailMaxRr: 5.5,
-          trailTpPoints: 80,
-          customData: JSON.stringify({ 'Confluence Count': 4, 'Emotional State': 'Calm' })
-        },
-        {
-          setupId: insertedSetups[1].id,
-          symbolId: insertedSymbols[1].id, // EURUSD
-          entryDatetime: new Date(Date.now() - 86400000).toISOString(), // 1 day ago
-          exitDatetime: new Date(Date.now() - 86400000 + 1800000).toISOString(),
-          sessionName: 'New York',
-          position: 'Sell',
-          directionBias: 'Bearish',
-          entryTimeframe: 'M1',
-          news: true,
-          quality: 'Orange',
-          isTest: true,
-          images: JSON.stringify(['https://placehold.co/800x450/e2e8f0/64748b?text=Chart+3']),
-          notes: 'Took a paper trade during news. Spread got wide and hit SL quickly.',
-          normalSlPoints: 10,
-          normalRr: -1,
-          normalMaxRr: 0.5,
-          normalTpPoints: -10,
-          beSlPoints: null,
-          beRr: null,
-          beMaxRr: null,
-          beTpPoints: null,
-          trailSlPoints: null,
-          trailRr: null,
-          trailMaxRr: null,
-          trailTpPoints: null,
-          customData: JSON.stringify({ 'Confluence Count': 2, 'Emotional State': 'Anxious' })
-        }
-      ])
-      .run()
-
-    console.log('✅ Database seeding complete!')
+    console.log('✅ Database seeding complete from seed-data.json!')
   } catch (error) {
     console.error('Error seeding database:', error)
+    throw error
   }
 }
