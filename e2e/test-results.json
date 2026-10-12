@@ -121,7 +121,7 @@
                   "workerIndex": 0,
                   "parallelIndex": 0,
                   "status": "passed",
-                  "duration": 3401,
+                  "duration": 4372,
                   "errors": [],
                   "stdout": [],
                   "stderr": [],
@@ -129,26 +129,30 @@
                   "steps": [
                     {
                       "title": "Launch Electron app and get main window",
-                      "duration": 180
+                      "duration": 215
                     },
                     {
                       "title": "Wait for application root to mount",
-                      "duration": 167
+                      "duration": 162
                     },
                     {
                       "title": "Verify navigation elements are accessible at default width 900px",
-                      "duration": 2011
+                      "duration": 2043
                     },
                     {
                       "title": "Verify responsive navigation when window is narrowed",
-                      "duration": 826
+                      "duration": 895
+                    },
+                    {
+                      "title": "Verify desktop sidebar toggle show/hide functionality",
+                      "duration": 749
                     },
                     {
                       "title": "Capture main window screenshot",
-                      "duration": 212
+                      "duration": 303
                     }
                   ],
-                  "startTime": "2026-10-12T16:46:09.838Z",
+                  "startTime": "2026-10-12T17:35:35.060Z",
                   "annotations": [],
                   "attachments": []
                 }
@@ -185,7 +189,7 @@
                   "workerIndex": 0,
                   "parallelIndex": 0,
                   "status": "passed",
-                  "duration": 3945,
+                  "duration": 4112,
                   "errors": [],
                   "stdout": [],
                   "stderr": [],
@@ -193,38 +197,38 @@
                   "steps": [
                     {
                       "title": "Wait for application ready at 900px default width",
-                      "duration": 126
+                      "duration": 165
                     },
                     {
                       "title": "Navigate to Settings via sidebar UI",
-                      "duration": 2230
+                      "duration": 2248
                     },
                     {
                       "title": "Create a new Trading Setup",
-                      "duration": 390
+                      "duration": 431
                     },
                     {
                       "title": "Create a new Trading Symbol",
-                      "duration": 188
+                      "duration": 196
                     },
                     {
                       "title": "Navigate to New Trade via sidebar UI",
-                      "duration": 91
+                      "duration": 98
                     },
                     {
                       "title": "Fill trade details with created Setup, Symbol, Date, and RR values",
-                      "duration": 361
+                      "duration": 389
                     },
                     {
                       "title": "Save trade entry and verify success notification",
-                      "duration": 120
+                      "duration": 136
                     },
                     {
                       "title": "Verify saved trade data in Dashboard UI",
-                      "duration": 437
+                      "duration": 447
                     }
                   ],
-                  "startTime": "2026-10-12T16:46:15.903Z",
+                  "startTime": "2026-10-12T17:35:42.138Z",
                   "annotations": [],
                   "attachments": []
                 }
@@ -242,8 +246,8 @@
   ],
   "errors": [],
   "stats": {
-    "startTime": "2026-10-12T16:46:09.442Z",
-    "duration": 13178.083999999999,
+    "startTime": "2026-10-12T17:35:34.650Z",
+    "duration": 14400.381000000001,
     "expected": 2,
     "skipped": 0,
     "unexpected": 0,

@@ -2,7 +2,11 @@ import type { Meta, StoryObj } from '@storybook/vue3'
 import { VueFlow } from '@vue-flow/core'
 import '@vue-flow/core/dist/style.css'
 import '@vue-flow/core/dist/theme-default.css'
+import { createPinia, setActivePinia } from 'pinia'
 import AppSidebarNode from '../renderer/src/components/flow/AppSidebarNode.vue'
+
+const pinia = createPinia()
+setActivePinia(pinia)
 
 const meta = {
   title: 'Flow Nodes/AppSidebarNode',

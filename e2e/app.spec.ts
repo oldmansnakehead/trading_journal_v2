@@ -24,10 +24,12 @@ test('app opens and shows main window', async () => {
   })
 
   await test.step('Verify navigation elements are accessible at default width 900px', async () => {
-    await expect(window.locator('aside').locator('text=Trading Journal')).toBeVisible()
-    await expect(window.locator('aside').locator('text=Dashboard')).toBeVisible()
-    await expect(window.locator('aside').locator('text=Settings')).toBeVisible()
-    await expect(window.locator('aside').locator('text=New Trade')).toBeVisible()
+    await window.setViewportSize({ width: 900, height: 670 })
+    const desktopSidebar = window.locator('[data-testid="app-desktop-sidebar"]')
+    await expect(desktopSidebar.locator('text=Trading Journal')).toBeVisible()
+    await expect(desktopSidebar.locator('text=Dashboard')).toBeVisible()
+    await expect(desktopSidebar.locator('text=Settings')).toBeVisible()
+    await expect(desktopSidebar.locator('text=New Trade')).toBeVisible()
   })
 
   await test.step('Verify responsive navigation when window is narrowed', async () => {
@@ -43,6 +45,17 @@ test('app opens and shows main window', async () => {
     await expect(window.locator('[data-testid="mobile-drawer"]')).not.toBeVisible()
     // Reset to default 900px
     await window.setViewportSize({ width: 900, height: 670 })
+  })
+
+  await test.step('Verify desktop sidebar toggle show/hide functionality', async () => {
+    // Click toggle button to hide sidebar
+    await window.click('[data-testid="toggle-sidebar-btn"]')
+    await expect(window.locator('[data-testid="app-desktop-sidebar"]')).not.toBeVisible()
+
+    // Click toggle button again to show sidebar
+    await window.click('[data-testid="toggle-sidebar-btn"]')
+    await expect(window.locator('[data-testid="app-desktop-sidebar"]')).toBeVisible()
+    await expect(window.locator('[data-testid="app-desktop-sidebar"]').locator('text=Trading Journal')).toBeVisible()
   })
 
   await test.step('Capture main window screenshot', async () => {

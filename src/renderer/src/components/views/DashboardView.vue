@@ -1698,7 +1698,14 @@ const filteredTrades = computed(() => {
 })
 
 // Display trades in Recent Trades table with newest entries on top
-const displayTrades = computed(() => [...filteredTrades.value].reverse())
+const displayTrades = computed(() => {
+  return [...filteredTrades.value].sort((a, b) => {
+    const tA = new Date(a.entryDatetime).getTime() || 0
+    const tB = new Date(b.entryDatetime).getTime() || 0
+    if (tB !== tA) return tB - tA
+    return (b.id || 0) - (a.id || 0)
+  })
+})
 
 // Pagination State
 const currentPage = ref(1)

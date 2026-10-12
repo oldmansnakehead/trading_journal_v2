@@ -21,6 +21,7 @@ test('fill trade and save', async () => {
   const symbolName = `SYM${uniqueId}`
 
   await test.step('Wait for application ready at 900px default width', async () => {
+    await window.setViewportSize({ width: 900, height: 670 })
     await window.waitForSelector('#app', { state: 'attached' })
     expect(await window.locator('#app').count()).toBe(1)
   })
@@ -65,9 +66,9 @@ test('fill trade and save', async () => {
     await window.click('[data-testid="symbol-select"]')
     await window.locator('.absolute.z-50').locator(`text=${symbolName}`).click()
 
-    // Select Entry Date & Time using date picker
+    // Select Entry Date & Time using date picker (select last date in month to guarantee newest trade)
     await window.click('[data-testid="entry-date-picker"]')
-    await window.locator('.grid.grid-cols-7 button:not([disabled])').first().click()
+    await window.locator('.grid.grid-cols-7 button:not([disabled])').last().click()
     // Close picker by clicking overlay if present
     if (await window.locator('.fixed.inset-0.z-40').isVisible()) {
       await window.click('.fixed.inset-0.z-40')
