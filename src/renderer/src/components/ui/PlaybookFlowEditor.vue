@@ -401,6 +401,8 @@ const exportAsImage = async () => {
     isExporting.value = true
     const dataUrl = await toPng(flowContainerRef.value, {
       backgroundColor: '#f8fafc',
+      skipFonts: true,
+      fontEmbedCSS: '',
       filter: (node) => {
         // Exclude UI controls from exported picture
         const el = node as HTMLElement
@@ -476,6 +478,8 @@ const openImagePreview = async () => {
     await nextTick()
     const dataUrl = await toPng(flowContainerRef.value, {
       backgroundColor: '#f8fafc',
+      skipFonts: true,
+      fontEmbedCSS: '',
       filter: (node) => {
         const el = node as HTMLElement
         if (el?.classList?.contains('export-exclude')) return false
