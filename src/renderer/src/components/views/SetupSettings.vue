@@ -243,14 +243,19 @@
         <div v-else-if="setupSessionsList.length === 0" class="text-center py-8 border border-dashed border-gray-300 rounded-xl mt-4">
           <p class="text-gray-500 font-medium">No sessions found for this setup.</p>
         </div>
-        <div v-else class="overflow-x-auto mt-4 rounded-xl border border-gray-200">
+        <div v-else class="overflow-x-auto mt-4 rounded-xl border border-gray-200 bg-white">
           <table class="w-full text-left border-collapse">
             <thead>
               <tr
                 class="bg-gray-50 border-b border-gray-200 text-gray-500 text-xs font-bold uppercase tracking-wider"
               >
                 <th class="py-3 px-4 w-12 text-center">
-                  <input type="checkbox" :checked="selectedSessions.length === setupSessionsList.length && setupSessionsList.length > 0" @change="toggleAllSessions" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
+                  <input
+                    type="checkbox"
+                    :checked="paginatedSessions.length > 0 && paginatedSessions.every(s => selectedSessions.includes(s.id))"
+                    @change="toggleAllSessions"
+                    class="rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                  />
                 </th>
                 <th class="py-3 px-4">Session Name</th>
                 <th class="py-3 px-4">Start Time</th>
@@ -261,7 +266,7 @@
             <tbody>
               <tr
                 class="border-b border-gray-100 hover:bg-gray-50/50 transition-colors"
-                v-for="session in setupSessionsList"
+                v-for="session in paginatedSessions"
                 :key="session.id"
               >
                 <td class="py-4 px-4 text-center">
@@ -278,17 +283,26 @@
               </tr>
             </tbody>
           </table>
+
+          <BasePagination
+            v-if="setupSessionsList.length > 0"
+            v-model:currentPage="sessionsPage"
+            v-model:pageSize="sessionsPageSize"
+            :totalItems="setupSessionsList.length"
+            itemLabel="sessions"
+            :pageSizeOptions="[5, 10, 20]"
+          />
         </div>
       </div>
 
       <!-- Setup Playbooks Tab -->
       <div v-else-if="activeTab === 'setup_playbooks'" class="flex flex-col gap-6">
-        <div class="flex justify-between items-center">
+        <div class="flex flex-wrap justify-between items-center gap-4">
           <div>
             <h2 class="text-xl font-bold text-gray-900">Setup Playbooks</h2>
-            <p class="text-sm text-gray-500 mt-1">Write down your hypothesis, rules, and conditions for each setup.</p>
+            <p class="text-sm text-gray-500 mt-1">Define strategy rules, decision trees, and conditions for each setup.</p>
           </div>
-          <div class="flex items-center gap-4">
+          <div class="flex items-center gap-3">
             <div class="w-48">
               <BaseSelect
                 id="playbook-setup-select"
@@ -297,7 +311,37 @@
                 placeholder="Select Setup"
               />
             </div>
+
+            <!-- View Mode Switcher -->
+            <div v-if="selectedSetupId" class="bg-gray-100 p-1 rounded-xl flex items-center gap-1 text-xs font-bold">
+              <button
+                type="button"
+                @click="playbookViewMode = 'flow'"
+                :class="[
+                  'px-3 py-1.5 rounded-lg transition-all',
+                  playbookViewMode === 'flow'
+                    ? 'bg-white text-gray-900 shadow-xs'
+                    : 'text-gray-500 hover:text-gray-900'
+                ]"
+              >
+                Visual Flowchart
+              </button>
+              <button
+                type="button"
+                @click="playbookViewMode = 'notes'"
+                :class="[
+                  'px-3 py-1.5 rounded-lg transition-all',
+                  playbookViewMode === 'notes'
+                    ? 'bg-white text-gray-900 shadow-xs'
+                    : 'text-gray-500 hover:text-gray-900'
+                ]"
+              >
+                Markdown Notes
+              </button>
+            </div>
+
             <button
+              v-if="playbookViewMode === 'notes'"
               @click="savePlaybook"
               :disabled="!selectedSetupId || !playbookContentModified"
               class="bg-gray-900 hover:bg-gray-800 disabled:bg-gray-400 text-white px-4 py-2 rounded-lg font-bold text-sm flex items-center gap-2 transition-colors shadow-sm"
@@ -307,7 +351,7 @@
                 <polyline points="17 21 17 13 7 13 7 21"/>
                 <polyline points="7 3 7 8 15 8"/>
               </svg>
-              Save Playbook
+              Save Notes
             </button>
           </div>
         </div>
@@ -315,11 +359,23 @@
         <div v-if="!selectedSetupId" class="text-center py-8 border border-dashed border-gray-300 rounded-xl mt-4">
           <p class="text-gray-500 font-medium">Please select a Setup first to edit its playbook.</p>
         </div>
-        <div v-else class="flex flex-col gap-2 h-[400px]">
+        <div v-else-if="isLoadingSetupDetails" class="py-20 text-center flex flex-col items-center justify-center gap-3 border border-dashed border-gray-200 rounded-2xl bg-white/50 mt-4">
+          <span class="animate-spin inline-block w-8 h-8 border-3 border-blue-600 border-t-transparent rounded-full"></span>
+          <span class="text-xs font-bold text-gray-500">Loading strategy playbook...</span>
+        </div>
+        <div v-else-if="playbookViewMode === 'flow'" class="w-full" style="height: 680px; min-height: 680px;">
+          <PlaybookFlowEditor
+            :key="selectedSetupId"
+            :initial-flow-data="playbookFlowData"
+            :title="selectedSetupName || 'Strategy Playbook'"
+            @save="savePlaybookFlow"
+          />
+        </div>
+        <div v-else class="flex flex-col gap-2 h-[450px]">
           <textarea
             v-model="playbookContent"
             @input="playbookContentModified = true"
-            class="w-full h-full p-4 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm resize-none"
+            class="w-full h-full p-4 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm resize-none font-mono"
             placeholder="Type your setup rules and conditions here..."
           ></textarea>
         </div>
@@ -378,14 +434,19 @@
         <div v-else-if="customColumns.length === 0" class="text-center py-8 border border-dashed border-gray-300 rounded-xl mt-4">
           <p class="text-gray-500 font-medium">No custom columns found for this setup.</p>
         </div>
-        <div v-else class="overflow-x-auto mt-4 rounded-xl border border-gray-200">
+        <div v-else class="overflow-x-auto mt-4 rounded-xl border border-gray-200 bg-white">
           <table class="w-full text-left border-collapse">
             <thead>
               <tr
                 class="bg-gray-50 border-b border-gray-200 text-gray-500 text-xs font-bold uppercase tracking-wider"
               >
                 <th class="py-3 px-4 w-12 text-center">
-                  <input type="checkbox" :checked="selectedColumns.length === customColumns.length && customColumns.length > 0" @change="toggleAllColumns" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
+                  <input
+                    type="checkbox"
+                    :checked="paginatedColumns.length > 0 && paginatedColumns.every(c => selectedColumns.includes(c.id))"
+                    @change="toggleAllColumns"
+                    class="rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                  />
                 </th>
                 <th class="py-3 px-4">Column Name</th>
                 <th class="py-3 px-4">Type</th>
@@ -396,7 +457,7 @@
             <tbody>
               <tr
                 class="border-b border-gray-100 hover:bg-gray-50/50 transition-colors"
-                v-for="col in customColumns"
+                v-for="col in paginatedColumns"
                 :key="col.id"
               >
                 <td class="py-4 px-4 text-center">
@@ -426,6 +487,15 @@
               </tr>
             </tbody>
           </table>
+
+          <BasePagination
+            v-if="customColumns.length > 0"
+            v-model:currentPage="columnsPage"
+            v-model:pageSize="columnsPageSize"
+            :totalItems="customColumns.length"
+            itemLabel="columns"
+            :pageSizeOptions="[5, 10, 20]"
+          />
         </div>
       </div>
     </div>
@@ -716,6 +786,9 @@ import BaseSelect from '../ui/BaseSelect.vue'
 import BaseTimeInput from '../ui/BaseTimeInput.vue'
 import BaseConfirmModal from '../ui/BaseConfirmModal.vue'
 import BaseAlertDialog from '../ui/BaseAlertDialog.vue'
+import PlaybookFlowEditor from '../ui/PlaybookFlowEditor.vue'
+import BasePagination from '../ui/BasePagination.vue'
+import { paginateItems } from '../../utils/pagination'
 import { STANDARD_SESSIONS } from '../../utils/sessions'
 
 // Alert Modal State
@@ -957,6 +1030,15 @@ watch(
 
 const playbookContent = ref('')
 const playbookContentModified = ref(false)
+const playbookFlowData = ref<any | null>(null)
+const playbookViewMode = ref<'flow' | 'notes'>('flow')
+
+const selectedSetupName = computed(() => {
+  const s = setups.value.find((item) => item.id === selectedSetupId.value)
+  return s ? s.name : ''
+})
+
+const isLoadingSetupDetails = ref(false)
 
 const loadSetupDetails = async () => {
   if (!selectedSetupId.value) {
@@ -964,11 +1046,13 @@ const loadSetupDetails = async () => {
     setupSessionsList.value = []
     playbookContent.value = ''
     playbookContentModified.value = false
+    playbookFlowData.value = null
     return
   }
   try {
+    isLoadingSetupDetails.value = true
     const res = await window.api.setups.getDetails(selectedSetupId.value)
-    if (res.success) {
+    if (res.success && res.data) {
       customColumns.value = res.data.customColumns || []
       setupSessionsList.value = res.data.sessions || []
       if (res.data.playbooks && res.data.playbooks.length > 0) {
@@ -977,9 +1061,23 @@ const loadSetupDetails = async () => {
         playbookContent.value = ''
       }
       playbookContentModified.value = false
+
+      if (res.data.flow && res.data.flow.flowData) {
+        let fd = res.data.flow.flowData
+        if (typeof fd === 'string') {
+          try {
+            fd = JSON.parse(fd)
+          } catch {}
+        }
+        playbookFlowData.value = fd
+      } else {
+        playbookFlowData.value = null
+      }
     }
   } catch (error) {
     console.error('Failed to load setup details:', error)
+  } finally {
+    isLoadingSetupDetails.value = false
   }
 }
 
@@ -992,9 +1090,9 @@ const savePlaybook = async () => {
     })
     if (res.success) {
       playbookContentModified.value = false
-      showAlert('Success', 'Playbook saved successfully.', 'success')
+      showAlert('Success', 'Playbook notes saved successfully.', 'success')
     } else {
-      showAlert('Error', 'Failed to save playbook: ' + res.error, 'error')
+      showAlert('Error', 'Failed to save playbook notes: ' + res.error, 'error')
     }
   } catch (error: any) {
     console.error('Failed to save playbook:', error)
@@ -1002,9 +1100,30 @@ const savePlaybook = async () => {
   }
 }
 
+const savePlaybookFlow = async (data: any) => {
+  if (!selectedSetupId.value) return
+  try {
+    const res = await window.api.setupPlaybookFlows.save({
+      setupId: selectedSetupId.value,
+      flowData: data
+    })
+    if (res.success) {
+      playbookFlowData.value = data
+      showAlert('Success', 'Playbook flowchart saved successfully.', 'success')
+    } else {
+      showAlert('Error', 'Failed to save flowchart: ' + res.error, 'error')
+    }
+  } catch (error: any) {
+    console.error('Failed to save playbook flow:', error)
+    showAlert('Error', 'Failed to save flowchart: ' + (error.message || String(error)), 'error')
+  }
+}
+
 watch(selectedSetupId, () => {
   selectedSessions.value = []
   selectedColumns.value = []
+  sessionsPage.value = 1
+  columnsPage.value = 1
   loadSetupDetails()
 })
 
@@ -1092,14 +1211,24 @@ const deleteSession = async (id: number) => {
   }
 }
 
+// Pagination for Setup Sessions
+const sessionsPage = ref(1)
+const sessionsPageSize = ref(10)
+const paginatedSessions = computed(() => {
+  return paginateItems(setupSessionsList.value, sessionsPage.value, sessionsPageSize.value)
+})
+
 const selectedSessions = ref<number[]>([])
 
 const toggleAllSessions = (e: Event) => {
   const target = e.target as HTMLInputElement
   if (target.checked) {
-    selectedSessions.value = setupSessionsList.value.map(s => s.id)
+    const pageIds = paginatedSessions.value.map(s => s.id)
+    const newSelected = new Set([...selectedSessions.value, ...pageIds])
+    selectedSessions.value = Array.from(newSelected)
   } else {
-    selectedSessions.value = []
+    const pageIds = new Set(paginatedSessions.value.map(s => s.id))
+    selectedSessions.value = selectedSessions.value.filter(id => !pageIds.has(id))
   }
 }
 
@@ -1222,14 +1351,24 @@ const deleteColumn = async (id: number) => {
   }
 }
 
+// Pagination for Custom Columns
+const columnsPage = ref(1)
+const columnsPageSize = ref(10)
+const paginatedColumns = computed(() => {
+  return paginateItems(customColumns.value, columnsPage.value, columnsPageSize.value)
+})
+
 const selectedColumns = ref<number[]>([])
 
 const toggleAllColumns = (e: Event) => {
   const target = e.target as HTMLInputElement
   if (target.checked) {
-    selectedColumns.value = customColumns.value.map(c => c.id)
+    const pageIds = paginatedColumns.value.map(c => c.id)
+    const newSelected = new Set([...selectedColumns.value, ...pageIds])
+    selectedColumns.value = Array.from(newSelected)
   } else {
-    selectedColumns.value = []
+    const pageIds = new Set(paginatedColumns.value.map(c => c.id))
+    selectedColumns.value = selectedColumns.value.filter(id => !pageIds.has(id))
   }
 }
 

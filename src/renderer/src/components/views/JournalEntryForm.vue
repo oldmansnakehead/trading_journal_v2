@@ -263,7 +263,24 @@
           <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
             <!-- Setup Selection -->
             <div>
-              <label class="block text-sm font-semibold text-gray-700 mb-1.5">Setup</label>
+              <div class="flex items-center justify-between mb-1.5">
+                <label class="block text-sm font-semibold text-gray-700">Setup</label>
+                <button
+                  v-if="form.setupId"
+                  type="button"
+                  @click="isPlaybookModalOpen = true"
+                  class="text-xs font-bold text-blue-600 hover:text-blue-700 flex items-center gap-1 hover:underline transition-colors cursor-pointer"
+                  title="View and edit strategy playbook flow"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <rect width="18" height="18" x="3" y="3" rx="2" ry="2"/>
+                    <path d="M7 7h10"/>
+                    <path d="M7 12h10"/>
+                    <path d="M7 17h10"/>
+                  </svg>
+                  <span>View Playbook</span>
+                </button>
+              </div>
               <BaseSelect
                 data-testid="setup-select"
                 v-model="form.setupId"
@@ -1047,6 +1064,14 @@
       :duration="alertModal.duration"
       @close="alertModal.isOpen = false"
     />
+
+    <!-- Playbook Modal -->
+    <PlaybookModal
+      :is-open="isPlaybookModalOpen"
+      :setup-id="form.setupId ? Number(form.setupId) : null"
+      :setup-name="selectedSetupName"
+      @close="isPlaybookModalOpen = false"
+    />
   </div>
 </template>
 
@@ -1056,9 +1081,17 @@ import BaseDateInput from '../ui/BaseDateInput.vue'
 import BaseSelect from '../ui/BaseSelect.vue'
 import BaseMultiSelect from '../ui/BaseMultiSelect.vue'
 import BaseAlertDialog from '../ui/BaseAlertDialog.vue'
+import PlaybookModal from '../ui/PlaybookModal.vue'
 import { useTradeTabsStore, TradeTab } from '../../stores/tradeTabs'
 
 const tradeTabsStore = useTradeTabsStore()
+
+const isPlaybookModalOpen = ref(false)
+
+const selectedSetupName = computed(() => {
+  const found = tradeTabsStore.setups.find((s) => s.id === form.value.setupId)
+  return found ? found.name : ''
+})
 
 // Bind reactive form references to active tab
 const form = computed(() => tradeTabsStore.activeTab.form)

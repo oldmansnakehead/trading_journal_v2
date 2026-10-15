@@ -58,6 +58,22 @@ export const setupPlaybooks = sqliteTable('setup_playbooks', {
     .$defaultFn(() => new Date().toISOString())
 })
 
+// --- Setup Playbook Flows (Vue Flow) ---
+export const setupPlaybookFlows = sqliteTable('setup_playbook_flows', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  setupId: integer('setup_id')
+    .notNull()
+    .unique()
+    .references(() => setups.id, { onDelete: 'cascade' }),
+  flowData: text('flow_data', { mode: 'json' }).notNull(),
+  createdAt: text('created_at')
+    .notNull()
+    .$defaultFn(() => new Date().toISOString()),
+  updatedAt: text('updated_at')
+    .notNull()
+    .$defaultFn(() => new Date().toISOString())
+})
+
 
 // --- Custom Columns ---
 export const customColumns = sqliteTable('custom_columns', {

@@ -69,6 +69,10 @@ const api = {
   },
   setupPlaybooks: {
     save: (data: { setupId: number, content: string }) => ipcRenderer.invoke('setupPlaybooks:save', data)
+  },
+  setupPlaybookFlows: {
+    get: (setupId: number) => ipcRenderer.invoke('setupPlaybookFlows:get', setupId),
+    save: (data: { setupId: number, flowData: any }) => ipcRenderer.invoke('setupPlaybookFlows:save', data)
   }
 }
 

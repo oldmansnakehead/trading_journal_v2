@@ -90,6 +90,10 @@ declare global {
       setupPlaybooks: {
         save: (data: { setupId: number, content: string }) => Promise<any>
       }
+      setupPlaybookFlows: {
+        get: (setupId: number) => Promise<any>
+        save: (data: { setupId: number, flowData: any }) => Promise<any>
+      }
     }
   }
 }

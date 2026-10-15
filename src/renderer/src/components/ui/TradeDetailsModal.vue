@@ -138,10 +138,39 @@
 
           <!-- Images -->
           <div v-if="parsedImages && parsedImages.length > 0" class="bg-white p-5 rounded-xl border border-gray-100 shadow-sm space-y-4 md:col-span-2">
-            <h3 class="font-bold text-gray-900 border-b border-gray-100 pb-2">Screenshots</h3>
+            <div class="flex items-center justify-between border-b border-gray-100 pb-2">
+              <h3 class="font-bold text-gray-900">Screenshots ({{ parsedImages.length }})</h3>
+              <button
+                type="button"
+                @click="showScreenshotsModal = true"
+                class="px-2.5 py-1 text-xs font-bold text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors flex items-center gap-1 cursor-pointer"
+                title="กดดูภาพใหญ่ทั้งหมด (Fullscreen Lightbox)"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/>
+                  <circle cx="12" cy="12" r="3"/>
+                </svg>
+                <span>กดดูภาพใหญ่</span>
+              </button>
+            </div>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div v-for="(img, idx) in parsedImages" :key="idx" class="border border-gray-200 rounded-lg overflow-hidden">
-                <img :src="formatImageUrl(img)" class="w-full object-cover" />
+              <div
+                v-for="(img, idx) in parsedImages"
+                :key="idx"
+                @click="showScreenshotsModal = true"
+                class="relative group border border-gray-200 rounded-lg overflow-hidden cursor-pointer hover:border-blue-400 transition-all hover:shadow-md"
+                title="คลิกเพื่อเปิดดูภาพใหญ่"
+              >
+                <img :src="formatImageUrl(img)" class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-200" />
+                <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1.5 text-white text-xs font-bold backdrop-blur-xs">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="15 3 21 3 21 9"/>
+                    <polyline points="9 21 3 21 3 15"/>
+                    <line x1="21" y1="3" x2="14" y2="10"/>
+                    <line x1="3" y1="21" x2="10" y2="14"/>
+                  </svg>
+                  <span>คลิกเพื่อดูภาพใหญ่</span>
+                </div>
               </div>
             </div>
           </div>
@@ -159,12 +188,19 @@
         </button>
       </div>
     </div>
+
+    <!-- Trade Screenshots Lightbox Modal (ดูภาพใหญ่) -->
+    <TradeScreenshotsModal
+      v-model:show="showScreenshotsModal"
+      :trade-id="props.tradeId"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, watch, computed } from 'vue'
 import { calculateTradeDuration } from '../../utils/duration'
+import TradeScreenshotsModal from './TradeScreenshotsModal.vue'
 
 const props = defineProps<{
   show: boolean
@@ -175,6 +211,7 @@ const emit = defineEmits(['update:show'])
 
 const trade = ref<any>(null)
 const loading = ref(false)
+const showScreenshotsModal = ref(false)
 const customFieldNames = ref<Record<string, string>>({})
 const customFieldTypes = ref<Record<string, string>>({})
 

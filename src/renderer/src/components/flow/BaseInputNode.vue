@@ -12,7 +12,7 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits(['updateNodeInternals'])
-const inputValue = ref(props.data.value || '')
+const inputValue = ref(props.data?.value || '')
 
 // If we wanted to propagate value changes to the node's data in Vue Flow,
 // we could do so via an event or store, but for display this is fine.

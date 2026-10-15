@@ -97,7 +97,11 @@
           </tr>
         </thead>
         <tbody class="text-sm font-medium">
-          <tr class="hover:bg-gray-50 border-b border-gray-100 transition-colors">
+          <tr
+            v-for="item in paginatedRows"
+            :key="item.id"
+            class="hover:bg-gray-50 border-b border-gray-100 transition-colors"
+          >
             <td class="py-4 px-6">
               <input
                 type="checkbox"
@@ -107,115 +111,34 @@
             <td class="py-4 px-4">
               <div class="flex items-center gap-3">
                 <div
-                  class="w-10 h-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold"
+                  class="w-10 h-10 rounded-full flex items-center justify-center font-bold"
+                  :class="item.avatarBg"
                 >
-                  A
+                  {{ item.avatarChar }}
                 </div>
                 <div>
-                  <p class="font-bold text-textPrimary">Amiah Pruitt</p>
-                  <p class="text-xs text-textSecondary">INV-19919</p>
+                  <p class="font-bold text-textPrimary">{{ item.name }}</p>
+                  <p class="text-xs text-textSecondary">{{ item.invoice }}</p>
                 </div>
               </div>
             </td>
             <td class="py-4 px-4 text-textPrimary">
-              <p>21 Sep 2026</p>
-              <p class="text-xs text-textSecondary">2:27 pm</p>
+              <p>{{ item.createDate }}</p>
+              <p class="text-xs text-textSecondary">{{ item.createTime }}</p>
             </td>
             <td class="py-4 px-4 text-textPrimary">
-              <p>14 Nov 2026</p>
-              <p class="text-xs text-textSecondary">9:27 am</p>
+              <p>{{ item.dueDate }}</p>
+              <p class="text-xs text-textSecondary">{{ item.dueTime }}</p>
             </td>
-            <td class="py-4 px-4 text-textPrimary">$2,331.63</td>
-            <td class="py-4 px-4 text-textSecondary">9</td>
+            <td class="py-4 px-4 text-textPrimary">{{ item.amount }}</td>
+            <td class="py-4 px-4 text-textSecondary">{{ item.sent }}</td>
             <td class="py-4 px-4">
               <span
-                class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold bg-success/20 text-success-dark"
-                >Paid</span
+                class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold"
+                :class="item.statusClass"
               >
-            </td>
-            <td class="py-4 px-6 text-right">
-              <button class="text-gray-400 hover:text-gray-700 p-1 rounded hover:bg-gray-200">
-                <i class="ph-bold ph-dots-three-vertical"></i>
-              </button>
-            </td>
-          </tr>
-          <tr class="hover:bg-gray-50 border-b border-gray-100 transition-colors">
-            <td class="py-4 px-6">
-              <input
-                type="checkbox"
-                class="rounded border-gray-300 text-primary focus:ring-primary w-4 h-4 cursor-pointer"
-              />
-            </td>
-            <td class="py-4 px-4">
-              <div class="flex items-center gap-3">
-                <div
-                  class="w-10 h-10 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center font-bold"
-                >
-                  L
-                </div>
-                <div>
-                  <p class="font-bold text-textPrimary">Lawson Bass</p>
-                  <p class="text-xs text-textSecondary">INV-19917</p>
-                </div>
-              </div>
-            </td>
-            <td class="py-4 px-4 text-textPrimary">
-              <p>23 Sep 2026</p>
-              <p class="text-xs text-textSecondary">2:27 pm</p>
-            </td>
-            <td class="py-4 px-4 text-textPrimary">
-              <p>12 Nov 2026</p>
-              <p class="text-xs text-textSecondary">7:27 am</p>
-            </td>
-            <td class="py-4 px-4 text-textPrimary">$2,283.97</td>
-            <td class="py-4 px-4 text-textSecondary">9</td>
-            <td class="py-4 px-4">
-              <span
-                class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold bg-warning/20 text-warning-dark"
-                >Pending</span
-              >
-            </td>
-            <td class="py-4 px-6 text-right">
-              <button class="text-gray-400 hover:text-gray-700 p-1 rounded hover:bg-gray-200">
-                <i class="ph-bold ph-dots-three-vertical"></i>
-              </button>
-            </td>
-          </tr>
-          <tr class="hover:bg-gray-50 border-b border-gray-100 transition-colors">
-            <td class="py-4 px-6">
-              <input
-                type="checkbox"
-                class="rounded border-gray-300 text-primary focus:ring-primary w-4 h-4 cursor-pointer"
-              />
-            </td>
-            <td class="py-4 px-4">
-              <div class="flex items-center gap-3">
-                <div
-                  class="w-10 h-10 rounded-full bg-red-100 text-red-600 flex items-center justify-center font-bold"
-                >
-                  A
-                </div>
-                <div>
-                  <p class="font-bold text-textPrimary">Ariana Lang</p>
-                  <p class="text-xs text-textSecondary">INV-19918</p>
-                </div>
-              </div>
-            </td>
-            <td class="py-4 px-4 text-textPrimary">
-              <p>22 Sep 2026</p>
-              <p class="text-xs text-textSecondary">2:27 pm</p>
-            </td>
-            <td class="py-4 px-4 text-textPrimary">
-              <p>13 Nov 2026</p>
-              <p class="text-xs text-textSecondary">8:27 am</p>
-            </td>
-            <td class="py-4 px-4 text-textPrimary">$2,372.93</td>
-            <td class="py-4 px-4 text-textSecondary">4</td>
-            <td class="py-4 px-4">
-              <span
-                class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold bg-error/20 text-error-dark"
-                >Overdue</span
-              >
+                {{ item.status }}
+              </span>
             </td>
             <td class="py-4 px-6 text-right">
               <button class="text-gray-400 hover:text-gray-700 p-1 rounded hover:bg-gray-200">
@@ -228,38 +151,135 @@
     </div>
 
     <!-- Pagination Footer -->
-    <div
-      class="p-4 border-t border-gray-200 flex flex-col sm:flex-row justify-between items-center gap-4 bg-white mt-auto"
-    >
-      <div class="flex items-center gap-2">
-        <label class="relative inline-flex items-center cursor-pointer">
-          <input type="checkbox" value="" class="sr-only peer" />
-          <div
-            class="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary"
-          ></div>
-        </label>
-        <span class="text-sm font-semibold text-textPrimary">Dense</span>
-      </div>
-      <div class="flex items-center text-sm font-semibold text-textSecondary gap-6">
-        <div class="flex items-center gap-2">
-          Rows per page:
-          <BaseSelect modelValue="5" :options="['5', '10', '25']" />
-        </div>
-        <span>1-5 of 20</span>
-        <div class="flex gap-2">
-          <button class="p-1 hover:bg-gray-100 rounded text-gray-400 cursor-not-allowed">
-            <i class="ph-bold ph-caret-left text-lg"></i>
-          </button>
-          <button class="p-1 hover:bg-gray-100 rounded text-textPrimary">
-            <i class="ph-bold ph-caret-right text-lg"></i>
-          </button>
-        </div>
-      </div>
-    </div>
+    <BasePagination
+      v-model:currentPage="currentPage"
+      v-model:pageSize="pageSize"
+      :totalItems="rows.length"
+      itemLabel="invoices"
+      :pageSizeOptions="[5, 10, 25]"
+      class="mt-auto border-t border-gray-200"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
+import { ref, computed } from 'vue'
+import BasePagination from './BasePagination.vue'
 import BaseSelect from './BaseSelect.vue'
-// DataTable component
+import { paginateItems } from '../../utils/pagination'
+
+const rows = ref([
+  {
+    id: 1,
+    name: 'Amiah Pruitt',
+    invoice: 'INV-19919',
+    avatarBg: 'bg-blue-100 text-blue-600',
+    avatarChar: 'A',
+    createDate: '21 Sep 2026',
+    createTime: '2:27 pm',
+    dueDate: '14 Nov 2026',
+    dueTime: '9:27 am',
+    amount: '$2,331.63',
+    sent: 9,
+    status: 'Paid',
+    statusClass: 'bg-success/20 text-success-dark'
+  },
+  {
+    id: 2,
+    name: 'Lawson Bass',
+    invoice: 'INV-19917',
+    avatarBg: 'bg-purple-100 text-purple-600',
+    avatarChar: 'L',
+    createDate: '23 Sep 2026',
+    createTime: '2:27 pm',
+    dueDate: '12 Nov 2026',
+    dueTime: '7:27 am',
+    amount: '$2,283.97',
+    sent: 9,
+    status: 'Pending',
+    statusClass: 'bg-warning/20 text-warning-dark'
+  },
+  {
+    id: 3,
+    name: 'Ariana Lang',
+    invoice: 'INV-19918',
+    avatarBg: 'bg-red-100 text-red-600',
+    avatarChar: 'A',
+    createDate: '22 Sep 2026',
+    createTime: '2:27 pm',
+    dueDate: '13 Nov 2026',
+    dueTime: '8:27 am',
+    amount: '$2,372.93',
+    sent: 4,
+    status: 'Overdue',
+    statusClass: 'bg-error/20 text-error-dark'
+  },
+  {
+    id: 4,
+    name: 'Corbin Trevino',
+    invoice: 'INV-19916',
+    avatarBg: 'bg-emerald-100 text-emerald-600',
+    avatarChar: 'C',
+    createDate: '24 Sep 2026',
+    createTime: '11:15 am',
+    dueDate: '10 Nov 2026',
+    dueTime: '4:00 pm',
+    amount: '$1,850.00',
+    sent: 2,
+    status: 'Paid',
+    statusClass: 'bg-success/20 text-success-dark'
+  },
+  {
+    id: 5,
+    name: 'Daisy Morgan',
+    invoice: 'INV-19915',
+    avatarBg: 'bg-amber-100 text-amber-600',
+    avatarChar: 'D',
+    createDate: '25 Sep 2026',
+    createTime: '10:00 am',
+    dueDate: '08 Nov 2026',
+    dueTime: '1:30 pm',
+    amount: '$940.50',
+    sent: 5,
+    status: 'Pending',
+    statusClass: 'bg-warning/20 text-warning-dark'
+  },
+  {
+    id: 6,
+    name: 'Ethan Hunt',
+    invoice: 'INV-19914',
+    avatarBg: 'bg-indigo-100 text-indigo-600',
+    avatarChar: 'E',
+    createDate: '26 Sep 2026',
+    createTime: '3:45 pm',
+    dueDate: '05 Nov 2026',
+    dueTime: '12:00 pm',
+    amount: '$3,120.00',
+    sent: 1,
+    status: 'Draft',
+    statusClass: 'bg-gray-200 text-gray-600'
+  },
+  {
+    id: 7,
+    name: 'Fiona Gallagher',
+    invoice: 'INV-19913',
+    avatarBg: 'bg-pink-100 text-pink-600',
+    avatarChar: 'F',
+    createDate: '27 Sep 2026',
+    createTime: '9:10 am',
+    dueDate: '02 Nov 2026',
+    dueTime: '5:00 pm',
+    amount: '$1,430.20',
+    sent: 3,
+    status: 'Paid',
+    statusClass: 'bg-success/20 text-success-dark'
+  }
+])
+
+const currentPage = ref(1)
+const pageSize = ref(5)
+
+const paginatedRows = computed(() => {
+  return paginateItems(rows.value, currentPage.value, pageSize.value)
+})
 </script>
