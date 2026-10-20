@@ -94,6 +94,46 @@ declare global {
         get: (setupId: number) => Promise<any>
         save: (data: { setupId: number, flowData: any }) => Promise<any>
       }
+      updater: {
+        check: () => Promise<{
+          status: 'idle' | 'checking' | 'available' | 'not-available' | 'downloading' | 'downloaded' | 'error'
+          currentVersion: string
+          updateInfo?: {
+            version: string
+            releaseName?: string
+            releaseNotes?: string | Array<{ version: string; note: string | null }>
+            releaseDate?: string
+          } | null
+          progress?: {
+            percent: number
+            bytesPerSecond: number
+            transferred: number
+            total: number
+          } | null
+          error?: string | null
+        }>
+        download: () => Promise<any>
+        install: () => Promise<{ success: boolean }>
+        getStatus: () => Promise<{
+          status: 'idle' | 'checking' | 'available' | 'not-available' | 'downloading' | 'downloaded' | 'error'
+          currentVersion: string
+          updateInfo?: {
+            version: string
+            releaseName?: string
+            releaseNotes?: string | Array<{ version: string; note: string | null }>
+            releaseDate?: string
+          } | null
+          progress?: {
+            percent: number
+            bytesPerSecond: number
+            transferred: number
+            total: number
+          } | null
+          error?: string | null
+        }>
+        getVersion: () => Promise<string>
+        onStatusChange: (callback: (state: any) => void) => () => void
+      }
     }
   }
 }

@@ -3,6 +3,7 @@ import { drizzle } from 'drizzle-orm/better-sqlite3'
 import { migrate } from 'drizzle-orm/better-sqlite3/migrator'
 import { getPaths } from '../paths'
 import { join } from 'path'
+import { existsSync } from 'fs'
 import { app } from 'electron'
 
 let sqliteDb: Database.Database | null = null
@@ -29,11 +30,24 @@ export const getSqliteDb = () => {
 
 export const runMigrations = () => {
   const database = getDb()
-  const migrationsFolder = app.isPackaged
-    ? join(process.resourcesPath, 'app.asar/out/main/db/migrations')
-    : join(__dirname, '../../src/main/db/migrations')
+  let migrationsFolder = join(__dirname, '../../src/main/db/migrations')
 
-  migrate(database, { migrationsFolder })
+  if (app.isPackaged) {
+    const resourceMigrations = join(process.resourcesPath, 'migrations')
+    const asarMigrations = join(process.resourcesPath, 'app.asar/out/main/db/migrations')
+
+    if (existsSync(resourceMigrations)) {
+      migrationsFolder = resourceMigrations
+    } else if (existsSync(asarMigrations)) {
+      migrationsFolder = asarMigrations
+    }
+  }
+
+  try {
+    migrate(database, { migrationsFolder })
+  } catch (err) {
+    console.error('Failed to run database migrations:', err)
+  }
 }
 
 export const checkpointDb = () => {

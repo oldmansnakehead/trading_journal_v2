@@ -498,6 +498,15 @@
           />
         </div>
       </div>
+
+      <!-- App Updates Tab -->
+      <div v-else-if="activeTab === 'updates' || activeTab === 'preferences'" class="flex flex-col gap-6">
+        <div>
+          <h2 class="text-xl font-bold text-gray-900">Application & Updates</h2>
+          <p class="text-sm text-gray-500 mt-1">Check for new releases, changelogs, and manage desktop auto-updates.</p>
+        </div>
+        <AppUpdateCard />
+      </div>
     </div>
 
     <!-- Add Setup Modal -->
@@ -788,6 +797,7 @@ import BaseConfirmModal from '../ui/BaseConfirmModal.vue'
 import BaseAlertDialog from '../ui/BaseAlertDialog.vue'
 import PlaybookFlowEditor from '../ui/PlaybookFlowEditor.vue'
 import BasePagination from '../ui/BasePagination.vue'
+import AppUpdateCard from '../ui/AppUpdateCard.vue'
 import { paginateItems } from '../../utils/pagination'
 import { STANDARD_SESSIONS } from '../../utils/sessions'
 
@@ -850,7 +860,7 @@ const tabs = [
   { id: 'setup_sessions', label: 'Setup Sessions' },
   { id: 'setup_playbooks', label: 'Setup Playbooks' },
   { id: 'custom_columns', label: 'Custom Columns' },
-  { id: 'preferences', label: 'Preferences' }
+  { id: 'updates', label: 'App Updates' }
 ]
 
 const activeTab = ref('setups')

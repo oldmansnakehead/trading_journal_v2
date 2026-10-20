@@ -13,13 +13,23 @@ asarUnpack:
   - resources/**
   - node_modules/better-sqlite3/**
   - node_modules/sharp/**
+extraResources:
+  - from: src/main/db/migrations
+    to: migrations
 win:
+  icon: build/icon.ico
   executableName: trading_journal
+  target:
+    - target: nsis
+      arch:
+        - x64
 nsis:
   artifactName: ${name}-${version}-setup.${ext}
   shortcutName: ${productName}
   uninstallDisplayName: ${productName}
   createDesktopShortcut: always
+  createStartMenuShortcut: true
+  allowToChangeInstallationDirectory: true
   oneClick: false
   perMachine: false
 mac:
@@ -44,5 +54,7 @@ appImage:
 npmRebuild: false
 publish:
   provider: github
-  owner: USERNAME
+  owner: oldmansnakehead
   repo: trading_journal_v2
+  releaseType: release
+

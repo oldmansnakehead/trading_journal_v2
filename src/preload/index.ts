@@ -73,6 +73,20 @@ const api = {
   setupPlaybookFlows: {
     get: (setupId: number) => ipcRenderer.invoke('setupPlaybookFlows:get', setupId),
     save: (data: { setupId: number, flowData: any }) => ipcRenderer.invoke('setupPlaybookFlows:save', data)
+  },
+  updater: {
+    check: () => ipcRenderer.invoke('updater:check'),
+    download: () => ipcRenderer.invoke('updater:download'),
+    install: () => ipcRenderer.invoke('updater:install'),
+    getStatus: () => ipcRenderer.invoke('updater:getStatus'),
+    getVersion: () => ipcRenderer.invoke('updater:getVersion'),
+    onStatusChange: (callback: (state: any) => void) => {
+      const listener = (_event: any, state: any): void => callback(state)
+      ipcRenderer.on('updater:status-changed', listener)
+      return (): void => {
+        ipcRenderer.removeListener('updater:status-changed', listener)
+      }
+    }
   }
 }
 

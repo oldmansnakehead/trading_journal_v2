@@ -1,10 +1,23 @@
 <script setup lang="ts">
-import { onMounted, onUnmounted } from 'vue'
-import { RouterView } from 'vue-router'
+import { ref, onMounted, onUnmounted } from 'vue'
+import { RouterView, useRouter } from 'vue-router'
 import AppSidebar from './components/ui/AppSidebar.vue'
 import { useSidebarStore } from './stores/sidebar'
 
+const router = useRouter()
 const sidebarStore = useSidebarStore()
+
+const updateState = ref<{
+  status: string
+  version?: string
+  percent?: number
+}>({ status: 'idle' })
+
+let unsubUpdater: (() => void) | null = null
+
+const goToSettingsUpdates = () => {
+  router.push('/settings')
+}
 
 // Global keyboard shortcut: Ctrl+B or Cmd+B to toggle sidebar show/hide
 const handleKeyDown = (event: KeyboardEvent) => {
@@ -14,12 +27,42 @@ const handleKeyDown = (event: KeyboardEvent) => {
   }
 }
 
-onMounted(() => {
+onMounted(async () => {
   window.addEventListener('keydown', handleKeyDown)
+
+  if (window.api?.updater) {
+    try {
+      const initial = await window.api.updater.getStatus()
+      if (initial && initial.status) {
+        updateState.value = {
+          status: initial.status,
+          version: initial.updateInfo?.version,
+          percent: initial.progress?.percent
+        }
+      }
+    } catch {
+      // ignore
+    }
+
+    if (window.api.updater.onStatusChange) {
+      unsubUpdater = window.api.updater.onStatusChange((state) => {
+        if (state) {
+          updateState.value = {
+            status: state.status,
+            version: state.updateInfo?.version,
+            percent: state.progress?.percent
+          }
+        }
+      })
+    }
+  }
 })
 
 onUnmounted(() => {
   window.removeEventListener('keydown', handleKeyDown)
+  if (unsubUpdater) {
+    unsubUpdater()
+  }
 })
 </script>
 
@@ -67,9 +110,42 @@ onUnmounted(() => {
           </button>
         </div>
 
-        <div class="flex items-center gap-2 text-xs font-medium text-gray-400">
-          <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-          <span>Trading Journal v2</span>
+        <div class="flex items-center gap-3">
+          <!-- Update Indicator Badge -->
+          <button
+            v-if="updateState.status === 'available'"
+            type="button"
+            @click="goToSettingsUpdates"
+            class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-blue-50 border border-blue-200 text-blue-700 hover:bg-blue-100 text-xs font-semibold transition-all cursor-pointer shadow-2xs"
+            title="Click to view update details in Settings"
+          >
+            <i class="ph ph-sparkle text-sm text-blue-600"></i>
+            <span>Update v{{ updateState.version }} Available</span>
+          </button>
+
+          <div
+            v-else-if="updateState.status === 'downloading'"
+            class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-indigo-50 border border-indigo-200 text-indigo-700 text-xs font-semibold shadow-2xs"
+          >
+            <i class="ph ph-cloud-arrow-down text-sm text-indigo-600 animate-bounce"></i>
+            <span>Downloading {{ updateState.percent || 0 }}%</span>
+          </div>
+
+          <button
+            v-else-if="updateState.status === 'downloaded'"
+            type="button"
+            @click="goToSettingsUpdates"
+            class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-50 border border-emerald-300 text-emerald-700 hover:bg-emerald-100 text-xs font-semibold transition-all cursor-pointer shadow-2xs animate-pulse"
+            title="Update ready! Click to restart & install"
+          >
+            <i class="ph ph-check-circle text-sm text-emerald-600"></i>
+            <span>Update Ready (Restart)</span>
+          </button>
+
+          <div class="flex items-center gap-2 text-xs font-medium text-gray-400">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+            <span>Trading Journal v2</span>
+          </div>
         </div>
       </header>
 
