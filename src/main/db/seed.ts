@@ -5,6 +5,7 @@ import {
   setupSessions,
   setupPlaybooks,
   customColumns,
+  setupCustomColumns,
   journalEntries
 } from './schema'
 import fs from 'fs'
@@ -23,6 +24,7 @@ export interface SeedJsonStructure {
       type: string
       options?: string[]
       reportFilter?: boolean
+      description?: string
     }>
   }>
   journalEntries: Array<{
@@ -72,6 +74,7 @@ export async function seed(customSeedFilePath?: string) {
   try {
     console.log('Clearing existing data...')
     db.delete(journalEntries).run()
+    db.delete(setupCustomColumns).run()
     db.delete(customColumns).run()
     db.delete(setupPlaybooks).run()
     db.delete(setupSessions).run()
@@ -91,6 +94,7 @@ export async function seed(customSeedFilePath?: string) {
 
     console.log(`Inserting ${seedData.setups?.length || 0} setups...`)
     const setupMap = new Map<string, number>()
+    const colByNameMap = new Map<string, number>()
     const customColMap = new Map<string, number>() // `${setupId}:${colName}` -> colId
 
     for (const setupItem of seedData.setups || []) {
@@ -129,19 +133,36 @@ export async function seed(customSeedFilePath?: string) {
       }
 
       if (setupItem.customColumns && setupItem.customColumns.length > 0) {
-        for (const col of setupItem.customColumns) {
-          const insertedCol = db
-            .insert(customColumns)
+        for (let i = 0; i < setupItem.customColumns.length; i++) {
+          const col = setupItem.customColumns[i]
+          let colId = colByNameMap.get(col.name)
+          if (!colId) {
+            const insertedCol = db
+              .insert(customColumns)
+              .values({
+                setupId: null,
+                name: col.name,
+                type: col.type,
+                options: col.options || null,
+                reportFilter: !!col.reportFilter,
+                description: col.description || null
+              })
+              .returning()
+              .get()
+            colId = insertedCol.id
+            colByNameMap.set(col.name, colId)
+          }
+
+          db.insert(setupCustomColumns)
             .values({
               setupId: insertedSetup.id,
-              name: col.name,
-              type: col.type,
-              options: col.options || null,
-              reportFilter: !!col.reportFilter
+              customColumnId: colId,
+              orderIndex: i,
+              isRequired: false
             })
-            .returning()
-            .get()
-          customColMap.set(`${insertedSetup.id}:${col.name}`, insertedCol.id)
+            .run()
+
+          customColMap.set(`${insertedSetup.id}:${col.name}`, colId)
         }
       }
     }

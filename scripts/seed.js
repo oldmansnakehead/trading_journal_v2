@@ -74,12 +74,13 @@ async function runSeed() {
   console.log('🧹 Clearing existing records in all tables...')
   sqlite.exec(`
     DELETE FROM journal_entries;
+    DELETE FROM setup_custom_columns;
     DELETE FROM custom_columns;
     DELETE FROM setup_playbooks;
     DELETE FROM setup_sessions;
     DELETE FROM setups;
     DELETE FROM symbols;
-    DELETE FROM sqlite_sequence WHERE name IN ('journal_entries', 'custom_columns', 'setup_playbooks', 'setup_sessions', 'setups', 'symbols');
+    DELETE FROM sqlite_sequence WHERE name IN ('journal_entries', 'setup_custom_columns', 'custom_columns', 'setup_playbooks', 'setup_sessions', 'setups', 'symbols');
   `)
 
   // 4. Insert Symbols
@@ -116,11 +117,17 @@ async function runSeed() {
   `)
 
   const insertColStmt = sqlite.prepare(`
-    INSERT INTO custom_columns (setup_id, name, type, options, report_filter, created_at, updated_at)
-    VALUES (?, ?, ?, ?, ?, datetime('now'), datetime('now'))
+    INSERT INTO custom_columns (setup_id, name, type, options, report_filter, description, created_at, updated_at)
+    VALUES (?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))
+  `)
+
+  const insertLinkStmt = sqlite.prepare(`
+    INSERT INTO setup_custom_columns (setup_id, custom_column_id, is_required, order_index, created_at, updated_at)
+    VALUES (?, ?, 0, ?, datetime('now'), datetime('now'))
   `)
 
   const setupMap = new Map() // name -> id
+  const colByNameMap = new Map() // name -> id
   const customColMap = new Map() // setupId:colName -> id
 
   const insertAllSetups = sqlite.transaction((setupItems) => {
@@ -143,11 +150,26 @@ async function runSeed() {
 
       // Custom Columns
       if (s.customColumns && Array.isArray(s.customColumns)) {
-        for (const col of s.customColumns) {
-          const optionsJson = col.options ? JSON.stringify(col.options) : null
-          const reportFilterVal = col.reportFilter ? 1 : 0
-          const colInfo = insertColStmt.run(setupId, col.name, col.type, optionsJson, reportFilterVal)
-          const colId = Number(colInfo.lastInsertRowid)
+        for (let order = 0; order < s.customColumns.length; order++) {
+          const col = s.customColumns[order]
+          let colId = colByNameMap.get(col.name)
+          if (!colId) {
+            const optionsJson = col.options ? JSON.stringify(col.options) : null
+            const reportFilterVal = col.reportFilter ? 1 : 0
+            const colInfo = insertColStmt.run(
+              null, // Shared in library
+              col.name,
+              col.type,
+              optionsJson,
+              reportFilterVal,
+              col.description || null
+            )
+            colId = Number(colInfo.lastInsertRowid)
+            colByNameMap.set(col.name, colId)
+          }
+
+          // Link column to setup in setup_custom_columns
+          insertLinkStmt.run(setupId, colId, order)
           customColMap.set(`${setupId}:${col.name}`, colId)
         }
       }

@@ -182,12 +182,24 @@ src/
 - **Setup Playbook (ผูกกับ Setup)**
   - `setup_id` (FK)
   - `content` (Text): เป็นฟิลด์ที่ให้ผู้ใช้ระบุข้อความยาวๆ เพื่อจดสมมติฐาน กฎเกณฑ์ และเงื่อนไขต่างๆ ของ Setup นั้นอย่างละเอียด เพื่อให้กลับมาอ่านแล้วไม่ลืม
-- **Custom Columns (ผูกกับ Setup)**
-  - **จุดเด่น:** ระบบออกแบบมาให้ผู้ใช้สามารถ **เพิ่มคอลัมน์กี่รายการก็ได้ (ไม่จำกัดจำนวน)** เพื่อสร้างฟิลด์ทดสอบของตัวเองได้อย่างอิสระ
-  - `setup_id` (FK)
-  - `name` (String): ชื่อคอลัมน์ที่ผู้ใช้ต้องการตั้ง
-  - `type` (Enum): ชนิดของข้อมูลที่เลือกได้อิสระ ได้แก่ `checkbox`, `multiple_selector`, `single_selector`, `number`, `string`, `boolean`
-  - `report_filter` (Boolean): หากติ๊กเป็น `true` คอลัมน์ที่สร้างขึ้นมาใหม่นี้ จะไปปรากฏเป็นตัวกรอง (Filter) ในหน้ารายงานให้ใช้งานด้วย
+- **Custom Columns (รองรับทั้งแบบ Shared ข้าม Setup และแบบเฉพาะ Setup)**
+  - **จุดเด่น:** ระบบออกแบบมาให้ผู้ใช้สามารถ **สร้างคอลัมน์และกำหนดชุดตัวเลือก (Options) ครั้งเดียว แล้วนำไปแชร์ใช้งานร่วมกันได้กับหลาย Setup (Shared Library)** เพื่อรักษามาตรฐานชื่อและค่าตัวเลือกให้ตรงกัน หรือจะสร้างคอลัมน์เฉพาะของ Setup ใด Setup หนึ่งก็ได้
+  - **โครงสร้างข้อมูลและการเชื่อมโยง (Many-to-Many Architecture):**
+    - **Master Column Definitions (`custom_columns`):**
+      - `name` (String): ชื่อคอลัมน์ เช่น `Zone`, `Entry Confirmation`, `HTF Bias`
+      - `type` (Enum): `single_selector`, `multiple_selector`, `checkbox`, `number`, `string`, `boolean`
+      - `options` (JSON Array): รายการตัวเลือกสำหรับ Selector เช่น `["FVG", "OB", "BREAKER BLOCK"]`
+      - `report_filter` (Boolean): หากติ๊กเป็น `true` จะไปปรากฏเป็นตัวกรองในหน้า Dashboard และรายงาน
+      - `description` (Text): คำอธิบายจุดประสงค์ของคอลัมน์
+    - **ตารางเชื่อม Setup กับ Custom Column (`setup_custom_columns` Junction Table):**
+      - `setup_id` (FK): อ้างอิงตาราง Setups
+      - `custom_column_id` (FK): อ้างอิงตาราง Custom Columns
+      - `is_required` (Boolean): กำหนดว่าจำเป็นต้องกรอกในหน้านั้นหรือไม่
+      - `order_index` (Integer): ลำดับการแสดงผลในฟอร์มของ Setup นั้น
+    - **ประโยชน์สำคัญ:**
+      1. **ขจัดความซ้ำซ้อน:** ไม่ต้องสร้างคอลัมน์ `Zone` ซ้ำทุกครั้งที่มี Setup ใหม่
+      2. **มาตรฐานชื่อและตัวเลือก:** ป้องกันปัญหา Typo (เช่น พิมพ์ `fvg`, `FVG`, `Fair Value Gap` สลับกัน)
+      3. **วิเคราะห์เปรียบเทียบข้ามระบบ:** สามารถดึงค่า `Zone = 'FVG'` ไปจัดอันดับและวิเคราะห์ Win Rate / Loss Rate ทั้งในระดับภาพรวมของทุก Setup หรือแยกเฉพาะแต่ละ Setup ได้อย่างแม่นยำ
 - **Symbols** (ใช้ร่วมกันทุก Setup ไม่ต้องผูก)
   - `name` (String): เช่น XAUUSD, EURUSD
 
@@ -270,6 +282,24 @@ src/
   - **1-Click Copy AI Prompt:** ปุ่มลัดคัดลอก Prompt และข้อมูลสรุปทั้งหมดลง Clipboard ทันที เพื่อนำไป Paste ใน ChatGPT, Claude, หรือ Gemini ได้ในคลิกเดียว
   - **Machine-Readable JSON (`.json`):** ส่งออกข้อมูลแบบมีโครงสร้างระบุ schemaVersion สำหรับเชื่อมต่อกับระบบอัตโนมัติหรือ AI Agents
 - **Export Image:** จับภาพหน้าจอแดชบอร์ดความละเอียดสูงเป็น PNG (ตัดปุ่มที่กำกับด้วย class `export-exclude` ออกจากภาพโดยอัตโนมัติ)
+
+### 13.5. การจัดอันดับและวิเคราะห์สถิติ Custom Column (Custom Attribute Performance & Win/Loss Ranking)
+
+- **เป้าหมาย:** วิเคราะห์ว่าค่าตัวเลือกใน Custom Column (เช่น คอลัมน์ `Zone` ที่มีค่า `FVG`, `OB`, `BREAKER BLOCK`) ค่าใดมี Edge สูงที่สุด และให้อัตราการชนะ (Win Rate) หรือผลตอบแทนดีที่สุด
+- **ส่วนการเลือกคอลัมน์วิเคราะห์ (Attribute Selector):**
+  - Dropdown ให้ผู้ใช้เลือก Custom Column ที่เป็นประเภท Selector หรือ Categorical (เช่น `Zone`, `Entry Confirmation`, `Market Bias`)
+- **ตารางจัดอันดับสถิติ (Custom Attribute Ranking Table):**
+  - **Rank / Value:** แสดงค่าตัวเลือก เช่น `BREAKER BLOCK`, `FVG`, `OB`
+  - **จำนวนไม้ (Trades) & % Share:** จำนวนไม้ที่เข้าด้วยค่านั้น และคิดเป็นกี่เปอร์เซ็นต์ของไม้ทั้งหมด
+  - **Win Rate (%) & Loss Rate (%):** อัตราส่วนชนะและแพ้ แสดงพร้อมแถบเปรียบเทียบสัดส่วน (Win/Loss/BE Visual Bar)
+  - **Break Even Rate (%):** สัดส่วนไม้ที่จบเสมอทุน
+  - **Avg Realized RR:** ค่าเฉลี่ย Risk:Reward ที่ทำได้จริง
+  - **Total Net R / Net PnL:** กำไรสะสมในหน่วย R และจำนวนเงิน ($)
+  - **Profit Factor:** Gross Profit / Gross Loss
+- **ความยืดหยุ่นในการกรอง (Multi-Scope Filtering):**
+  - **Cross-Strategy View (ภาพรวมทุก Setup):** ดูสถิติรวมของ `Zone` จากทุกกลยุทธ์ เพื่อตอบคำถามว่าในภาพรวม FVG หรือ OB ทำเงินได้ดีกว่ากัน
+  - **Setup-Specific View (เจาะจงเฉพาะ Setup):** ทำงานร่วมกับ `TradeFiltersBar` เพื่อดูว่าเมื่อกรองเฉพาะ Setup หนึ่งแล้ว ค่าของคอลัมน์ `Zone` มีผลลัพธ์เป็นอย่างไร
+- **Sorting & Highlighting:** รองรับการคลิกหัวตารางเพื่อจัดอันดับตาม Win Rate, Expectancy, หรือ Net PnL พร้อมไฮไลท์ค่าตัวเลือกที่เป็น "Top Performer" ประจำคอลัมน์นั้น
 
 ---
 

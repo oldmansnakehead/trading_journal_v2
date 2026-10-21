@@ -79,12 +79,31 @@ export const setupPlaybookFlows = sqliteTable('setup_playbook_flows', {
 export const customColumns = sqliteTable('custom_columns', {
   id: integer('id').primaryKey({ autoIncrement: true }),
   setupId: integer('setup_id')
-    .notNull()
     .references(() => setups.id, { onDelete: 'cascade' }),
   name: text('name').notNull(),
   type: text('type').notNull(), // checkbox, multiple_selector, single_selector, number, string, boolean
   options: text('options', { mode: 'json' }), // JSON Array of strings for selectors
   reportFilter: integer('report_filter', { mode: 'boolean' }).notNull().default(false),
+  description: text('description'),
+  createdAt: text('created_at')
+    .notNull()
+    .$defaultFn(() => new Date().toISOString()),
+  updatedAt: text('updated_at')
+    .notNull()
+    .$defaultFn(() => new Date().toISOString())
+})
+
+// --- Setup Custom Columns (Junction Table for M:N) ---
+export const setupCustomColumns = sqliteTable('setup_custom_columns', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  setupId: integer('setup_id')
+    .notNull()
+    .references(() => setups.id, { onDelete: 'cascade' }),
+  customColumnId: integer('custom_column_id')
+    .notNull()
+    .references(() => customColumns.id, { onDelete: 'cascade' }),
+  isRequired: integer('is_required', { mode: 'boolean' }).notNull().default(false),
+  orderIndex: integer('order_index').notNull().default(0),
   createdAt: text('created_at')
     .notNull()
     .$defaultFn(() => new Date().toISOString()),

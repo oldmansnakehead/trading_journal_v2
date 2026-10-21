@@ -18,8 +18,10 @@ import { getPaths } from './paths'
 function createWindow(): BrowserWindow {
   // Create the browser window.
   const win = new BrowserWindow({
-    width: 900,
-    height: 670,
+    width: 1280,
+    height: 800,
+    minWidth: 900,
+    minHeight: 670,
     show: false,
     autoHideMenuBar: true,
     ...(process.platform === 'linux' ? { icon } : {}),
@@ -30,6 +32,7 @@ function createWindow(): BrowserWindow {
   })
 
   win.on('ready-to-show', () => {
+    win.maximize()
     win.show()
   })
 

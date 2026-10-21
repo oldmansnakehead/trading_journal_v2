@@ -78,10 +78,14 @@ declare global {
         }>
       }
       customColumns: {
-        list: (setupId: number) => Promise<any>
+        list: (setupId?: number | null) => Promise<any>
+        listLibrary: () => Promise<any>
         create: (data: any) => Promise<any>
         update: (id: number, data: any) => Promise<any>
         delete: (id: number) => Promise<any>
+        linkSetup: (data: { setupId: number; customColumnId: number; isRequired?: boolean; orderIndex?: number }) => Promise<any>
+        unlinkSetup: (data: { setupId: number; customColumnId: number }) => Promise<any>
+        batchSyncSetup: (data: { setupId: number; columnIds: number[] }) => Promise<any>
       }
       setupSessions: {
         create: (data: any) => Promise<any>

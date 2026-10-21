@@ -974,6 +974,15 @@
       </div>
     </div>
 
+    <!-- Custom Attribute Ranking (e.g. Zone: FVG vs OB vs Breaker Block) -->
+    <div class="mb-8">
+      <CustomAttributeRankingCard
+        :trades="filteredTrades"
+        :availableColumns="dashboardCustomColumns"
+        :statMode="statMode"
+      />
+    </div>
+
     <!-- Trades Table -->
     <div class="mt-8 bg-white rounded-2xl shadow-sm border border-gray-100 p-6 overflow-hidden">
       <!-- Table Header & Batch Actions -->
@@ -1319,6 +1328,7 @@ import InfoTooltip from '../ui/InfoTooltip.vue'
 import CalendarView from '../ui/CalendarView.vue'
 import BasePagination from '../ui/BasePagination.vue'
 import ExportExcelButton from '../ui/ExportExcelButton.vue'
+import CustomAttributeRankingCard from '../ui/CustomAttributeRankingCard.vue'
 import { calculateTradeDuration } from '../../utils/duration'
 import { filterTrades } from '../../utils/tradeFilters'
 import {
@@ -1623,6 +1633,7 @@ const filters = ref({
   customFields: {} as Record<string, string>
 })
 const allReportCustomColumns = ref<any[]>([])
+const dashboardCustomColumns = ref<any[]>([])
 const allSetupSessions = ref<string[]>([])
 const reportCustomColumns = computed(() => {
   if (filters.value.setup === 'all') return []
@@ -1860,6 +1871,18 @@ const fetchData = async () => {
     }
     allReportCustomColumns.value = cols
     allSetupSessions.value = Array.from(setupSessionsSet)
+
+    // Fetch master custom columns library for attribute performance ranking
+    try {
+      const libColsRes = await window.api?.customColumns?.listLibrary?.()
+      if (libColsRes?.success && Array.isArray(libColsRes.data)) {
+        dashboardCustomColumns.value = libColsRes.data
+      } else {
+        dashboardCustomColumns.value = cols
+      }
+    } catch {
+      dashboardCustomColumns.value = cols
+    }
   } catch (err) {
     console.error('Failed to fetch data:', err)
   }

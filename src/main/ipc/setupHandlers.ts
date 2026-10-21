@@ -1,7 +1,7 @@
 import { ipcMain } from 'electron'
 import { getDb } from '../db/client'
-import { setups, setupSessions, setupPlaybooks, setupPlaybookFlows, customColumns } from '../db/schema'
-import { eq } from 'drizzle-orm'
+import { setups, setupSessions, setupPlaybooks, setupPlaybookFlows, customColumns, setupCustomColumns } from '../db/schema'
+import { eq, asc } from 'drizzle-orm'
 
 export const registerSetupHandlers = () => {
   // Get all setups
@@ -55,11 +55,46 @@ export const registerSetupHandlers = () => {
         .all()
       const playbooks = db.select().from(setupPlaybooks).where(eq(setupPlaybooks.setupId, parsedSetupId)).all()
       const flows = db.select().from(setupPlaybookFlows).where(eq(setupPlaybookFlows.setupId, parsedSetupId)).all()
-      const columns = db
+      // Fetch custom columns linked via setup_custom_columns junction table
+      const linkedColumns = db
+        .select({
+          id: customColumns.id,
+          setupId: setupCustomColumns.setupId,
+          name: customColumns.name,
+          type: customColumns.type,
+          options: customColumns.options,
+          reportFilter: customColumns.reportFilter,
+          description: customColumns.description,
+          isRequired: setupCustomColumns.isRequired,
+          orderIndex: setupCustomColumns.orderIndex,
+          createdAt: customColumns.createdAt,
+          updatedAt: customColumns.updatedAt
+        })
+        .from(setupCustomColumns)
+        .innerJoin(customColumns, eq(setupCustomColumns.customColumnId, customColumns.id))
+        .where(eq(setupCustomColumns.setupId, parsedSetupId))
+        .orderBy(asc(setupCustomColumns.orderIndex))
+        .all()
+
+      // Legacy fallback for any columns having direct setupId
+      const directColumns = db
         .select()
         .from(customColumns)
         .where(eq(customColumns.setupId, parsedSetupId))
         .all()
+
+      const seenIds = new Set(linkedColumns.map((c) => c.id))
+      const columns = [...linkedColumns]
+      for (const dc of directColumns) {
+        if (!seenIds.has(dc.id)) {
+          columns.push({
+            ...dc,
+            setupId: dc.setupId ?? parsedSetupId,
+            isRequired: false,
+            orderIndex: columns.length
+          })
+        }
+      }
 
       let parsedFlow: any = null
       if (flows.length > 0 && flows[0]) {

@@ -383,119 +383,319 @@
 
       <!-- Custom Columns Tab -->
       <div v-else-if="activeTab === 'custom_columns'" class="flex flex-col gap-6">
-        <div class="flex justify-between items-center">
+        <!-- Sub-tabs: 'setup_columns' | 'library' -->
+        <div class="flex flex-wrap justify-between items-center gap-4 pb-2 border-b border-gray-100">
           <div>
             <h2 class="text-xl font-bold text-gray-900">Custom Columns</h2>
-            <p class="text-sm text-gray-500 mt-1">Add custom fields to your journal entries.</p>
+            <p class="text-sm text-gray-500 mt-1">Manage reusable column library and configure columns for each trading setup.</p>
           </div>
-          <div class="flex items-center gap-4">
-            <div class="w-48">
-              <BaseSelect
-                id="setup-select"
-                v-model="selectedSetupId"
-                :options="setupOptions"
-                placeholder="Select Setup"
-              />
-            </div>
+
+          <!-- View Toggle Pills -->
+          <div class="bg-gray-100 p-1 rounded-xl flex items-center gap-1 text-xs font-bold">
             <button
-              v-if="selectedColumns.length > 0"
-              @click="deleteSelectedColumns"
-              class="bg-red-50 hover:bg-red-100 text-red-600 px-4 py-2 rounded-lg font-bold text-sm transition-colors shadow-sm border border-red-200"
+              type="button"
+              @click="customColumnSubTab = 'setup_columns'"
+              :class="[
+                'px-3 py-1.5 rounded-lg transition-all',
+                customColumnSubTab === 'setup_columns'
+                  ? 'bg-white text-gray-900 shadow-xs'
+                  : 'text-gray-500 hover:text-gray-900'
+              ]"
             >
-              Delete Selected ({{ selectedColumns.length }})
+              Setup Columns
             </button>
             <button
-              @click="openAddColumnModal"
-              :disabled="!selectedSetupId"
-              class="bg-gray-900 hover:bg-gray-800 disabled:bg-gray-400 text-white px-4 py-2 rounded-lg font-bold text-sm flex items-center gap-2 transition-colors shadow-sm"
+              type="button"
+              @click="switchToLibraryTab"
+              :class="[
+                'px-3 py-1.5 rounded-lg transition-all',
+                customColumnSubTab === 'library'
+                  ? 'bg-white text-gray-900 shadow-xs'
+                  : 'text-gray-500 hover:text-gray-900'
+              ]"
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2.5"
-                stroke-linecap="round"
-                stroke-linejoin="round"
+              Master Library ({{ libraryColumns.length }})
+            </button>
+          </div>
+        </div>
+
+        <!-- 1. Setup Columns View -->
+        <div v-if="customColumnSubTab === 'setup_columns'" class="flex flex-col gap-6">
+          <div class="flex flex-wrap justify-between items-center gap-4">
+            <div class="flex items-center gap-3">
+              <span class="text-sm font-semibold text-gray-700">Setup:</span>
+              <div class="w-56">
+                <BaseSelect
+                  id="setup-select"
+                  v-model="selectedSetupId"
+                  :options="setupOptions"
+                  placeholder="Select Setup"
+                />
+              </div>
+            </div>
+
+            <div class="flex items-center gap-2">
+              <button
+                v-if="selectedColumns.length > 0"
+                @click="deleteSelectedColumns"
+                class="bg-red-50 hover:bg-red-100 text-red-600 px-3 py-2 rounded-lg font-bold text-xs transition-colors shadow-sm border border-red-200"
               >
+                Delete Selected ({{ selectedColumns.length }})
+              </button>
+
+              <button
+                @click="openLinkLibraryModal"
+                :disabled="!selectedSetupId"
+                class="bg-blue-50 hover:bg-blue-100 disabled:bg-gray-100 disabled:text-gray-400 text-blue-700 px-4 py-2 rounded-lg font-bold text-sm flex items-center gap-2 transition-colors border border-blue-200 shadow-xs"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+                  <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+                </svg>
+                Link from Library
+              </button>
+
+              <button
+                @click="openAddColumnModal('setup')"
+                :disabled="!selectedSetupId"
+                class="bg-gray-900 hover:bg-gray-800 disabled:bg-gray-400 text-white px-4 py-2 rounded-lg font-bold text-sm flex items-center gap-2 transition-colors shadow-sm"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M5 12h14" />
+                  <path d="M12 5v14" />
+                </svg>
+                New Column
+              </button>
+            </div>
+          </div>
+
+          <div v-if="!selectedSetupId" class="text-center py-10 border border-dashed border-gray-300 rounded-xl mt-2">
+            <p class="text-gray-500 font-medium">Please select a Setup first to manage its custom columns.</p>
+          </div>
+          <div v-else-if="customColumns.length === 0" class="text-center py-10 border border-dashed border-gray-300 rounded-xl mt-2 flex flex-col items-center gap-3">
+            <p class="text-gray-500 font-medium">No custom columns linked to this setup yet.</p>
+            <div class="flex gap-3">
+              <BaseButton variant="outline" size="sm" @click="openLinkLibraryModal">
+                Link existing from Library
+              </BaseButton>
+              <BaseButton variant="primary" size="sm" @click="openAddColumnModal('setup')">
+                Create new Column
+              </BaseButton>
+            </div>
+          </div>
+          <div v-else class="overflow-x-auto mt-2 rounded-xl border border-gray-200 bg-white">
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr
+                  class="bg-gray-50 border-b border-gray-200 text-gray-500 text-xs font-bold uppercase tracking-wider"
+                >
+                  <th class="py-3 px-4 w-12 text-center">
+                    <input
+                      type="checkbox"
+                      :checked="paginatedColumns.length > 0 && paginatedColumns.every(c => selectedColumns.includes(c.id))"
+                      @change="toggleAllColumns"
+                      class="rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                    />
+                  </th>
+                  <th class="py-3 px-4">Column Name</th>
+                  <th class="py-3 px-4">Type</th>
+                  <th class="py-3 px-4">Options</th>
+                  <th class="py-3 px-4">Report Filter</th>
+                  <th class="py-3 px-4 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr
+                  class="border-b border-gray-100 hover:bg-gray-50/50 transition-colors"
+                  v-for="col in paginatedColumns"
+                  :key="col.id"
+                >
+                  <td class="py-4 px-4 text-center">
+                    <input type="checkbox" :value="col.id" v-model="selectedColumns" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
+                  </td>
+                  <td class="py-4 px-4 font-semibold text-sm text-gray-900">
+                    <div>{{ col.name }}</div>
+                    <div v-if="col.description" class="text-xs text-gray-400 font-normal mt-0.5">{{ col.description }}</div>
+                  </td>
+                  <td class="py-4 px-4 text-sm text-gray-600 capitalize">
+                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-700">
+                      {{ col.type.replace('_', ' ') }}
+                    </span>
+                  </td>
+                  <td class="py-4 px-4 text-xs text-gray-500 max-w-xs">
+                    <div v-if="col.options && col.options.length > 0" class="flex flex-wrap gap-1">
+                      <span
+                        v-for="(opt, oIdx) in col.options.slice(0, 3)"
+                        :key="oIdx"
+                        class="px-1.5 py-0.5 bg-blue-50 text-blue-700 rounded text-[11px] font-medium"
+                      >
+                        {{ opt }}
+                      </span>
+                      <span v-if="col.options.length > 3" class="text-[11px] text-gray-400 font-medium">
+                        +{{ col.options.length - 3 }} more
+                      </span>
+                    </div>
+                    <span v-else class="text-gray-400 italic">-</span>
+                  </td>
+                  <td class="py-4 px-4">
+                    <div 
+                      :class="col.reportFilter ? 'bg-blue-600' : 'bg-gray-300'"
+                      class="w-10 h-5 rounded-full relative transition-colors"
+                    >
+                      <div
+                        class="w-3.5 h-3.5 bg-white rounded-full absolute top-[3px] transition-all"
+                        :class="col.reportFilter ? 'left-[22px]' : 'left-[3px]'"
+                      ></div>
+                    </div>
+                  </td>
+                  <td class="py-4 px-4 text-right whitespace-nowrap">
+                    <button @click="editColumn(col)" class="text-blue-500 hover:text-blue-700 font-semibold text-sm mr-3">
+                      Edit
+                    </button>
+                    <button @click="unlinkColumn(col.id)" class="text-amber-600 hover:text-amber-800 font-semibold text-sm mr-3" title="Unlink from this setup">
+                      Unlink
+                    </button>
+                    <button @click="deleteColumn(col.id)" class="text-red-500 hover:text-red-700 font-semibold text-sm">
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+
+            <BasePagination
+              v-if="customColumns.length > 0"
+              v-model:currentPage="columnsPage"
+              v-model:pageSize="columnsPageSize"
+              :totalItems="customColumns.length"
+              itemLabel="columns"
+              :pageSizeOptions="[5, 10, 20]"
+            />
+          </div>
+        </div>
+
+        <!-- 2. Master Library View -->
+        <div v-else class="flex flex-col gap-6">
+          <div class="flex flex-wrap justify-between items-center gap-4">
+            <div class="flex-1 max-w-sm">
+              <BaseInput
+                id="library-search"
+                v-model="librarySearchQuery"
+                placeholder="Search master columns..."
+              />
+            </div>
+
+            <button
+              @click="openAddColumnModal('library')"
+              class="bg-gray-900 hover:bg-gray-800 text-white px-4 py-2 rounded-lg font-bold text-sm flex items-center gap-2 transition-colors shadow-sm"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M5 12h14" />
                 <path d="M12 5v14" />
               </svg>
-              Add Column
+              New Master Column
             </button>
           </div>
-        </div>
 
-        <div v-if="!selectedSetupId" class="text-center py-8 border border-dashed border-gray-300 rounded-xl mt-4">
-          <p class="text-gray-500 font-medium">Please select a Setup first to manage its custom columns.</p>
-        </div>
-        <div v-else-if="customColumns.length === 0" class="text-center py-8 border border-dashed border-gray-300 rounded-xl mt-4">
-          <p class="text-gray-500 font-medium">No custom columns found for this setup.</p>
-        </div>
-        <div v-else class="overflow-x-auto mt-4 rounded-xl border border-gray-200 bg-white">
-          <table class="w-full text-left border-collapse">
-            <thead>
-              <tr
-                class="bg-gray-50 border-b border-gray-200 text-gray-500 text-xs font-bold uppercase tracking-wider"
-              >
-                <th class="py-3 px-4 w-12 text-center">
-                  <input
-                    type="checkbox"
-                    :checked="paginatedColumns.length > 0 && paginatedColumns.every(c => selectedColumns.includes(c.id))"
-                    @change="toggleAllColumns"
-                    class="rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
-                  />
-                </th>
-                <th class="py-3 px-4">Column Name</th>
-                <th class="py-3 px-4">Type</th>
-                <th class="py-3 px-4">Report Filter</th>
-                <th class="py-3 px-4 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr
-                class="border-b border-gray-100 hover:bg-gray-50/50 transition-colors"
-                v-for="col in paginatedColumns"
-                :key="col.id"
-              >
-                <td class="py-4 px-4 text-center">
-                  <input type="checkbox" :value="col.id" v-model="selectedColumns" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
-                </td>
-                <td class="py-4 px-4 font-semibold text-sm text-gray-900">{{ col.name }}</td>
-                <td class="py-4 px-4 text-sm text-gray-600 capitalize">{{ col.type.replace('_', ' ') }}</td>
-                <td class="py-4 px-4">
-                  <div 
-                    :class="col.reportFilter ? 'bg-blue-600' : 'bg-gray-300'"
-                    class="w-10 h-5 rounded-full relative transition-colors"
-                  >
+          <div v-if="filteredLibraryColumns.length === 0" class="text-center py-10 border border-dashed border-gray-300 rounded-xl mt-2">
+            <p class="text-gray-500 font-medium">No master columns found. Create reusable columns like Zone, HTF Trend, Confirmation!</p>
+          </div>
+          <div v-else class="overflow-x-auto mt-2 rounded-xl border border-gray-200 bg-white">
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr class="bg-gray-50 border-b border-gray-200 text-gray-500 text-xs font-bold uppercase tracking-wider">
+                  <th class="py-3 px-4">Column Name</th>
+                  <th class="py-3 px-4">Type</th>
+                  <th class="py-3 px-4">Options</th>
+                  <th class="py-3 px-4">Linked Setups</th>
+                  <th class="py-3 px-4">Report Filter</th>
+                  <th class="py-3 px-4 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr
+                  class="border-b border-gray-100 hover:bg-gray-50/50 transition-colors"
+                  v-for="col in paginatedLibraryColumns"
+                  :key="col.id"
+                >
+                  <td class="py-4 px-4 font-semibold text-sm text-gray-900">
+                    <div>{{ col.name }}</div>
+                    <div v-if="col.description" class="text-xs text-gray-400 font-normal mt-0.5">{{ col.description }}</div>
+                  </td>
+                  <td class="py-4 px-4 text-sm text-gray-600 capitalize">
+                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-700">
+                      {{ col.type.replace('_', ' ') }}
+                    </span>
+                  </td>
+                  <td class="py-4 px-4 text-xs text-gray-500 max-w-xs">
+                    <div v-if="col.options && col.options.length > 0" class="flex flex-wrap gap-1">
+                      <span
+                        v-for="(opt, oIdx) in col.options.slice(0, 3)"
+                        :key="oIdx"
+                        class="px-1.5 py-0.5 bg-blue-50 text-blue-700 rounded text-[11px] font-medium"
+                      >
+                        {{ opt }}
+                      </span>
+                      <span v-if="col.options.length > 3" class="text-[11px] text-gray-400 font-medium">
+                        +{{ col.options.length - 3 }} more
+                      </span>
+                    </div>
+                    <span v-else class="text-gray-400 italic">-</span>
+                  </td>
+                  <td class="py-4 px-4 text-xs">
+                    <div v-if="col.linkedSetupIds && col.linkedSetupIds.length > 0" class="flex flex-wrap gap-1">
+                      <span
+                        v-for="sid in col.linkedSetupIds"
+                        :key="sid"
+                        class="px-2 py-0.5 rounded-full text-[11px] font-medium bg-purple-50 text-purple-700 border border-purple-200"
+                      >
+                        {{ getSetupName(sid) }}
+                      </span>
+                    </div>
+                    <span v-else class="text-gray-400 italic">Not linked</span>
+                  </td>
+                  <td class="py-4 px-4">
                     <div
-                      class="w-3.5 h-3.5 bg-white rounded-full absolute top-[3px] transition-all"
-                      :class="col.reportFilter ? 'left-[22px]' : 'left-[3px]'"
-                    ></div>
-                  </div>
-                </td>
-                <td class="py-4 px-4 text-right">
-                  <button @click="editColumn(col)" class="text-blue-500 hover:text-blue-700 font-semibold text-sm">
-                    Edit
-                  </button>
-                  <button @click="deleteColumn(col.id)" class="text-red-500 hover:text-red-700 font-semibold text-sm ml-3">
-                    Delete
-                  </button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+                      :class="col.reportFilter ? 'bg-blue-600' : 'bg-gray-300'"
+                      class="w-10 h-5 rounded-full relative transition-colors"
+                    >
+                      <div
+                        class="w-3.5 h-3.5 bg-white rounded-full absolute top-[3px] transition-all"
+                        :class="col.reportFilter ? 'left-[22px]' : 'left-[3px]'"
+                      ></div>
+                    </div>
+                  </td>
+                  <td class="py-4 px-4 text-right whitespace-nowrap">
+                    <button @click="editColumn(col)" class="text-blue-500 hover:text-blue-700 font-semibold text-sm mr-3">
+                      Edit
+                    </button>
+                    <button @click="deleteColumn(col.id)" class="text-red-500 hover:text-red-700 font-semibold text-sm">
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
 
-          <BasePagination
-            v-if="customColumns.length > 0"
-            v-model:currentPage="columnsPage"
-            v-model:pageSize="columnsPageSize"
-            :totalItems="customColumns.length"
-            itemLabel="columns"
-            :pageSizeOptions="[5, 10, 20]"
-          />
+            <BasePagination
+              v-if="filteredLibraryColumns.length > 0"
+              v-model:currentPage="libraryPage"
+              v-model:pageSize="libraryPageSize"
+              :totalItems="filteredLibraryColumns.length"
+              itemLabel="columns"
+              :pageSizeOptions="[5, 10, 20]"
+            />
+          </div>
         </div>
       </div>
 
@@ -582,7 +782,17 @@
     >
       <div class="bg-white rounded-2xl w-full max-w-md shadow-xl overflow-hidden flex flex-col">
         <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
-          <h3 class="text-xl font-bold text-gray-900">{{ editingColumnId ? 'Edit Custom Column' : 'Add Custom Column' }}</h3>
+          <div>
+            <h3 class="text-xl font-bold text-gray-900">
+              {{ editingColumnId ? 'Edit Custom Column' : (columnModalTarget === 'setup' ? 'Add Column to Setup' : 'Add Master Library Column') }}
+            </h3>
+            <p v-if="!editingColumnId && columnModalTarget === 'setup'" class="text-xs text-gray-500 mt-0.5">
+              Creating for: <strong>{{ selectedSetupName }}</strong>
+            </p>
+            <p v-else-if="!editingColumnId" class="text-xs text-gray-500 mt-0.5">
+              Available across all setups in your journal
+            </p>
+          </div>
           <button @click="closeAddColumnModal" class="text-gray-400 hover:text-gray-600 transition-colors">
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -601,13 +811,23 @@
           </button>
         </div>
         
-        <div class="p-6 flex flex-col gap-5 overflow-y-auto">
+        <div class="p-6 flex flex-col gap-5 overflow-y-auto max-h-[70vh]">
           <BaseInput
             id="column-name"
             label="Column Name"
             v-model="newColumn.name"
-            placeholder="e.g. Confluences, RR, Emotion"
+            placeholder="e.g. Zone, Liquidity, Bias, Confirmation"
           />
+
+          <div class="flex flex-col gap-1">
+            <label class="text-sm font-semibold text-gray-700">Description (Optional)</label>
+            <textarea
+              v-model="newColumn.description"
+              rows="2"
+              class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm resize-none"
+              placeholder="Brief description or purpose of this attribute..."
+            ></textarea>
+          </div>
           
           <BaseSelect
             id="column-type"
@@ -623,7 +843,7 @@
               <input
                 type="text"
                 v-model="newColumn.options[index]"
-                placeholder="e.g. Option name"
+                placeholder="e.g. FVG, OB, BREAKER BLOCK"
                 class="flex-1 bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-lg p-2.5 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
               />
               <button
@@ -696,6 +916,99 @@
           <BaseButton variant="primary" @click="saveColumn" :disabled="!newColumn.name">
             Save Column
           </BaseButton>
+        </div>
+      </div>
+    </div>
+
+    <!-- Link from Library Modal -->
+    <div
+      v-if="isLinkModalOpen"
+      @click.self="isLinkModalOpen = false"
+      class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+    >
+      <div class="bg-white rounded-2xl w-full max-w-lg shadow-xl overflow-hidden flex flex-col max-h-[85vh]">
+        <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+          <div>
+            <h3 class="text-xl font-bold text-gray-900">Link Columns from Library</h3>
+            <p class="text-xs text-gray-500 mt-1">Select columns to link to <strong>{{ selectedSetupName }}</strong></p>
+          </div>
+          <button @click="isLinkModalOpen = false" class="text-gray-400 hover:text-gray-600 transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+
+        <div class="p-4 border-b border-gray-100 bg-white">
+          <input
+            v-model="modalSearchQuery"
+            type="text"
+            placeholder="Search library columns..."
+            class="w-full bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-lg px-3 py-2 outline-none focus:border-blue-500"
+          />
+        </div>
+
+        <div class="p-6 overflow-y-auto flex flex-col gap-3 flex-1">
+          <div v-if="filteredModalLibraryColumns.length === 0" class="text-center py-8 text-gray-400 text-sm">
+            No columns match your search.
+          </div>
+          <div
+            v-for="col in filteredModalLibraryColumns"
+            :key="col.id"
+            @click="toggleLinkColumn(col.id)"
+            class="flex items-center justify-between p-3.5 border rounded-xl cursor-pointer transition-all"
+            :class="selectedLinkColumnIds.includes(col.id) ? 'border-blue-500 bg-blue-50/30 ring-1 ring-blue-500' : 'border-gray-200 hover:border-gray-300 bg-white'"
+          >
+            <div class="flex items-center gap-3">
+              <input
+                type="checkbox"
+                :checked="selectedLinkColumnIds.includes(col.id)"
+                class="rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer pointer-events-none"
+              />
+              <div>
+                <div class="text-sm font-bold text-gray-900 flex items-center gap-2">
+                  {{ col.name }}
+                  <span class="text-[10px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded bg-gray-100 text-gray-600">
+                    {{ col.type.replace('_', ' ') }}
+                  </span>
+                </div>
+                <div v-if="col.description" class="text-xs text-gray-400 mt-0.5">{{ col.description }}</div>
+                <div v-if="col.options && col.options.length > 0" class="flex flex-wrap gap-1 mt-1">
+                  <span
+                    v-for="(opt, oIdx) in col.options.slice(0, 3)"
+                    :key="oIdx"
+                    class="text-[10px] px-1.5 py-0.5 bg-gray-100 text-gray-600 rounded font-medium"
+                  >
+                    {{ opt }}
+                  </span>
+                  <span v-if="col.options.length > 3" class="text-[10px] text-gray-400 font-medium">
+                    +{{ col.options.length - 3 }} more
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div v-if="selectedLinkColumnIds.includes(col.id)" class="text-blue-600 font-bold text-xs flex items-center gap-1">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+              Linked
+            </div>
+          </div>
+        </div>
+
+        <div class="p-4 border-t border-gray-100 bg-gray-50 flex justify-between items-center">
+          <span class="text-xs text-gray-500">
+            Selected: <strong>{{ selectedLinkColumnIds.length }}</strong> columns
+          </span>
+          <div class="flex gap-2">
+            <BaseButton variant="outline" size="sm" @click="isLinkModalOpen = false">
+              Cancel
+            </BaseButton>
+            <BaseButton variant="primary" size="sm" @click="saveLinkedColumns">
+              Save Links
+            </BaseButton>
+          </div>
         </div>
       </div>
     </div>
@@ -992,10 +1305,20 @@ const customColumns = ref<any[]>([])
 const isAddColumnModalOpen = ref(false)
 const newColumn = ref({
   name: '',
+  description: '',
   type: 'string',
   reportFilter: false,
   options: [] as string[]
 })
+const columnModalTarget = ref<'setup' | 'library'>('setup')
+const customColumnSubTab = ref<'setup_columns' | 'library'>('setup_columns')
+const libraryColumns = ref<any[]>([])
+const librarySearchQuery = ref('')
+const libraryPage = ref(1)
+const libraryPageSize = ref(10)
+const isLinkModalOpen = ref(false)
+const modalSearchQuery = ref('')
+const selectedLinkColumnIds = ref<number[]>([])
 
 const columnTypeOptions = [
   { value: 'string', label: 'String' },
@@ -1005,6 +1328,120 @@ const columnTypeOptions = [
   { value: 'single_selector', label: 'Single Selector' },
   { value: 'multiple_selector', label: 'Multiple Selector' }
 ]
+
+const loadLibraryColumns = async () => {
+  try {
+    const res = await window.api.customColumns.listLibrary()
+    if (res.success) {
+      libraryColumns.value = res.data || []
+    }
+  } catch (error) {
+    console.error('Failed to load library columns:', error)
+  }
+}
+
+const switchToLibraryTab = async () => {
+  customColumnSubTab.value = 'library'
+  await loadLibraryColumns()
+}
+
+const getSetupName = (id: number) => {
+  const found = setups.value.find((s) => s.id === id)
+  return found ? found.name : `Setup #${id}`
+}
+
+const filteredLibraryColumns = computed(() => {
+  const q = librarySearchQuery.value.trim().toLowerCase()
+  if (!q) return libraryColumns.value
+  return libraryColumns.value.filter((c) => {
+    return (
+      c.name.toLowerCase().includes(q) ||
+      (c.description && c.description.toLowerCase().includes(q)) ||
+      (c.options && c.options.some((opt: string) => opt.toLowerCase().includes(q)))
+    )
+  })
+})
+
+const paginatedLibraryColumns = computed(() => {
+  return paginateItems(filteredLibraryColumns.value, libraryPage.value, libraryPageSize.value)
+})
+
+const filteredModalLibraryColumns = computed(() => {
+  const q = modalSearchQuery.value.trim().toLowerCase()
+  if (!q) return libraryColumns.value
+  return libraryColumns.value.filter((c) => {
+    return (
+      c.name.toLowerCase().includes(q) ||
+      (c.description && c.description.toLowerCase().includes(q)) ||
+      (c.options && c.options.some((opt: string) => opt.toLowerCase().includes(q)))
+    )
+  })
+})
+
+const openLinkLibraryModal = async () => {
+  await loadLibraryColumns()
+  selectedLinkColumnIds.value = customColumns.value.map((c) => c.id)
+  modalSearchQuery.value = ''
+  isLinkModalOpen.value = true
+}
+
+const toggleLinkColumn = (id: number) => {
+  const idx = selectedLinkColumnIds.value.indexOf(id)
+  if (idx > -1) {
+    selectedLinkColumnIds.value.splice(idx, 1)
+  } else {
+    selectedLinkColumnIds.value.push(id)
+  }
+}
+
+const saveLinkedColumns = async () => {
+  if (!selectedSetupId.value) return
+  try {
+    const payload = {
+      setupId: Number(selectedSetupId.value),
+      columnIds: Array.from(selectedLinkColumnIds.value || []).map((id) => Number(id))
+    }
+    const cleanPayload = JSON.parse(JSON.stringify(payload))
+    const res = await window.api.customColumns.batchSyncSetup(cleanPayload)
+    if (res.success) {
+      await loadSetupDetails()
+      await loadLibraryColumns()
+      isLinkModalOpen.value = false
+      showAlert('Success', 'Linked columns updated successfully.', 'success')
+    } else {
+      showAlert('Error', 'Failed to update linked columns: ' + res.error, 'error')
+    }
+  } catch (error: any) {
+    showAlert('Error', 'Failed to update linked columns: ' + (error.message || String(error)), 'error')
+  }
+}
+
+const unlinkColumn = async (columnId: number) => {
+  if (!selectedSetupId.value) return
+  const confirmed = await showConfirm({
+    title: 'Unlink Column',
+    message: 'Are you sure you want to unlink this column from this setup? The column will remain safe in the Master Library.',
+    confirmText: 'Unlink',
+    variant: 'info'
+  })
+  if (!confirmed) return
+  try {
+    const payload = {
+      setupId: Number(selectedSetupId.value),
+      customColumnId: Number(columnId)
+    }
+    const res = await window.api.customColumns.unlinkSetup(JSON.parse(JSON.stringify(payload)))
+    if (res.success) {
+      await loadSetupDetails()
+      await loadLibraryColumns()
+      showAlert('Success', 'Column unlinked from setup.', 'success')
+    } else {
+      showAlert('Error', 'Failed to unlink column: ' + res.error, 'error')
+    }
+  } catch (error: any) {
+    showAlert('Error', 'Failed to unlink column: ' + (error.message || String(error)), 'error')
+  }
+}
 
 
 
@@ -1266,9 +1703,10 @@ const deleteSelectedSessions = async () => {
 
 const editingColumnId = ref<number | null>(null)
 
-const openAddColumnModal = () => {
+const openAddColumnModal = (target: 'setup' | 'library' = 'setup') => {
   editingColumnId.value = null
-  newColumn.value = { name: '', type: 'string', reportFilter: false, options: [''] }
+  columnModalTarget.value = target
+  newColumn.value = { name: '', description: '', type: 'string', reportFilter: false, options: [''] }
   isAddColumnModalOpen.value = true
 }
 
@@ -1278,6 +1716,7 @@ const editColumn = (col: any) => {
   if (opts.length === 0) opts = ['']
   newColumn.value = {
     name: col.name,
+    description: col.description || '',
     type: col.type,
     reportFilter: !!col.reportFilter,
     options: [...opts]
@@ -1302,7 +1741,8 @@ const removeColumnOption = (index: number) => {
 }
 
 const saveColumn = async () => {
-  if (!newColumn.value.name || !selectedSetupId.value) return
+  if (!newColumn.value.name) return
+  if (columnModalTarget.value === 'setup' && !editingColumnId.value && !selectedSetupId.value) return
   
   let optionsToSave: string[] = []
   if (['single_selector', 'multiple_selector'].includes(newColumn.value.type)) {
@@ -1313,22 +1753,25 @@ const saveColumn = async () => {
 
   try {
     const payload = {
-      setupId: selectedSetupId.value,
-      name: newColumn.value.name,
+      setupId: columnModalTarget.value === 'setup' && selectedSetupId.value ? selectedSetupId.value : null,
+      name: newColumn.value.name.trim(),
+      description: newColumn.value.description ? newColumn.value.description.trim() : null,
       type: newColumn.value.type,
       reportFilter: newColumn.value.reportFilter,
       options: optionsToSave.length > 0 ? optionsToSave : null
     }
 
+    const cleanPayload = JSON.parse(JSON.stringify(payload))
     let res
     if (editingColumnId.value) {
-      res = await window.api.customColumns.update(editingColumnId.value, payload)
+      res = await window.api.customColumns.update(Number(editingColumnId.value), cleanPayload)
     } else {
-      res = await window.api.customColumns.create(payload)
+      res = await window.api.customColumns.create(cleanPayload)
     }
 
     if (res.success) {
       await loadSetupDetails()
+      await loadLibraryColumns()
       closeAddColumnModal()
       showAlert('Success', editingColumnId.value ? 'Custom column updated successfully.' : 'Custom column saved successfully.', 'success')
     } else {
@@ -1343,7 +1786,7 @@ const saveColumn = async () => {
 const deleteColumn = async (id: number) => {
   const confirmed = await showConfirm({
     title: 'Delete Column',
-    message: 'Are you sure you want to delete this column?',
+    message: 'Are you sure you want to permanently delete this column from the Master Library? It will be removed from all setups.',
     confirmText: 'Delete'
   })
   if (!confirmed) return
@@ -1352,6 +1795,8 @@ const deleteColumn = async (id: number) => {
     if (res.success) {
       selectedColumns.value = selectedColumns.value.filter(cid => cid !== id)
       await loadSetupDetails()
+      await loadLibraryColumns()
+      showAlert('Success', 'Column deleted successfully.', 'success')
     } else {
       showAlert('Error', 'Failed to delete column: ' + res.error, 'error')
     }
@@ -1385,7 +1830,7 @@ const toggleAllColumns = (e: Event) => {
 const deleteSelectedColumns = async () => {
   const confirmed = await showConfirm({
     title: 'Delete Selected Columns',
-    message: `Are you sure you want to delete ${selectedColumns.value.length} selected columns?`,
+    message: `Are you sure you want to delete ${selectedColumns.value.length} selected columns from the Master Library?`,
     confirmText: 'Delete'
   })
   if (!confirmed) return
@@ -1398,6 +1843,7 @@ const deleteSelectedColumns = async () => {
     }
     selectedColumns.value = []
     await loadSetupDetails()
+    await loadLibraryColumns()
   } catch (error) {
     console.error('Failed to delete selected columns:', error)
     showAlert('Error', 'Failed to delete selected columns.', 'error')
@@ -1407,5 +1853,6 @@ const deleteSelectedColumns = async () => {
 onMounted(() => {
   loadSetups()
   loadSymbols()
+  loadLibraryColumns()
 })
 </script>

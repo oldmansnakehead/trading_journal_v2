@@ -56,6 +56,13 @@ const setups = [
 - Move to Break Even once price breaks prior structure swing (typically at +1.5R).
 - Trail stop using M5 swing points if momentum remains strong.`,
     customColumns: [
+      {
+        name: 'Zone',
+        type: 'single_selector',
+        options: ['FVG', 'OB', 'BREAKER BLOCK'],
+        reportFilter: true,
+        description: 'Entry Zone / Key Level'
+      },
       { name: 'Confluence Count', type: 'number', reportFilter: true },
       {
         name: 'Emotional State',
@@ -94,6 +101,13 @@ const setups = [
 ## 3. Profit Taking
 - Partial TP1 at 2.5R, TP2 at 4.0R, runner trailed to external range high/low (5R-8R).`,
     customColumns: [
+      {
+        name: 'Zone',
+        type: 'single_selector',
+        options: ['FVG', 'OB', 'BREAKER BLOCK'],
+        reportFilter: true,
+        description: 'Entry Zone / Key Level'
+      },
       {
         name: 'Killzone',
         type: 'single_selector',
@@ -137,39 +151,33 @@ const setups = [
   }
 ]
 
-// Generate dates spread across the last 180 days (Mon-Fri trading days)
-function generateTradingDates(count) {
+// Generate dates spread across May 2026 to October 2026 (Mon-Fri trading days)
+function generateTradingDates(count, baseDayOffset = 0) {
   const dates = []
-  const baseDate = new Date('2025-10-15T08:00:00.000Z')
-  let current = new Date(baseDate)
+  const baseDate = new Date('2026-05-04T08:00:00.000Z') // Monday
+  let current = new Date(baseDate.getTime() + baseDayOffset * 86400000)
 
   while (dates.length < count) {
     const day = current.getUTCDay()
-    // Prefer weekdays Monday (1) to Friday (5)
     if (day >= 1 && day <= 5) {
-      // Pick random session hour: London (8-11 UTC) or NY (13-16 UTC)
-      const isLondon = random() < 0.6
+      const isLondon = random() < 0.65
       const hour = isLondon ? randomInt(8, 11) : randomInt(13, 16)
       const minute = randomChoice([0, 5, 12, 15, 23, 30, 35, 45, 52])
-      
+
       const entryTime = new Date(current)
       entryTime.setUTCHours(hour, minute, 0, 0)
 
-      // Duration 20 mins to 3 hours
-      const durationMins = randomInt(25, 180)
+      const durationMins = randomInt(30, 220)
       const exitTime = new Date(entryTime.getTime() + durationMins * 60000)
 
       dates.push({ entryTime, exitTime, isLondon })
     }
-    // Advance 1 to 2 days
-    current = new Date(current.getTime() + (random() < 0.35 ? 86400000 : 86400000 * 2))
+    // Step forward 1 to 3 days
+    const step = random() < 0.4 ? 1 : random() < 0.85 ? 2 : 3
+    current = new Date(current.getTime() + step * 86400000)
   }
   return dates
 }
-
-const haDates = generateTradingDates(100)
-const smcDates = generateTradingDates(100)
-const breakoutDates = generateTradingDates(100)
 
 const sampleImages = [
   'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=800&auto=format&fit=crop&q=60',
@@ -177,86 +185,95 @@ const sampleImages = [
   'https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?w=800&auto=format&fit=crop&q=60'
 ]
 
-const haNotesWin = [
-  'Clean Asian low sweep during London Open. M5 CHOCH confirmed, entered on FVG retracement. Hit full TP at prior day high.',
-  'High momentum continuation following NY Open news absorption. Protected SL behind displacement candle.',
-  'Textbook HA Model: 15m liquidity grab, 5m displacement with volume spike. Runner trailed to 4.2R.',
-  'Perfect rejection off 4H order block aligned with London session killzone. Zero drawdown on entry.',
-  'Liquidity sweep of equal highs, strong downside impulse. Target 3.5R achieved smoothly before NY close.'
-]
-
-const haNotesLoss = [
-  'False breakout sweep: price tapped FVG but failed to displace. Stopped out at planned -1.0R SL.',
-  'Market structure shifted back against direction due to unexpected Fed commentary.',
-  'Premature entry before displacement confirmation candle closed. Followed SL plan strictly.',
-  'Price reversed just 2 pips before target and swept trailing stop. Took -1.0R loss.'
-]
-
-const smcNotesWin = [
-  'Judas swing during London Open. Swept Asian high into 4H bearish FVG. Deep discount entry on M5 MSS with 5.5R target reached.',
-  'High timeframe draw on liquidity reached. Massive displacement with 3 consecutive institutional candles. Partial TP at 3R, runner caught 7.2R.',
-  'NY Killzone reversal: purged previous day liquidity pool, M1 entry on OTE 70.5% retracement. Clean 4.5R profit.',
-  'Classic SMC setup: Fair Value Gap + Breaker block confluence. Clean expansion during London-NY overlap.'
-]
-
-const smcNotesLoss = [
-  'Price swept liquidity but failed to hold Order Block. Stopped out at full -1.0R.',
-  'High-impact CPI release caused massive slippage and hit stop immediately. Followed discipline.',
-  'Order block breached due to heavy HTF institutional selling. Controlled risk kept to 1R.'
-]
-
-const breakoutNotesWin = [
-  'Strong expansion candle breaking Asian range high with 2x average volume. Reached 2.5R target.',
-  'London opening breakout carried through London session with sustained momentum. Took profit at +2.0R.'
-]
-
-const breakoutNotesLoss = [
-  'Fakeout: price briefly broke Asian range low then reversed sharply back inside range. Stopped out.',
-  'Volume lacked follow-through after the initial breakout candle. Took planned -1.0R loss.'
-]
-
 const journalEntries = []
 
-// 1. Generate 100 HA Model trades (~64% Win Rate, High Expectancy ~1.2R)
-haDates.forEach((d, idx) => {
-  const isWin = idx < 64
-  const isBe = idx >= 64 && idx < 68
-  const isLoss = idx >= 68
+// Helper for generating dynamic trade outcomes based on attributes
+function generateTradeOutcome(options) {
+  const { zone, emotionalState, displacement, setupBaseWinRate } = options
 
+  // Calculate dynamic win probability based on real statistical edge
+  let winProb = setupBaseWinRate || 0.52
+
+  // Edge by Zone:
+  if (zone === 'OB') winProb += 0.14          // OB has highest edge
+  else if (zone === 'FVG') winProb += 0.03     // FVG solid performance
+  else if (zone === 'BREAKER BLOCK') winProb -= 0.11 // Breaker has lower win rate
+
+  // Edge by Psychology:
+  if (emotionalState === 'Disciplined') winProb += 0.08
+  else if (emotionalState === 'FOMO') winProb -= 0.28
+  else if (emotionalState === 'Revenge') winProb -= 0.35
+  else if (emotionalState === 'Hesitant') winProb -= 0.10
+
+  // Edge by Displacement Quality:
+  if (displacement === 'A+ High Energy') winProb += 0.09
+  else if (displacement === 'C Low Displacement') winProb -= 0.15
+
+  // Bound probability
+  winProb = Math.max(0.18, Math.min(0.82, winProb))
+
+  const roll = random()
+  const beRate = 0.08
+
+  if (roll < winProb) {
+    return 'win'
+  } else if (roll < winProb + beRate) {
+    return 'be'
+  } else {
+    return 'loss'
+  }
+}
+
+// 1. HA Model Trades (~65 trades, chronological with natural streaks)
+const haDates = generateTradingDates(65, 0)
+haDates.forEach((d) => {
+  const zone = randomChoice(['OB', 'OB', 'FVG', 'FVG', 'FVG', 'BREAKER BLOCK'])
+  const emotionalState = randomChoice([
+    'Disciplined', 'Disciplined', 'Disciplined', 'Disciplined',
+    'FOMO', 'Hesitant', 'Revenge', 'Neutral'
+  ])
+  const setupTypeDetail = randomChoice(['Liquidity Sweep', 'Continuation', 'Session Open Reversal'])
   const symbol = randomChoice(['XAUUSD', 'XAUUSD', 'XAUUSD', 'EURUSD', 'EURUSD', 'GBPUSD'])
   const position = randomChoice(['Buy', 'Sell'])
   const directionBias = position === 'Buy' ? 'Bullish' : 'Bearish'
   const sessionName = d.isLondon ? 'London' : 'New York'
-  const slPoints = symbol === 'XAUUSD' ? randomFloat(15, 30, 1) : randomFloat(8, 18, 1)
+  const slPoints = symbol === 'XAUUSD' ? randomFloat(18, 32, 1) : randomFloat(9, 18, 1)
 
-  let normalRr, normalMaxRr, mae, notes
+  const outcome = generateTradeOutcome({
+    zone,
+    emotionalState,
+    setupBaseWinRate: 0.56
+  })
 
-  if (isWin) {
-    normalRr = randomChoice([1.8, 2.2, 2.5, 3.0, 3.2, 3.5, 4.0, 4.2, 4.8])
-    normalMaxRr = randomFloat(normalRr, normalRr + randomFloat(0.3, 1.8))
-    mae = randomFloat(-0.6, -0.05)
-    notes = randomChoice(haNotesWin)
-  } else if (isBe) {
+  let normalRr, normalMaxRr, mae, notes, quality
+
+  if (outcome === 'win') {
+    normalRr = randomChoice([1.8, 2.2, 2.5, 3.0, 3.2, 3.5, 4.0, 4.2])
+    normalMaxRr = randomFloat(normalRr, normalRr + randomFloat(0.3, 1.6))
+    mae = randomFloat(-0.55, -0.05)
+    quality = randomChoice(['Green', 'Green', 'Blue'])
+    notes = zone === 'OB'
+      ? `Textbook ${zone} reaction during ${sessionName} session. Clear MSS with high energy impulse. Reached full target at +${normalRr}R.`
+      : `Clean ${zone} tap following liquidity sweep. Followed HTF draw on liquidity strictly. Hit +${normalRr}R.`
+  } else if (outcome === 'be') {
     normalRr = 0.0
-    normalMaxRr = randomFloat(1.2, 2.2) // Went into profit but returned to BE
+    normalMaxRr = randomFloat(1.2, 2.4)
     mae = randomFloat(-0.4, -0.1)
-    notes = 'Trade went +1.5R in profit, moved stop to Break Even as planned. Stopped out at BE.'
+    quality = 'Yellow'
+    notes = `Trade pushed +1.8R into profit. Trailed stop loss to Break Even according to rules. Reversed to take out BE.`
   } else {
     normalRr = randomChoice([-1.0, -1.0, -1.0, -0.8, -0.5])
-    // Occasional reversal loss (MFE was positive but trade lost)
-    normalMaxRr = random() < 0.25 ? randomFloat(1.2, 2.4) : randomFloat(0.1, 0.6)
+    normalMaxRr = random() < 0.2 ? randomFloat(1.0, 1.8) : randomFloat(0.1, 0.5)
     mae = -1.0
-    notes = randomChoice(haNotesLoss)
+    quality = randomChoice(['Orange', 'Red'])
+    notes = emotionalState === 'FOMO'
+      ? `Chased entry on ${zone} without displacement confirmation. Punished by the market, took planned -1.0R loss.`
+      : `${zone} failed to hold under heavy counter-trend pressure. Stopped out at planned -1.0R.`
   }
 
   const normalTpPoints = normalRr > 0 ? Number((normalRr * slPoints).toFixed(1)) : -slPoints
-  const quality = isWin ? randomChoice(['Green', 'Green', 'Blue']) : isBe ? 'Yellow' : randomChoice(['Orange', 'Red'])
-  const news = random() < 0.15
-
-  // Trail / BE RR variants
-  const beRr = isWin ? normalRr : isBe ? 0.0 : -1.0
-  const beMaxRr = normalMaxRr
-  const trailRr = isWin ? Number((normalRr + randomChoice([0.2, 0.5, 0.8])).toFixed(2)) : normalRr
+  const beRr = outcome === 'win' ? normalRr : outcome === 'be' ? 0.0 : -1.0
+  const trailRr = outcome === 'win' ? Number((normalRr + randomChoice([0.2, 0.4, 0.6])).toFixed(2)) : normalRr
 
   journalEntries.push({
     setupName: 'HA Model',
@@ -267,7 +284,7 @@ haDates.forEach((d, idx) => {
     position,
     directionBias,
     entryTimeframe: randomChoice(['M5', 'M5', 'M15', 'M1']),
-    news,
+    news: random() < 0.15,
     quality,
     isTest: false,
     images: random() < 0.35 ? [randomChoice(sampleImages)] : null,
@@ -278,58 +295,67 @@ haDates.forEach((d, idx) => {
     normalTpPoints,
     beSlPoints: slPoints,
     beRr,
-    beMaxRr,
+    beMaxRr: normalMaxRr,
     beTpPoints: normalTpPoints,
     trailSlPoints: slPoints,
     trailRr,
     trailMaxRr: normalMaxRr,
     trailTpPoints: Number((trailRr * slPoints).toFixed(1)),
     customData: {
-      'Confluence Count': isWin ? randomInt(3, 5) : randomInt(1, 3),
-      'Emotional State': isWin ? 'Disciplined' : randomChoice(['Disciplined', 'Hesitant', 'FOMO']),
-      'Setup Type Detail': randomChoice(['Liquidity Sweep', 'Continuation', 'Session Open Reversal']),
+      'Zone': zone,
+      'Confluence Count': outcome === 'win' ? randomInt(3, 5) : randomInt(1, 3),
+      'Emotional State': emotionalState,
+      'Setup Type Detail': setupTypeDetail,
       'MAE': mae
     }
   })
 })
 
-// 2. Generate 100 ICT / SMC Classic trades (~46% Win Rate, High Payoff Multi-R ~0.95R Expectancy)
-smcDates.forEach((d, idx) => {
-  const isWin = idx < 46
-  const isBe = idx >= 46 && idx < 52
-  const isLoss = idx >= 52
-
+// 2. ICT / SMC Classic Trades (~60 trades, higher R multi-payoffs, natural streaks)
+const smcDates = generateTradingDates(60, 1)
+smcDates.forEach((d) => {
+  const zone = randomChoice(['OB', 'OB', 'FVG', 'FVG', 'BREAKER BLOCK', 'BREAKER BLOCK'])
+  const killzone = d.isLondon ? 'London Open' : 'NY Open'
+  const displacement = randomChoice(['A+ High Energy', 'A+ High Energy', 'B Moderate', 'C Low Displacement'])
   const symbol = randomChoice(['XAUUSD', 'EURUSD', 'GBPUSD', 'USDJPY', 'BTCUSD'])
   const position = randomChoice(['Buy', 'Sell'])
   const directionBias = position === 'Buy' ? 'Bullish' : 'Bearish'
   const sessionName = d.isLondon ? 'London' : 'New York'
-  const slPoints = symbol === 'XAUUSD' ? randomFloat(18, 35, 1) : symbol === 'BTCUSD' ? randomFloat(150, 400, 0) : randomFloat(10, 22, 1)
+  const slPoints = symbol === 'XAUUSD' ? randomFloat(18, 35, 1) : symbol === 'BTCUSD' ? randomFloat(180, 420, 0) : randomFloat(10, 22, 1)
 
-  let normalRr, normalMaxRr, mae, notes
+  const outcome = generateTradeOutcome({
+    zone,
+    displacement,
+    setupBaseWinRate: 0.48
+  })
 
-  if (isWin) {
-    normalRr = randomChoice([3.0, 3.5, 4.0, 4.5, 5.0, 5.8, 6.5, 7.5])
-    normalMaxRr = randomFloat(normalRr, normalRr + randomFloat(0.5, 3.0)) // Big MFE excursion!
-    mae = randomFloat(-0.7, -0.1)
-    notes = randomChoice(smcNotesWin)
-  } else if (isBe) {
+  let normalRr, normalMaxRr, mae, notes, quality
+
+  if (outcome === 'win') {
+    normalRr = randomChoice([3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.5, 7.2])
+    normalMaxRr = randomFloat(normalRr, normalRr + randomFloat(0.5, 2.5))
+    mae = randomFloat(-0.65, -0.08)
+    quality = randomChoice(['Green', 'Green', 'Blue'])
+    notes = `High conviction ${zone} execution in ${killzone}. Massive institutional expansion with ${displacement}. Multi-R payoff +${normalRr}R secured.`
+  } else if (outcome === 'be') {
     normalRr = 0.0
-    normalMaxRr = randomFloat(2.0, 3.8) // Strong excursion before pulling back to BE
-    mae = randomFloat(-0.5, -0.1)
-    notes = 'Hit +2.5R partial zone, stop moved to BE, reversed on London-NY handover.'
+    normalMaxRr = randomFloat(2.0, 3.5)
+    mae = randomFloat(-0.45, -0.1)
+    quality = 'Yellow'
+    notes = `Reached +2.5R partial zone off ${zone}. Stop moved to BE. Volatility spikes took out runner at 0.0R.`
   } else {
     normalRr = -1.0
-    // A few reversal losses to test Edge Analysis scatter
-    normalMaxRr = random() < 0.2 ? randomFloat(1.5, 3.2) : randomFloat(0.1, 0.7)
+    normalMaxRr = random() < 0.25 ? randomFloat(1.2, 2.2) : randomFloat(0.1, 0.7)
     mae = -1.0
-    notes = randomChoice(smcNotesLoss)
+    quality = randomChoice(['Orange', 'Red'])
+    notes = displacement === 'C Low Displacement'
+      ? `Lack of displacement energy on ${zone} retest. Failed to hold structure, clean -1.0R loss taken without emotion.`
+      : `Draw on liquidity shifted unexpectedly. ${zone} swept, strict invalidation respected.`
   }
 
   const normalTpPoints = normalRr > 0 ? Number((normalRr * slPoints).toFixed(1)) : -slPoints
-  const quality = isWin ? randomChoice(['Green', 'Green', 'Blue']) : isBe ? 'Yellow' : randomChoice(['Orange', 'Red'])
-  const news = random() < 0.2
-
-  const trailRr = isWin ? Number((normalRr + randomChoice([0.5, 1.0, 1.5])).toFixed(2)) : normalRr
+  const beRr = outcome === 'win' ? normalRr : outcome === 'be' ? 0.0 : -1.0
+  const trailRr = outcome === 'win' ? Number((normalRr + randomChoice([0.3, 0.7, 1.2])).toFixed(2)) : normalRr
 
   journalEntries.push({
     setupName: 'ICT / SMC Classic',
@@ -339,18 +365,18 @@ smcDates.forEach((d, idx) => {
     sessionName,
     position,
     directionBias,
-    entryTimeframe: randomChoice(['M5', 'M1', 'M15']),
-    news,
+    entryTimeframe: randomChoice(['M5', 'M15', 'M1']),
+    news: random() < 0.18,
     quality,
     isTest: false,
-    images: random() < 0.35 ? [randomChoice(sampleImages)] : null,
+    images: random() < 0.4 ? [randomChoice(sampleImages)] : null,
     notes,
     normalSlPoints: slPoints,
     normalRr,
     normalMaxRr,
     normalTpPoints,
     beSlPoints: slPoints,
-    beRr: isWin ? normalRr : isBe ? 0.0 : -1.0,
+    beRr,
     beMaxRr: normalMaxRr,
     beTpPoints: normalTpPoints,
     trailSlPoints: slPoints,
@@ -358,47 +384,51 @@ smcDates.forEach((d, idx) => {
     trailMaxRr: normalMaxRr + 0.5,
     trailTpPoints: Number((trailRr * slPoints).toFixed(1)),
     customData: {
-      'Killzone': sessionName === 'London' ? 'London Open' : 'NY Open',
-      'Displacement Quality': isWin ? 'A+ High Energy' : randomChoice(['B Moderate', 'C Low Displacement']),
-      'Confluence Count': isWin ? randomInt(3, 5) : randomInt(1, 3),
+      'Zone': zone,
+      'Killzone': killzone,
+      'Displacement Quality': displacement,
+      'Confluence Count': outcome === 'win' ? randomInt(3, 5) : randomInt(1, 3),
       'MAE': mae
     }
   })
 })
 
-// 3. Generate 100 Breakout Strategy trades (~40% Win Rate, Demo Testing)
-breakoutDates.forEach((d, idx) => {
-  const isWin = idx < 40
-  const isBe = idx >= 40 && idx < 44
-  const isLoss = idx >= 44
-
+// 3. Breakout Strategy Trades (~45 trades, demo testing)
+const breakoutDates = generateTradingDates(45, 2)
+breakoutDates.forEach((d) => {
   const symbol = randomChoice(['EURUSD', 'GBPUSD', 'USDJPY', 'BTCUSD'])
   const position = randomChoice(['Buy', 'Sell'])
   const directionBias = position === 'Buy' ? 'Bullish' : 'Bearish'
   const sessionName = d.isLondon ? 'London' : 'New York'
-  const slPoints = randomFloat(12, 25, 1)
+  const slPoints = randomFloat(12, 26, 1)
 
-  let normalRr, normalMaxRr, mae, notes
+  const outcome = generateTradeOutcome({
+    setupBaseWinRate: 0.42
+  })
 
-  if (isWin) {
+  let normalRr, normalMaxRr, mae, notes, quality
+
+  if (outcome === 'win') {
     normalRr = randomChoice([1.5, 2.0, 2.2, 2.5, 3.0])
     normalMaxRr = randomFloat(normalRr, normalRr + randomFloat(0.2, 1.2))
     mae = randomFloat(-0.5, -0.1)
-    notes = randomChoice(breakoutNotesWin)
-  } else if (isBe) {
+    quality = 'Green'
+    notes = `Strong Asian range breakout with above-average volume. Follow-through hit +${normalRr}R target.`
+  } else if (outcome === 'be') {
     normalRr = 0.0
     normalMaxRr = randomFloat(1.0, 1.8)
     mae = randomFloat(-0.4, -0.1)
-    notes = 'Breakout stalled, closed at BE.'
+    quality = 'Yellow'
+    notes = `Breakout lost momentum at range extension. Protected position at Break Even.`
   } else {
     normalRr = -1.0
-    normalMaxRr = randomFloat(0.1, 0.8)
+    normalMaxRr = randomFloat(0.1, 0.7)
     mae = -1.0
-    notes = randomChoice(breakoutNotesLoss)
+    quality = randomChoice(['Orange', 'Red'])
+    notes = `False breakout: price rejected sharply back inside the range. Stopped out at -1.0R.`
   }
 
   const normalTpPoints = normalRr > 0 ? Number((normalRr * slPoints).toFixed(1)) : -slPoints
-  const quality = isWin ? 'Green' : isBe ? 'Yellow' : 'Orange'
 
   journalEntries.push({
     setupName: 'Breakout Strategy',
@@ -411,7 +441,7 @@ breakoutDates.forEach((d, idx) => {
     entryTimeframe: 'M15',
     news: false,
     quality,
-    isTest: true, // Demo trades
+    isTest: true,
     images: null,
     notes,
     normalSlPoints: slPoints,
@@ -419,7 +449,7 @@ breakoutDates.forEach((d, idx) => {
     normalMaxRr,
     normalTpPoints,
     beSlPoints: slPoints,
-    beRr: isWin ? normalRr : isBe ? 0.0 : -1.0,
+    beRr: outcome === 'win' ? normalRr : outcome === 'be' ? 0.0 : -1.0,
     beMaxRr: normalMaxRr,
     beTpPoints: normalTpPoints,
     trailSlPoints: slPoints,
@@ -434,6 +464,9 @@ breakoutDates.forEach((d, idx) => {
   })
 })
 
+// Sort ALL journal entries chronologically by entryDatetime
+journalEntries.sort((a, b) => new Date(a.entryDatetime).getTime() - new Date(b.entryDatetime).getTime())
+
 const seedData = {
   symbols,
   setups,
@@ -445,5 +478,5 @@ fs.writeFileSync(outputPath, JSON.stringify(seedData, null, 2), 'utf-8')
 console.log(`✅ Generated seed-data.json with:`)
 console.log(`- ${symbols.length} symbols`)
 console.log(`- ${setups.length} setups`)
-console.log(`- ${journalEntries.length} journal entries (100 per setup: HA Model, ICT/SMC Classic, Breakout Strategy)`)
+console.log(`- ${journalEntries.length} journal entries sorted chronologically with natural win/loss distribution`)
 console.log(`File saved at: ${outputPath}`)

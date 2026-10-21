@@ -29,6 +29,13 @@
       "when": 1791829312509,
       "tag": "0003_boring_proemial_gods",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1792499564781,
+      "tag": "0004_sticky_mockingbird",
+      "breakpoints": true
     }
   ]
 }
