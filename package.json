@@ -30,6 +30,7 @@
     "build-storybook": "storybook build",
     "seed": "node scripts/seed.js",
     "seed:generate": "node scripts/generate-seed-json.js",
+    "icons": "node scripts/build-icons.js",
     "test": "vitest run --project=unit",
     "test:unit": "vitest run --project=unit",
     "test:e2e": "playwright test && node scripts/generate-pdf-report.js"

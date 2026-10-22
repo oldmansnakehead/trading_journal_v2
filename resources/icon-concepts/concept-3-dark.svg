@@ -1,0 +1,136 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <defs>
+    <!-- Background: Midnight Obsidian with Deep Royal Indigo Gradient -->
+    <linearGradient id="bgGrad3A" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#161936" />
+      <stop offset="40%" stop-color="#0f1124" />
+      <stop offset="100%" stop-color="#070810" />
+    </linearGradient>
+
+    <!-- Bevel Specular Border Highlight -->
+    <linearGradient id="rimGrad3A" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#a5b4fc" stop-opacity="0.6" />
+      <stop offset="30%" stop-color="#6366f1" stop-opacity="0.2" />
+      <stop offset="70%" stop-color="#10b981" stop-opacity="0.2" />
+      <stop offset="100%" stop-color="#34d399" stop-opacity="0.5" />
+    </linearGradient>
+
+    <!-- Inner Ambient Lighting Dome -->
+    <radialGradient id="ambientCenter" cx="50%" cy="45%" r="50%">
+      <stop offset="0%" stop-color="#4f46e5" stop-opacity="0.35" />
+      <stop offset="60%" stop-color="#4338ca" stop-opacity="0.1" />
+      <stop offset="100%" stop-color="#000000" stop-opacity="0" />
+    </radialGradient>
+
+    <!-- Breakout Glow for Emerald Candle -->
+    <radialGradient id="emeraldGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#10b981" stop-opacity="0.4" />
+      <stop offset="60%" stop-color="#10b981" stop-opacity="0.1" />
+      <stop offset="100%" stop-color="#10b981" stop-opacity="0" />
+    </radialGradient>
+
+    <!-- Candle 1: Soft Silver Periwinkle -->
+    <linearGradient id="candle1Grad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#e0e7ff" />
+      <stop offset="100%" stop-color="#818cf8" />
+    </linearGradient>
+
+    <!-- Candle 2: Vivid Royal Indigo -->
+    <linearGradient id="candle2Grad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#a5b4fc" />
+      <stop offset="10%" stop-color="#6366f1" />
+      <stop offset="100%" stop-color="#4338ca" />
+    </linearGradient>
+
+    <!-- Candle 3: Radiant Emerald Prism -->
+    <linearGradient id="candle3Grad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#6ee7b7" />
+      <stop offset="15%" stop-color="#34d399" />
+      <stop offset="100%" stop-color="#059669" />
+    </linearGradient>
+
+    <!-- Trend Ray Gradient -->
+    <linearGradient id="rayGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#818cf8" stop-opacity="0.3" />
+      <stop offset="50%" stop-color="#c7d2fe" stop-opacity="0.8" />
+      <stop offset="100%" stop-color="#34d399" stop-opacity="1" />
+    </linearGradient>
+
+    <!-- Journal Plate Glass Gradient -->
+    <linearGradient id="journalPlate" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.12" />
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0.02" />
+    </linearGradient>
+
+    <!-- Deep 3D Drop Shadow -->
+    <filter id="masterShadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="24" stdDeviation="28" flood-color="#000000" flood-opacity="0.65" />
+    </filter>
+
+    <!-- Intense Specular Glow -->
+    <filter id="neonGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="12" result="coloredBlur" />
+      <feMerge>
+        <feMergeNode in="coloredBlur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- macOS Big Sur / Win11 Squircle Canvas -->
+  <rect x="100" y="100" width="824" height="824" rx="190" ry="190" fill="url(#bgGrad3A)" />
+  <rect x="100" y="100" width="824" height="824" rx="190" ry="190" fill="none" stroke="url(#rimGrad3A)" stroke-width="4.5" />
+
+  <!-- Ambient Internal Glow -->
+  <rect x="100" y="100" width="824" height="824" rx="190" ry="190" fill="url(#ambientCenter)" />
+  <circle cx="670" cy="380" r="280" fill="url(#emeraldGlow)" />
+
+  <g filter="url(#masterShadow)">
+    <!-- Sleek Minimalist Journal Base (Frosted Glass Plate with Spine Notch) -->
+    <path d="M 240 710 L 485 710 L 512 690 L 539 710 L 784 710 C 798 710, 808 720, 808 732 L 808 738 C 808 750, 798 760, 784 760 L 240 760 C 226 760, 216 750, 216 738 L 216 732 C 216 720, 226 710, 240 710 Z" 
+          fill="url(#journalPlate)" stroke="#ffffff" stroke-opacity="0.18" stroke-width="2" />
+    
+    <!-- Journal Ribbon / Bookmark Bookmark Accent in Pure Mint -->
+    <path d="M 502 690 L 522 690 L 522 778 L 512 768 L 502 778 Z" fill="#34d399" />
+
+    <!-- Trajectory Ray (Disciplined Edge Line) -->
+    <path d="M 260 660 C 370 600, 470 520, 680 250" 
+          fill="none" stroke="url(#rayGrad)" stroke-width="6" stroke-linecap="round" stroke-dasharray="12 10" opacity="0.6" />
+
+    <!-- ================= CANDLE 1 (Left - Setup) ================= -->
+    <g>
+      <!-- Wick -->
+      <line x1="360" y1="450" x2="360" y2="670" stroke="#818cf8" stroke-width="12" stroke-linecap="round" opacity="0.8" />
+      <!-- Body -->
+      <rect x="318" y="490" width="84" height="130" rx="20" fill="url(#candle1Grad)" stroke="#ffffff" stroke-opacity="0.3" stroke-width="1.5" />
+    </g>
+
+    <!-- ================= CANDLE 2 (Middle - Execution) ================= -->
+    <g>
+      <!-- Wick -->
+      <line x1="512" y1="340" x2="512" y2="640" stroke="#a5b4fc" stroke-width="14" stroke-linecap="round" />
+      <!-- Body -->
+      <rect x="466" y="380" width="92" height="190" rx="22" fill="url(#candle2Grad)" stroke="#ffffff" stroke-opacity="0.4" stroke-width="2" />
+      <!-- Inner Specular Highlight on Candle 2 -->
+      <line x1="482" y1="396" x2="482" y2="554" stroke="#ffffff" stroke-width="4" stroke-linecap="round" stroke-opacity="0.35" />
+    </g>
+
+    <!-- ================= CANDLE 3 (Right - The Breakout Edge) ================= -->
+    <g>
+      <!-- Upper Wick -->
+      <line x1="674" y1="210" x2="674" y2="300" stroke="#6ee7b7" stroke-width="16" stroke-linecap="round" filter="url(#neonGlow)" />
+      <!-- Lower Wick -->
+      <line x1="674" y1="560" x2="674" y2="620" stroke="#10b981" stroke-width="14" stroke-linecap="round" />
+      <!-- Body -->
+      <rect x="624" y="270" width="100" height="280" rx="26" fill="url(#candle3Grad)" stroke="#ffffff" stroke-opacity="0.6" stroke-width="2.5" />
+      <!-- Candle 3 Specular Light Edge -->
+      <line x1="642" y1="292" x2="642" y2="528" stroke="#ffffff" stroke-width="5" stroke-linecap="round" stroke-opacity="0.5" />
+      
+      <!-- Crown Target Star / Edge Node -->
+      <g filter="url(#neonGlow)">
+        <circle cx="674" cy="200" r="18" fill="#34d399" />
+        <circle cx="674" cy="200" r="9" fill="#ffffff" />
+      </g>
+    </g>
+  </g>
+</svg>

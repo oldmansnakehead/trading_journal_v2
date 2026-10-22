@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <defs>
+    <!-- Background: Rich Royal Indigo-Purple Canvas -->
+    <linearGradient id="bgGrad3B" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#5552fa" />
+      <stop offset="50%" stop-color="#413ed6" />
+      <stop offset="100%" stop-color="#22207a" />
+    </linearGradient>
+
+    <linearGradient id="rimGrad3B" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.45" />
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0.08" />
+    </linearGradient>
+
+    <!-- Frosted Prism Glass Card -->
+    <linearGradient id="prismCardGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.22" />
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0.05" />
+    </linearGradient>
+
+    <!-- Mint Gradient -->
+    <linearGradient id="mintGrad3B" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#6ee7b7" />
+      <stop offset="100%" stop-color="#059669" />
+    </linearGradient>
+
+    <!-- Shadow -->
+    <filter id="shadow3B" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="22" stdDeviation="24" flood-color="#0f0c3d" flood-opacity="0.6" />
+    </filter>
+
+    <filter id="glow3B" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="14" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Squircle Canvas -->
+  <rect x="100" y="100" width="824" height="824" rx="190" ry="190" fill="url(#bgGrad3B)" />
+  <rect x="100" y="100" width="824" height="824" rx="190" ry="190" fill="none" stroke="url(#rimGrad3B)" stroke-width="4.5" />
+
+  <!-- Glass Prism Container Shield -->
+  <rect x="190" y="190" width="644" height="644" rx="140" ry="140" fill="url(#prismCardGrad)" stroke="#ffffff" stroke-opacity="0.25" stroke-width="2.5" />
+
+  <g filter="url(#shadow3B)">
+    <!-- Minimalist Journal Spine / Base Line -->
+    <path d="M 280 690 C 420 690, 470 660, 512 630 C 554 660, 604 690, 744 690" 
+          fill="none" stroke="#ffffff" stroke-width="16" stroke-linecap="round" opacity="0.8" />
+
+    <!-- Candle 1: Translucent White Glass -->
+    <line x1="360" y1="440" x2="360" y2="630" stroke="#ffffff" stroke-width="12" stroke-linecap="round" opacity="0.8" />
+    <rect x="318" y="480" width="84" height="110" rx="20" fill="#ffffff" fill-opacity="0.8" />
+
+    <!-- Candle 2: Crisp Bright White -->
+    <line x1="512" y1="330" x2="512" y2="590" stroke="#ffffff" stroke-width="14" stroke-linecap="round" />
+    <rect x="466" y="380" width="92" height="160" rx="22" fill="#ffffff" />
+
+    <!-- Candle 3: Glowing Mint-Emerald Breakout -->
+    <line x1="664" y1="220" x2="664" y2="550" stroke="#6ee7b7" stroke-width="16" stroke-linecap="round" filter="url(#glow3B)" />
+    <rect x="616" y="270" width="96" height="230" rx="24" fill="url(#mintGrad3B)" stroke="#ffffff" stroke-width="2.5" filter="url(#glow3B)" />
+    
+    <!-- Top Spark -->
+    <circle cx="664" cy="210" r="16" fill="#ffffff" />
+  </g>
+</svg>
