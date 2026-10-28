@@ -12,6 +12,7 @@ import { registerJournalHandlers } from './ipc/journalHandlers'
 import { registerSymbolHandlers } from './ipc/symbolHandlers'
 import { registerCustomColumnHandlers } from './ipc/customColumnHandlers'
 import { registerSetupSessionHandlers } from './ipc/setupSessionHandlers'
+import { registerResearchHandlers } from './ipc/researchHandlers'
 import { autoBackup } from './services/backup'
 import { getPaths } from './paths'
 
@@ -93,6 +94,7 @@ app.whenReady().then(async () => {
   registerSymbolHandlers()
   registerCustomColumnHandlers()
   registerSetupSessionHandlers()
+  registerResearchHandlers()
   registerUpdaterHandlers()
 
   // Default open or close DevTools by F12 in development

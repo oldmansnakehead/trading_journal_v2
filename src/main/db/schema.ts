@@ -74,7 +74,6 @@ export const setupPlaybookFlows = sqliteTable('setup_playbook_flows', {
     .$defaultFn(() => new Date().toISOString())
 })
 
-
 // --- Custom Columns ---
 export const customColumns = sqliteTable('custom_columns', {
   id: integer('id').primaryKey({ autoIncrement: true }),
@@ -154,6 +153,156 @@ export const journalEntries = sqliteTable('journal_entries', {
   // Custom Column Data (JSON map of custom_column_id -> value)
   customData: text('custom_data', { mode: 'json' }),
 
+  createdAt: text('created_at')
+    .notNull()
+    .$defaultFn(() => new Date().toISOString()),
+  updatedAt: text('updated_at')
+    .notNull()
+    .$defaultFn(() => new Date().toISOString())
+})
+
+// ==========================================
+// --- Trade Research & Zone Statistics ---
+// ==========================================
+
+// --- Research Setups ---
+export const researchSetups = sqliteTable('research_setups', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  name: text('name').notNull(),
+  description: text('description'),
+  type: text('type').notNull(), // backtest, forward_test, demo, real
+  enableExitDate: integer('enable_exit_date', { mode: 'boolean' }).notNull().default(false),
+  createdAt: text('created_at')
+    .notNull()
+    .$defaultFn(() => new Date().toISOString()),
+  updatedAt: text('updated_at')
+    .notNull()
+    .$defaultFn(() => new Date().toISOString())
+})
+
+// --- Research Setup Sessions ---
+export const researchSetupSessions = sqliteTable('research_setup_sessions', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  setupId: integer('setup_id')
+    .notNull()
+    .references(() => researchSetups.id, { onDelete: 'cascade' }),
+  startTime: text('start_time').notNull(), // HH:mm
+  endTime: text('end_time').notNull(), // HH:mm
+  sessionName: text('session_name').notNull(), // Asia, Tokyo, London, London Close, New York
+  createdAt: text('created_at')
+    .notNull()
+    .$defaultFn(() => new Date().toISOString()),
+  updatedAt: text('updated_at')
+    .notNull()
+    .$defaultFn(() => new Date().toISOString())
+})
+
+// --- Research Setup Playbooks ---
+export const researchSetupPlaybooks = sqliteTable('research_setup_playbooks', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  setupId: integer('setup_id')
+    .notNull()
+    .references(() => researchSetups.id, { onDelete: 'cascade' }),
+  content: text('content').notNull(),
+  createdAt: text('created_at')
+    .notNull()
+    .$defaultFn(() => new Date().toISOString()),
+  updatedAt: text('updated_at')
+    .notNull()
+    .$defaultFn(() => new Date().toISOString())
+})
+
+// --- Research Setup Playbook Flows (Vue Flow) ---
+export const researchSetupPlaybookFlows = sqliteTable('research_setup_playbook_flows', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  setupId: integer('setup_id')
+    .notNull()
+    .unique()
+    .references(() => researchSetups.id, { onDelete: 'cascade' }),
+  flowData: text('flow_data', { mode: 'json' }).notNull(),
+  createdAt: text('created_at')
+    .notNull()
+    .$defaultFn(() => new Date().toISOString()),
+  updatedAt: text('updated_at')
+    .notNull()
+    .$defaultFn(() => new Date().toISOString())
+})
+
+// --- Research Custom Columns (Zone Library) ---
+export const researchCustomColumns = sqliteTable('research_custom_columns', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  name: text('name').notNull(),
+  type: text('type').notNull(), // zone_group, checkbox, single_selector, string, number
+  options: text('options', { mode: 'json' }), // JSON Array of strings for selectors
+  description: text('description'),
+  createdAt: text('created_at')
+    .notNull()
+    .$defaultFn(() => new Date().toISOString()),
+  updatedAt: text('updated_at')
+    .notNull()
+    .$defaultFn(() => new Date().toISOString())
+})
+
+// --- Research Setup Custom Columns (Junction Table M:N) ---
+export const researchSetupCustomColumns = sqliteTable('research_setup_custom_columns', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  setupId: integer('setup_id')
+    .notNull()
+    .references(() => researchSetups.id, { onDelete: 'cascade' }),
+  customColumnId: integer('custom_column_id')
+    .notNull()
+    .references(() => researchCustomColumns.id, { onDelete: 'cascade' }),
+  orderIndex: integer('order_index').notNull().default(0),
+  createdAt: text('created_at')
+    .notNull()
+    .$defaultFn(() => new Date().toISOString()),
+  updatedAt: text('updated_at')
+    .notNull()
+    .$defaultFn(() => new Date().toISOString())
+})
+
+// --- Research Entries (Main Record) ---
+export const researchEntries = sqliteTable('research_entries', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  setupId: integer('setup_id')
+    .notNull()
+    .references(() => researchSetups.id, { onDelete: 'cascade' }),
+  symbolId: integer('symbol_id')
+    .notNull()
+    .references(() => symbols.id),
+  entryDatetime: text('entry_datetime').notNull(),
+  exitDatetime: text('exit_datetime'), // Present only if enable_exit_date is true on setup
+  sessionName: text('session_name'),
+  timeframe: text('timeframe'),
+  news: integer('news', { mode: 'boolean' }).default(false),
+  quality: text('quality'), // e.g., A+, A, B, C or color code
+  images: text('images', { mode: 'json' }), // JSON Array of image paths
+  notes: text('notes'),
+  createdAt: text('created_at')
+    .notNull()
+    .$defaultFn(() => new Date().toISOString()),
+  updatedAt: text('updated_at')
+    .notNull()
+    .$defaultFn(() => new Date().toISOString())
+})
+
+// --- Research Entry Zones (Per Custom Column Outcome) ---
+export const researchEntryZones = sqliteTable('research_entry_zones', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  researchEntryId: integer('research_entry_id')
+    .notNull()
+    .references(() => researchEntries.id, { onDelete: 'cascade' }),
+  customColumnId: integer('custom_column_id')
+    .notNull()
+    .references(() => researchCustomColumns.id, { onDelete: 'cascade' }),
+  bias: text('bias'), // Bullish, Bearish
+  minRr: real('min_rr'),
+  maxRr: real('max_rr'),
+  minSlPoints: real('min_sl_points'),
+  maxSlPoints: real('max_sl_points'),
+  isMissed: integer('is_missed', { mode: 'boolean' }).default(false),
+  outcome: text('outcome'), // win, loss, be, missed
+  notes: text('notes'),
   createdAt: text('created_at')
     .notNull()
     .$defaultFn(() => new Date().toISOString()),

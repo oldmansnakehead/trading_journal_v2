@@ -35,6 +35,19 @@ export const registerSetupSessionHandlers = () => {
         .get()
 
       if (existing) {
+        if (data.updateIfExists) {
+          const result = db
+            .update(setupSessions)
+            .set({
+              startTime: data.startTime,
+              endTime: data.endTime,
+              updatedAt: new Date().toISOString()
+            })
+            .where(eq(setupSessions.id, existing.id))
+            .returning()
+            .get()
+          return { success: true, data: result }
+        }
         return {
           success: false,
           error: `Session "${sessionName}" already exists for this setup.`

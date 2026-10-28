@@ -39,6 +39,13 @@ const overviewNav: NavItem[] = [
   { name: 'New Trade', to: '/journal', icon: 'ph ph-plus-circle' }
 ]
 
+
+const researchNav: NavItem[] = [
+  { name: 'จดสถิติ (New Entry)', to: '/research/entry', icon: 'ph ph-notebook' },
+  { name: 'สรุปผลวิจัย (Analytics)', to: '/research/dashboard', icon: 'ph ph-chart-line-up' },
+  { name: 'ตั้งค่าสถิติ (Settings)', to: '/research/settings', icon: 'ph ph-sliders' }
+]
+
 const managementNav: NavItem[] = [
   { name: 'Data Management', to: '/data', icon: 'ph ph-database' },
   { name: 'Settings', to: '/settings', icon: 'ph ph-gear' }
@@ -129,6 +136,24 @@ const managementNav: NavItem[] = [
         <nav class="space-y-1">
           <router-link
             v-for="item in overviewNav"
+            :key="item.to"
+            :to="item.to"
+            @click="sidebarStore.closeMobile"
+            active-class="bg-primary/10 text-primary font-semibold"
+            class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-textSecondary hover:bg-gray-100 hover:text-textPrimary font-medium transition-colors"
+          >
+            <i :class="[item.icon, 'text-xl']"></i>
+            <span>{{ item.name }}</span>
+          </router-link>
+        </nav>
+
+        
+        <div class="mt-6 mb-3 px-2 text-xs font-bold text-textSecondary uppercase tracking-wider">
+          จดสถิติ (Research)
+        </div>
+        <nav class="space-y-1">
+          <router-link
+            v-for="item in researchNav"
             :key="item.to"
             :to="item.to"
             @click="sidebarStore.closeMobile"
@@ -250,6 +275,35 @@ const managementNav: NavItem[] = [
       <nav class="space-y-1">
         <router-link
           v-for="item in overviewNav"
+          :key="item.to"
+          :to="item.to"
+          :title="sidebarStore.isCollapsed ? item.name : undefined"
+          active-class="bg-primary/10 text-primary font-semibold"
+          :class="[
+            'flex items-center rounded-xl text-textSecondary hover:bg-gray-100 hover:text-textPrimary font-medium transition-colors',
+            sidebarStore.isCollapsed
+              ? 'justify-center p-3 text-2xl'
+              : 'gap-3 px-3 py-2.5 text-base'
+          ]"
+        >
+          <i :class="[item.icon, sidebarStore.isCollapsed ? 'text-2xl' : 'text-xl']"></i>
+          <span v-if="!sidebarStore.isCollapsed" class="whitespace-nowrap">{{ item.name }}</span>
+        </router-link>
+      </nav>
+
+      
+      <!-- Research Section -->
+      <div
+        v-if="!sidebarStore.isCollapsed"
+        class="mt-8 mb-4 px-2 text-xs font-bold text-textSecondary uppercase tracking-wider whitespace-nowrap"
+      >
+        จดสถิติ (Research)
+      </div>
+      <hr v-else class="my-3 border-gray-100" />
+
+      <nav class="space-y-1">
+        <router-link
+          v-for="item in researchNav"
           :key="item.to"
           :to="item.to"
           :title="sidebarStore.isCollapsed ? item.name : undefined"

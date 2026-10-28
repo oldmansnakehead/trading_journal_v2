@@ -27,7 +27,7 @@ test('fill trade and save', async () => {
   })
 
   await test.step('Navigate to Settings via sidebar UI', async () => {
-    await window.click('text=Settings')
+    await window.click('a[href="#/settings"]')
     await expect(window.locator('h1:has-text("Settings")')).toBeVisible({ timeout: 5000 })
   })
 
@@ -40,6 +40,16 @@ test('fill trade and save', async () => {
     // Verify setup is visible in UI list
     await expect(window.locator(`h3:has-text("${setupName}")`)).toBeVisible({ timeout: 5000 })
     await window.screenshot({ path: 'e2e/screenshots/setup-created.png' })
+  })
+
+  await test.step('Apply Standard Session Presets in Journal Settings', async () => {
+    await window.click('button:has-text("Setup Sessions")')
+    await expect(window.locator('h2:has-text("Setup Sessions")')).toBeVisible({ timeout: 5000 })
+    await window.click('[data-testid="apply-standard-presets-btn"]')
+    await expect(window.locator('td:has-text("Asia")')).toBeVisible({ timeout: 5000 })
+    await expect(window.locator('td:has-text("07:00")')).toBeVisible({ timeout: 5000 })
+    await expect(window.locator('td:has-text("London Close")')).toBeVisible({ timeout: 5000 })
+    await window.screenshot({ path: 'e2e/screenshots/journal-sessions-presets.png' })
   })
 
   await test.step('Create a new Trading Symbol', async () => {

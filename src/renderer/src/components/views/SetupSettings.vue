@@ -192,13 +192,13 @@
 
       <!-- Setup Sessions Tab -->
       <div v-else-if="activeTab === 'setup_sessions'" class="flex flex-col gap-6">
-        <div class="flex justify-between items-center">
+        <div class="flex flex-col lg:flex-row justify-between lg:items-center gap-4">
           <div>
             <h2 class="text-xl font-bold text-gray-900">Setup Sessions</h2>
             <p class="text-sm text-gray-500 mt-1">Manage trading timetables for each setup.</p>
           </div>
-          <div class="flex items-center gap-4">
-            <div class="w-48">
+          <div class="flex flex-wrap sm:flex-nowrap items-center gap-3">
+            <div class="w-48 shrink-0">
               <BaseSelect
                 id="session-setup-select"
                 v-model="selectedSetupId"
@@ -209,14 +209,24 @@
             <button
               v-if="selectedSessions.length > 0"
               @click="deleteSelectedSessions"
-              class="bg-red-50 hover:bg-red-100 text-red-600 px-4 py-2 rounded-lg font-bold text-sm transition-colors shadow-sm border border-red-200"
+              class="bg-red-50 hover:bg-red-100 text-red-600 px-4 py-2 rounded-lg font-bold text-sm transition-colors shadow-sm border border-red-200 whitespace-nowrap shrink-0"
             >
               Delete Selected ({{ selectedSessions.length }})
             </button>
             <button
+              @click="applyStandardPresets"
+              :disabled="!selectedSetupId || isApplyingPresets"
+              data-testid="apply-standard-presets-btn"
+              class="bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 px-4 py-2 rounded-lg font-bold text-sm flex items-center gap-2 transition-colors disabled:opacity-50 cursor-pointer shadow-2xs whitespace-nowrap shrink-0"
+              title="เพิ่ม 4 เซสชันมาตรฐาน (Asia, London, New York, London Close) อัตโนมัติ"
+            >
+              <i class="ph ph-lightning text-base"></i>
+              {{ isApplyingPresets ? 'กำลังบันทึก...' : 'ใส่ Preset มาตรฐาน (4 เซสชัน)' }}
+            </button>
+            <button
               @click="openAddSessionModal"
               :disabled="!selectedSetupId"
-              class="bg-gray-900 hover:bg-gray-800 disabled:bg-gray-400 text-white px-4 py-2 rounded-lg font-bold text-sm flex items-center gap-2 transition-colors shadow-sm"
+              class="bg-gray-900 hover:bg-gray-800 disabled:bg-gray-400 text-white px-4 py-2 rounded-lg font-bold text-sm flex items-center gap-2 transition-colors shadow-sm whitespace-nowrap shrink-0"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -1041,18 +1051,43 @@
         </div>
         
         <div class="p-6 flex flex-col gap-5 overflow-y-auto">
+          <!-- Preset Quick Pick Buttons -->
+          <div>
+            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
+              เลือกเวลาจาก Preset ทันที:
+            </label>
+            <div class="grid grid-cols-2 gap-2">
+              <button
+                v-for="p in sessionPresets"
+                :key="p.sessionName"
+                type="button"
+                @click="applySinglePreset(p)"
+                :class="[
+                  'px-3 py-2 text-xs font-semibold rounded-xl border text-left flex flex-col gap-0.5 transition-all cursor-pointer',
+                  newSession.sessionName === p.sessionName
+                    ? 'bg-blue-50 border-blue-500 text-blue-700 ring-1 ring-blue-500'
+                    : 'bg-gray-50 hover:bg-gray-100 border-gray-200 text-gray-700'
+                ]"
+              >
+                <span class="flex items-center gap-1 font-bold">
+                  <i class="ph ph-clock text-sm"></i>
+                  {{ p.sessionName }}
+                </span>
+                <span class="font-mono text-[11px] text-gray-500">
+                  {{ p.startTime }} - {{ p.endTime }}
+                </span>
+              </button>
+            </div>
+          </div>
+
           <div>
             <label class="block text-sm font-semibold text-gray-700 mb-1.5">Session Name</label>
             <BaseSelect
               id="session-name"
               v-model="newSession.sessionName"
-              :options="availableSessionOptions"
+              :options="allSessionOptions"
               placeholder="Select Standard Session..."
-              :disabled="availableSessionOptions.length === 0"
             />
-            <p v-if="availableSessionOptions.length === 0" class="text-xs text-amber-600 mt-1 font-medium">
-              เพิ่มครบทุก Session มาตรฐาน (London, New York, London Close, Asia, Tokyo) สำหรับ Setup นี้แล้ว
-            </p>
           </div>
           
           <div class="grid grid-cols-2 gap-4">
@@ -1071,7 +1106,7 @@
           <BaseButton variant="outline" @click="closeAddSessionModal">
             Cancel
           </BaseButton>
-          <BaseButton variant="primary" @click="saveSession" :disabled="!newSession.sessionName || !newSession.startTime || !newSession.endTime || availableSessionOptions.length === 0">
+          <BaseButton variant="primary" @click="saveSession" :disabled="!newSession.sessionName || !newSession.startTime || !newSession.endTime">
             Save Session
           </BaseButton>
         </div>
@@ -1112,7 +1147,7 @@ import PlaybookFlowEditor from '../ui/PlaybookFlowEditor.vue'
 import BasePagination from '../ui/BasePagination.vue'
 import AppUpdateCard from '../ui/AppUpdateCard.vue'
 import { paginateItems } from '../../utils/pagination'
-import { STANDARD_SESSIONS } from '../../utils/sessions'
+import { STANDARD_SESSIONS, DEFAULT_SESSION_PRESETS } from '../../utils/sessions'
 
 // Alert Modal State
 const alertModal = ref({
@@ -1453,12 +1488,20 @@ const newSession = ref({
   endTime: ''
 })
 
-// Only allow standard sessions that have not already been added to the current setup
-const availableSessionOptions = computed(() => {
-  const existingNames = new Set(setupSessionsList.value.map((s) => s.sessionName))
-  return STANDARD_SESSIONS.filter((s) => !existingNames.has(s.value)).map((s) => ({
+const sessionPresets = DEFAULT_SESSION_PRESETS
+
+const applySinglePreset = (preset: { sessionName: string; startTime: string; endTime: string }) => {
+  newSession.value = {
+    sessionName: preset.sessionName,
+    startTime: preset.startTime,
+    endTime: preset.endTime
+  }
+}
+
+const allSessionOptions = computed(() => {
+  return STANDARD_SESSIONS.map((s) => ({
     value: s.value,
-    label: s.label
+    label: `${s.label} (${s.defaultStart} - ${s.defaultEnd})`
   }))
 })
 
@@ -1474,6 +1517,30 @@ watch(
     }
   }
 )
+
+const isApplyingPresets = ref(false)
+const applyStandardPresets = async () => {
+  if (!selectedSetupId.value) return
+  try {
+    isApplyingPresets.value = true
+    for (const preset of DEFAULT_SESSION_PRESETS) {
+      await window.api.setupSessions.create({
+        setupId: selectedSetupId.value,
+        sessionName: preset.sessionName,
+        startTime: preset.startTime,
+        endTime: preset.endTime,
+        updateIfExists: true
+      })
+    }
+    await loadSetupDetails()
+    showAlert('Success', 'บันทึกชุดเวลา 4 เซสชันมาตรฐาน (Asia, London, New York, London Close) เรียบร้อยแล้ว', 'success')
+  } catch (err: any) {
+    console.error('Failed to apply standard session presets:', err)
+    showAlert('Error', 'เกิดข้อผิดพลาดในการโหลด Preset: ' + (err.message || String(err)), 'error')
+  } finally {
+    isApplyingPresets.value = false
+  }
+}
 
 const playbookContent = ref('')
 const playbookContentModified = ref(false)
@@ -1575,16 +1642,11 @@ watch(selectedSetupId, () => {
 })
 
 const openAddSessionModal = () => {
-  const firstAvailable = availableSessionOptions.value[0]
-  if (firstAvailable) {
-    const std = STANDARD_SESSIONS.find((s) => s.value === firstAvailable.value)
-    newSession.value = {
-      sessionName: firstAvailable.value,
-      startTime: std?.defaultStart || '08:00',
-      endTime: std?.defaultEnd || '17:00'
-    }
-  } else {
-    newSession.value = { sessionName: '', startTime: '', endTime: '' }
+  const defaultPreset = sessionPresets[0]
+  newSession.value = {
+    sessionName: defaultPreset?.sessionName || 'Asia',
+    startTime: defaultPreset?.startTime || '07:00',
+    endTime: defaultPreset?.endTime || '12:00'
   }
   isAddSessionModalOpen.value = true
 }
@@ -1609,17 +1671,14 @@ const saveSession = async () => {
   const isDuplicate = setupSessionsList.value.some(
     (s) => s.sessionName === newSession.value.sessionName
   )
-  if (isDuplicate) {
-    showAlert('Error', `Session "${newSession.value.sessionName}" already exists for this setup.`, 'error')
-    return
-  }
   
   try {
     const dataToSave = {
       setupId: selectedSetupId.value,
       sessionName: newSession.value.sessionName,
       startTime: newSession.value.startTime,
-      endTime: newSession.value.endTime
+      endTime: newSession.value.endTime,
+      updateIfExists: true
     }
     console.log('Calling IPC with:', dataToSave)
     const res = await window.api.setupSessions.create(dataToSave)
@@ -1627,7 +1686,7 @@ const saveSession = async () => {
     if (res.success) {
       await loadSetupDetails()
       closeAddSessionModal()
-      showAlert('Success', 'Setup session saved successfully.', 'success')
+      showAlert('Success', isDuplicate ? 'บันทึกอัปเดตเวลา Session เรียบร้อยแล้ว' : 'บันทึก Setup Session เรียบร้อยแล้ว', 'success')
     } else {
       showAlert('Error', 'Failed to save session: ' + res.error, 'error')
     }

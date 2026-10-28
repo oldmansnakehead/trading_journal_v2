@@ -1,4 +1,15 @@
 import { ElectronAPI } from '@electron-toolkit/preload'
+import type {
+  ResearchSetup,
+  ResearchSession,
+  ResearchPlaybook,
+  ResearchCustomColumn,
+  ResearchEntry,
+  ResearchEntryInput,
+  ResearchFilters,
+  ResearchAnalyticsSummary,
+  ResearchExportPayload
+} from '../shared/types'
 
 declare global {
   interface Window {
@@ -97,6 +108,121 @@ declare global {
       setupPlaybookFlows: {
         get: (setupId: number) => Promise<any>
         save: (data: { setupId: number, flowData: any }) => Promise<any>
+      }
+      research: {
+        setups: {
+          list: () => Promise<{ success: boolean; data?: ResearchSetup[]; error?: string }>
+          get: (id: number) => Promise<{ success: boolean; data?: ResearchSetup; error?: string }>
+          getDetails: (id: number) => Promise<{ success: boolean; data?: any; error?: string }>
+          create: (data: {
+            name: string
+            description?: string
+            type: string
+            enableExitDate?: boolean
+          }) => Promise<{ success: boolean; data?: ResearchSetup; error?: string }>
+          update: (
+            id: number,
+            data: {
+              name?: string
+              description?: string
+              type?: string
+              enableExitDate?: boolean
+            }
+          ) => Promise<{ success: boolean; data?: ResearchSetup; error?: string }>
+          delete: (id: number) => Promise<{ success: boolean; error?: string }>
+        }
+        sessions: {
+          listBySetup: (
+            setupId: number
+          ) => Promise<{ success: boolean; data?: ResearchSession[]; error?: string }>
+          create: (data: {
+            setupId: number
+            startTime: string
+            endTime: string
+            sessionName: string
+          }) => Promise<{ success: boolean; data?: ResearchSession; error?: string }>
+          delete: (id: number) => Promise<{ success: boolean; error?: string }>
+        }
+        playbooks: {
+          get: (
+            setupId: number
+          ) => Promise<{ success: boolean; data?: ResearchPlaybook | null; error?: string }>
+          save: (data: {
+            setupId: number
+            content: string
+          }) => Promise<{ success: boolean; data?: ResearchPlaybook; error?: string }>
+        }
+        playbookFlows: {
+          get: (setupId: number) => Promise<{ success: boolean; data?: any; error?: string }>
+          save: (data: {
+            setupId: number
+            flowData: any
+          }) => Promise<{ success: boolean; data?: any; error?: string }>
+        }
+        customColumns: {
+          list: (
+            setupId?: number | null
+          ) => Promise<{ success: boolean; data?: ResearchCustomColumn[]; error?: string }>
+          listLibrary: () => Promise<{ success: boolean; data?: any[]; error?: string }>
+          create: (data: {
+            name: string
+            type: string
+            options?: string[]
+            description?: string
+          }) => Promise<{ success: boolean; data?: ResearchCustomColumn; error?: string }>
+          update: (
+            id: number,
+            data: {
+              name?: string
+              type?: string
+              options?: string[]
+              description?: string
+            }
+          ) => Promise<{ success: boolean; data?: ResearchCustomColumn; error?: string }>
+          delete: (id: number) => Promise<{ success: boolean; error?: string }>
+          linkSetup: (data: {
+            setupId: number
+            customColumnId: number
+            orderIndex?: number
+          }) => Promise<{ success: boolean; data?: any; error?: string }>
+          unlinkSetup: (data: {
+            setupId: number
+            customColumnId: number
+          }) => Promise<{ success: boolean; error?: string }>
+          batchSyncSetup: (data: {
+            setupId: number
+            columnIds: number[]
+          }) => Promise<{ success: boolean; error?: string }>
+        }
+        entries: {
+          list: (
+            filters?: ResearchFilters
+          ) => Promise<{ success: boolean; data?: ResearchEntry[]; error?: string }>
+          get: (id: number) => Promise<{ success: boolean; data?: ResearchEntry; error?: string }>
+          create: (
+            data: ResearchEntryInput
+          ) => Promise<{ success: boolean; data?: any; error?: string }>
+          update: (
+            id: number,
+            data: Partial<ResearchEntryInput>
+          ) => Promise<{ success: boolean; data?: any; error?: string }>
+          delete: (id: number) => Promise<{ success: boolean; error?: string }>
+          deleteMany: (ids: number[]) => Promise<{ success: boolean; error?: string }>
+          getAnalytics: (
+            filters?: ResearchFilters
+          ) => Promise<{ success: boolean; data?: ResearchAnalyticsSummary; error?: string }>
+        }
+        export: {
+          ai: (
+            payload: ResearchExportPayload
+          ) => Promise<{ success: boolean; canceled?: boolean; filePath?: string; format?: 'md' | 'json'; error?: string }>
+          generateAiReport: (
+            payload: ResearchExportPayload & { format?: 'md' | 'json' }
+          ) => Promise<{ success: boolean; content?: string; format?: 'md' | 'json'; error?: string }>
+          excel: (
+            payload: { entries: any[]; analytics?: any; setupName?: string; defaultName?: string }
+          ) => Promise<{ success: boolean; canceled?: boolean; filePath?: string; error?: string }>
+        }
       }
       updater: {
         check: () => Promise<{

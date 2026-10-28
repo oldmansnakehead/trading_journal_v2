@@ -47,6 +47,22 @@ const router = createRouter({
       path: '/design',
       name: 'design',
       component: () => import('../views/DesignSystemView.vue')
+    },
+    // Trade Research Routes
+    {
+      path: '/research/entry',
+      name: 'research-entry',
+      component: () => import('../components/views/ResearchEntryForm.vue')
+    },
+    {
+      path: '/research/dashboard',
+      name: 'research-dashboard',
+      component: () => import('../components/views/ResearchDashboardView.vue')
+    },
+    {
+      path: '/research/settings',
+      name: 'research-settings',
+      component: () => import('../components/views/ResearchSettings.vue')
     }
   ]
 })

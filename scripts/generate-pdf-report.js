@@ -136,6 +136,15 @@ function generatePdfReport() {
 
       // Map known screenshots to tests
       const testScreenshots = {
+        'trade research: complete research and zone statistics workflow': [
+          { name: 'Research Settings & Setup Created', path: path.join(screenshotsDir, 'research-setup-created.png') },
+          { name: 'Research Custom Zone Columns Linked', path: path.join(screenshotsDir, 'research-zones-linked.png') },
+          { name: 'Research Entry Form Auto-Sync & Quick Buttons', path: path.join(screenshotsDir, 'research-entry-filled.png') },
+          { name: 'Research Entry Saved Toast', path: path.join(screenshotsDir, 'research-entry-saved.png') },
+          { name: 'Research Analytics Matrix & Badges Verified', path: path.join(screenshotsDir, 'research-dashboard-verified.png') },
+          { name: 'Research AI Markdown Prompt Exported', path: path.join(screenshotsDir, 'research-ai-exported.png') },
+          { name: 'Research Entry Updated in Edit Mode', path: path.join(screenshotsDir, 'research-entry-updated.png') }
+        ],
         'app opens and shows main window': [
           { name: 'Main Window Rendered (900px)', path: path.join(screenshotsDir, 'main-window.png') }
         ],

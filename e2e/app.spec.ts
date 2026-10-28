@@ -28,7 +28,7 @@ test('app opens and shows main window', async () => {
     const desktopSidebar = window.locator('[data-testid="app-desktop-sidebar"]')
     await expect(desktopSidebar.locator('text=Trading Journal')).toBeVisible()
     await expect(desktopSidebar.locator('text=Dashboard')).toBeVisible()
-    await expect(desktopSidebar.locator('text=Settings')).toBeVisible()
+    await expect(desktopSidebar.locator('text="Settings"')).toBeVisible()
     await expect(desktopSidebar.locator('text=New Trade')).toBeVisible()
   })
 
@@ -38,7 +38,7 @@ test('app opens and shows main window', async () => {
     // Open mobile menu drawer
     await window.click('[data-testid="mobile-menu-btn"]')
     await expect(window.locator('[data-testid="mobile-drawer"]')).toBeVisible()
-    await expect(window.locator('[data-testid="mobile-drawer"]').locator('text=Settings')).toBeVisible()
+    await expect(window.locator('[data-testid="mobile-drawer"]').locator('text="Settings"')).toBeVisible()
     await expect(window.locator('[data-testid="mobile-drawer"]').locator('text=New Trade')).toBeVisible()
     // Close mobile menu drawer
     await window.click('[data-testid="close-menu-btn"]')

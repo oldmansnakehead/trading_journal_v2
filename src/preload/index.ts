@@ -90,6 +90,56 @@ const api = {
     get: (setupId: number) => ipcRenderer.invoke('setupPlaybookFlows:get', setupId),
     save: (data: { setupId: number, flowData: any }) => ipcRenderer.invoke('setupPlaybookFlows:save', safeClone(data))
   },
+  research: {
+    setups: {
+      list: () => ipcRenderer.invoke('researchSetups:list'),
+      get: (id: number) => ipcRenderer.invoke('researchSetups:get', id),
+      getDetails: (id: number) => ipcRenderer.invoke('researchSetups:getDetails', id),
+      create: (data: any) => ipcRenderer.invoke('researchSetups:create', safeClone(data)),
+      update: (id: number, data: any) => ipcRenderer.invoke('researchSetups:update', id, safeClone(data)),
+      delete: (id: number) => ipcRenderer.invoke('researchSetups:delete', id)
+    },
+    sessions: {
+      listBySetup: (setupId: number) => ipcRenderer.invoke('researchSessions:listBySetup', setupId),
+      create: (data: any) => ipcRenderer.invoke('researchSessions:create', safeClone(data)),
+      delete: (id: number) => ipcRenderer.invoke('researchSessions:delete', id)
+    },
+    playbooks: {
+      get: (setupId: number) => ipcRenderer.invoke('researchPlaybooks:get', setupId),
+      save: (data: { setupId: number; content: string }) => ipcRenderer.invoke('researchPlaybooks:save', safeClone(data))
+    },
+    playbookFlows: {
+      get: (setupId: number) => ipcRenderer.invoke('researchPlaybookFlows:get', setupId),
+      save: (data: { setupId: number; flowData: any }) => ipcRenderer.invoke('researchPlaybookFlows:save', safeClone(data))
+    },
+    customColumns: {
+      list: (setupId?: number | null) => ipcRenderer.invoke('researchCustomColumns:list', setupId),
+      listLibrary: () => ipcRenderer.invoke('researchCustomColumns:listLibrary'),
+      create: (data: any) => ipcRenderer.invoke('researchCustomColumns:create', safeClone(data)),
+      update: (id: number, data: any) => ipcRenderer.invoke('researchCustomColumns:update', id, safeClone(data)),
+      delete: (id: number) => ipcRenderer.invoke('researchCustomColumns:delete', id),
+      linkSetup: (data: { setupId: number; customColumnId: number; orderIndex?: number }) =>
+        ipcRenderer.invoke('researchCustomColumns:linkSetup', safeClone(data)),
+      unlinkSetup: (data: { setupId: number; customColumnId: number }) =>
+        ipcRenderer.invoke('researchCustomColumns:unlinkSetup', safeClone(data)),
+      batchSyncSetup: (data: { setupId: number; columnIds: number[] }) =>
+        ipcRenderer.invoke('researchCustomColumns:batchSyncSetup', safeClone(data))
+    },
+    entries: {
+      list: (filters?: any) => ipcRenderer.invoke('researchEntries:list', safeClone(filters)),
+      get: (id: number) => ipcRenderer.invoke('researchEntries:get', id),
+      create: (data: any) => ipcRenderer.invoke('researchEntries:create', safeClone(data)),
+      update: (id: number, data: any) => ipcRenderer.invoke('researchEntries:update', id, safeClone(data)),
+      delete: (id: number) => ipcRenderer.invoke('researchEntries:delete', id),
+      deleteMany: (ids: number[]) => ipcRenderer.invoke('researchEntries:deleteMany', safeClone(ids)),
+      getAnalytics: (filters?: any) => ipcRenderer.invoke('researchEntries:getAnalytics', safeClone(filters))
+    },
+    export: {
+      ai: (payload: any) => ipcRenderer.invoke('research:exportAi', safeClone(payload)),
+      generateAiReport: (payload: any) => ipcRenderer.invoke('research:generateAiReport', safeClone(payload)),
+      excel: (payload: any) => ipcRenderer.invoke('research:exportExcel', safeClone(payload))
+    }
+  },
   updater: {
     check: () => ipcRenderer.invoke('updater:check'),
     download: () => ipcRenderer.invoke('updater:download'),
