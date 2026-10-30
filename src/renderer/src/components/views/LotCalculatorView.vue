@@ -22,9 +22,6 @@ const minLot = ref<number>(0.01)
 const maxLot = ref<number>(100)
 const commissionPerLot = ref<number>(0)
 
-// Copy feedback
-const copied = ref(false)
-
 // Handle Asset Preset change
 const onAssetChange = (asset: AssetType) => {
   selectedAsset.value = asset
@@ -96,19 +93,19 @@ const riskStatus = computed(() => {
   const r = Number(riskPercent.value) || 0
   if (r <= 1.0) {
     return {
-      label: 'อยู่ในระดับระมัดระวัง',
+      label: 'ความเสี่ยงต่ำ (Conservative)',
       dotColor: 'bg-emerald-500',
       badgeClass: 'bg-emerald-50 text-emerald-700 border-emerald-200/80'
     }
   } else if (r <= 2.5) {
     return {
-      label: 'อยู่ในระดับปานกลาง',
+      label: 'ความเสี่ยงมาตรฐาน (Balanced)',
       dotColor: 'bg-amber-500',
       badgeClass: 'bg-amber-50 text-amber-700 border-amber-200/80'
     }
   } else {
     return {
-      label: 'ความเสี่ยงสูง ควรระวัง',
+      label: 'ความเสี่ยงสูง (Aggressive)',
       dotColor: 'bg-rose-500',
       badgeClass: 'bg-rose-50 text-rose-700 border-rose-200/80'
     }
@@ -144,19 +141,6 @@ const resetForm = () => {
   pointSize.value = 0.01
 }
 
-// Copy to clipboard
-const copyLot = async () => {
-  try {
-    await navigator.clipboard.writeText(recommendedLot.value.toFixed(2))
-    copied.value = true
-    setTimeout(() => {
-      copied.value = false
-    }, 2000)
-  } catch (err) {
-    console.error('Failed to copy lot size:', err)
-  }
-}
-
 // Formatters
 const formatCurrency = (val: number) => {
   return val.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
@@ -174,10 +158,10 @@ const formatNumber = (val: number) => {
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 class="text-3xl font-bold text-gray-900 tracking-tight">
-            คำนวณ Lot ก่อนเข้าเทรด
+            คำนวณขนาดสัญญาและคุมความเสี่ยง (Position Sizing)
           </h1>
           <p class="text-sm text-textSecondary mt-1">
-            กำหนดเงินที่ยอมเสี่ยงและตำแหน่ง Stop Loss แล้วให้ระบบช่วยหาขนาด Lot ที่ไม่ปัดความเสี่ยงขึ้น
+            กำหนดเงินทุนและจุด Stop Loss เพื่อหา Volume สัญญา (Lot Size) ที่ปลอดภัย โดยไม่ให้ผลขาดทุนเกินเพดานความเสี่ยงที่วางไว้
           </p>
         </div>
 
@@ -232,10 +216,10 @@ const formatNumber = (val: number) => {
             <!-- Account Balance -->
             <div>
               <div class="flex items-center gap-1 mb-1.5">
-                <label class="block text-xs font-bold text-gray-700">Account Balance</label>
+                <label class="block text-xs font-bold text-gray-700">ทุนในพอร์ต (Account Equity)</label>
                 <i
                   class="ph ph-info text-gray-400 text-xs cursor-pointer hover:text-gray-600"
-                  title="ยอดเงินทุนในพอร์ตการเทรดของคุณ (USD)"
+                  title="มูลค่าเงินทุนสุทธิในพอร์ตการเทรดที่นำมาใช้คำนวณความเสี่ยง (USD)"
                 ></i>
               </div>
               <div class="relative flex items-center">
@@ -253,10 +237,10 @@ const formatNumber = (val: number) => {
             <!-- Risk per Trade -->
             <div>
               <div class="flex items-center gap-1 mb-1.5">
-                <label class="block text-xs font-bold text-gray-700">Risk per Trade</label>
+                <label class="block text-xs font-bold text-gray-700">สัดส่วนความเสี่ยง (Risk %)</label>
                 <i
                   class="ph ph-info text-gray-400 text-xs cursor-pointer hover:text-gray-600"
-                  title="เปอร์เซ็นต์ความเสี่ยงที่ยอมรับได้ต่อไม้นี้ เช่น 1%"
+                  title="เพดานความเสี่ยงสูงสุดต่อไม้นี้ เทียบเป็น % ของเงินทุน"
                 ></i>
               </div>
               <div class="relative flex items-center">
@@ -277,10 +261,10 @@ const formatNumber = (val: number) => {
             <!-- Entry Price -->
             <div>
               <div class="flex items-center gap-1 mb-1.5">
-                <label class="block text-xs font-bold text-gray-700">Entry Price</label>
+                <label class="block text-xs font-bold text-gray-700">ราคาเปิดสถานะ (Entry Price)</label>
                 <i
                   class="ph ph-info text-gray-400 text-xs cursor-pointer hover:text-gray-600"
-                  title="ระดับราคาที่ต้องการเปิดออเดอร์"
+                  title="ระดับราคาตามแผนเข้าเทรด"
                 ></i>
               </div>
               <input
@@ -295,10 +279,10 @@ const formatNumber = (val: number) => {
             <!-- Stop Loss Price -->
             <div>
               <div class="flex items-center gap-1 mb-1.5">
-                <label class="block text-xs font-bold text-gray-700">Stop Loss Price</label>
+                <label class="block text-xs font-bold text-gray-700">ราคาตัดขาดทุน (Stop Loss)</label>
                 <i
                   class="ph ph-info text-gray-400 text-xs cursor-pointer hover:text-gray-600"
-                  title="ระดับราคาตัดขาดทุน (Stop Loss)"
+                  title="ระดับราคาปิดทำลายมุมมอง (SL Price) เพื่อตัดขาดทุน"
                 ></i>
               </div>
               <input
@@ -315,8 +299,8 @@ const formatNumber = (val: number) => {
           <div class="flex flex-col gap-3 pt-1">
             <!-- Balance Presets -->
             <div class="flex flex-wrap items-center gap-2">
-              <span class="text-[11px] font-bold text-gray-400 tracking-wider uppercase w-16">
-                BALANCE
+              <span class="text-[11px] font-bold text-gray-400 tracking-wider uppercase w-20">
+                ขนาดพอร์ต
               </span>
               <button
                 v-for="b in balancePresets"
@@ -336,8 +320,8 @@ const formatNumber = (val: number) => {
 
             <!-- Risk Presets -->
             <div class="flex flex-wrap items-center gap-2">
-              <span class="text-[11px] font-bold text-gray-400 tracking-wider uppercase w-16">
-                RISK
+              <span class="text-[11px] font-bold text-gray-400 tracking-wider uppercase w-20">
+                อัตราเสี่ยง
               </span>
               <button
                 v-for="r in riskPresets"
@@ -403,7 +387,7 @@ const formatNumber = (val: number) => {
 
             <!-- Distance Subtitle -->
             <span class="text-xs font-semibold text-textSecondary tracking-wide mt-1">
-              {{ orderType }} PLAN · ระยะห่าง {{ formatNumber(priceDistance) }}
+              ฝั่ง {{ orderType }} · ระยะ SL ห่าง {{ formatNumber(priceDistance) }} ({{ stopLossPoints.toLocaleString() }} จุด)
             </span>
           </div>
 
@@ -416,10 +400,10 @@ const formatNumber = (val: number) => {
             >
               <span class="flex items-center gap-1.5">
                 <i class="ph ph-sliders-horizontal text-base text-primary"></i>
-                ตั้งค่าขั้นสูง
+                กำหนดสเปกสินทรัพย์ & โบรกเกอร์ (Broker Specs)
               </span>
               <span class="text-xs text-textSecondary hover:text-gray-800">
-                {{ showAdvanced ? 'ซ่อน' : 'แสดง' }}
+                {{ showAdvanced ? 'ย่อเก็บ' : 'ดูรายละเอียด' }}
               </span>
             </button>
 
@@ -428,7 +412,7 @@ const formatNumber = (val: number) => {
               <!-- Asset Presets -->
               <div class="sm:col-span-2">
                 <label class="block text-xs font-bold text-gray-600 mb-1.5">
-                  ประเภทสินทรัพย์ (Asset Preset)
+                  คู่เงิน / สินทรัพย์อ้างอิง
                 </label>
                 <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
                   <button
@@ -453,7 +437,7 @@ const formatNumber = (val: number) => {
                         : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'
                     ]"
                   >
-                    Forex Standard
+                    Forex (EUR/USD)
                   </button>
                   <button
                     type="button"
@@ -465,7 +449,7 @@ const formatNumber = (val: number) => {
                         : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'
                     ]"
                   >
-                    Forex JPY
+                    Forex JPY (USD/JPY)
                   </button>
                   <button
                     type="button"
@@ -477,7 +461,7 @@ const formatNumber = (val: number) => {
                         : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'
                     ]"
                   >
-                    Crypto
+                    คริปโต (Crypto)
                   </button>
                 </div>
               </div>
@@ -485,7 +469,7 @@ const formatNumber = (val: number) => {
               <!-- Contract Size -->
               <div>
                 <label class="block text-xs font-semibold text-gray-600 mb-1">
-                  ขนาดสัญญา (Contract Size)
+                  ขนาดสัญญาต่อ 1.00 Lot (Contract Size)
                 </label>
                 <input
                   type="number"
@@ -497,7 +481,7 @@ const formatNumber = (val: number) => {
               <!-- Point Value / Size -->
               <div>
                 <label class="block text-xs font-semibold text-gray-600 mb-1">
-                  ขนาด 1 Point (Point Size)
+                  มูลค่าต่อ 1 จุดทศนิยม (Point Size)
                 </label>
                 <input
                   type="number"
@@ -510,7 +494,7 @@ const formatNumber = (val: number) => {
               <!-- Min Lot -->
               <div>
                 <label class="block text-xs font-semibold text-gray-600 mb-1">
-                  ขนาด Lot ขั้นต่ำ (Min Lot)
+                  ปริมาณเทรดขั้นต่ำ (Min Lot)
                 </label>
                 <input
                   type="number"
@@ -523,7 +507,7 @@ const formatNumber = (val: number) => {
               <!-- Commission per lot -->
               <div>
                 <label class="block text-xs font-semibold text-gray-600 mb-1">
-                  ค่าคอมมิชชั่น / Lot ($)
+                  ค่าคอมมิชชั่นสุทธิ / Lot ($)
                 </label>
                 <input
                   type="number"
@@ -543,32 +527,19 @@ const formatNumber = (val: number) => {
             <!-- Header Row -->
             <div class="flex items-center justify-between">
               <span class="text-xs font-bold text-primary uppercase tracking-wider">
-                LOT ที่แนะนำ
+                ขนาดสัญญาที่แนะนำ (Position Size)
               </span>
 
-              <div class="flex items-center gap-2">
-                <!-- Copy Button -->
-                <button
-                  type="button"
-                  @click="copyLot"
-                  class="px-3 py-1.5 rounded-xl bg-white border border-gray-200 hover:bg-gray-50 text-xs font-semibold text-gray-700 flex items-center gap-1.5 transition-all cursor-pointer shadow-2xs select-none active:scale-95"
-                  :title="copied ? 'คัดลอกแล้ว!' : 'คัดลอกขนาด Lot'"
-                >
-                  <i :class="copied ? 'ph-bold ph-check text-emerald-600' : 'ph ph-copy text-gray-500'"></i>
-                  <span>{{ copied ? 'คัดลอกแล้ว!' : 'Copy' }}</span>
-                </button>
-
-                <!-- Reset Button -->
-                <button
-                  type="button"
-                  @click="resetForm"
-                  class="px-3 py-1.5 rounded-xl bg-white border border-gray-200 hover:bg-gray-50 text-xs font-semibold text-gray-700 flex items-center gap-1.5 transition-all cursor-pointer shadow-2xs select-none active:scale-95"
-                  title="รีเซ็ตค่าเป็นค่าเริ่มต้น"
-                >
-                  <i class="ph ph-arrow-counter-clockwise text-gray-500"></i>
-                  <span>Reset</span>
-                </button>
-              </div>
+              <!-- Reset Button -->
+              <button
+                type="button"
+                @click="resetForm"
+                class="px-3 py-1.5 rounded-xl bg-white border border-gray-200 hover:bg-gray-50 text-xs font-semibold text-gray-700 flex items-center gap-1.5 transition-all cursor-pointer shadow-2xs select-none active:scale-95"
+                title="รีเซ็ตค่าเป็นค่าเริ่มต้น"
+              >
+                <i class="ph ph-arrow-counter-clockwise text-gray-500"></i>
+                <span>Reset</span>
+              </button>
             </div>
 
             <!-- Big Number Display -->
@@ -585,41 +556,41 @@ const formatNumber = (val: number) => {
             <div class="bg-gray-50/70 rounded-xl border border-gray-200/80 divide-y divide-gray-200/80 overflow-hidden shadow-2xs">
               <!-- Top Row -->
               <div class="grid grid-cols-2 divide-x divide-gray-200/80">
-                <!-- เงินที่ยอมเสี่ยง -->
+                <!-- งบขาดทุนสูงสุดที่ยอมรับได้ -->
                 <div class="p-3.5 sm:p-4">
-                  <span class="text-xs text-textSecondary block mb-1 font-medium">เงินที่ยอมเสี่ยง</span>
+                  <span class="text-xs text-textSecondary block mb-1 font-medium">งบขาดทุนสูงสุดที่ยอมรับได้</span>
                   <span class="text-base sm:text-lg font-bold text-gray-900 block">
                     ${{ formatCurrency(riskAmount) }}
                   </span>
                 </div>
 
-                <!-- ระยะ Stop Loss -->
+                <!-- ระยะห่างถึงจุด SL -->
                 <div class="p-3.5 sm:p-4">
-                  <span class="text-xs text-textSecondary block mb-1 font-medium">ระยะ Stop Loss</span>
+                  <span class="text-xs text-textSecondary block mb-1 font-medium">ระยะห่างถึงจุด SL</span>
                   <span class="text-base sm:text-lg font-bold text-gray-900 block">
-                    {{ stopLossPoints.toLocaleString() }} Point
+                    {{ stopLossPoints.toLocaleString() }} จุด
                   </span>
                 </div>
               </div>
 
               <!-- Bottom Row -->
               <div class="grid grid-cols-2 divide-x divide-gray-200/80">
-                <!-- ขาดทุนต่อ 1 Lot -->
+                <!-- มูลค่าขาดทุนต่อ 1 Lot -->
                 <div class="p-3.5 sm:p-4">
-                  <span class="text-xs text-textSecondary block mb-1 font-medium">ขาดทุนต่อ 1 Lot</span>
+                  <span class="text-xs text-textSecondary block mb-1 font-medium">มูลค่าขาดทุนต่อ 1.00 Lot</span>
                   <span class="text-base sm:text-lg font-bold text-gray-900 block">
                     ${{ formatCurrency(lossPerOneLot) }}
                   </span>
                 </div>
 
-                <!-- ความเสี่ยงจริง -->
+                <!-- ความเสี่ยงสุทธิเมื่อโดน SL -->
                 <div class="p-3.5 sm:p-4">
-                  <span class="text-xs text-textSecondary block mb-1 font-medium">ความเสี่ยงจริง</span>
+                  <span class="text-xs text-textSecondary block mb-1 font-medium">ความเสี่ยงสุทธิเมื่อโดน SL</span>
                   <span class="text-base sm:text-lg font-bold text-gray-900 block">
                     ${{ formatCurrency(realRiskAmount) }}
                   </span>
                   <span class="text-xs font-bold text-primary block mt-0.5">
-                    {{ realRiskPercent.toFixed(2) }}%
+                    {{ realRiskPercent.toFixed(2) }}% ของพอร์ต
                   </span>
                 </div>
               </div>
@@ -628,20 +599,20 @@ const formatNumber = (val: number) => {
             <!-- Narrative Callout Summary Box -->
             <div class="border-l-4 border-primary bg-primary/5 p-4 rounded-r-xl text-xs text-textPrimary leading-relaxed shadow-2xs">
               <span v-if="isValid && recommendedLot > 0">
-                หากคุณเปิด <strong class="text-gray-900 font-extrabold">{{ recommendedLot.toFixed(2) }} Lot</strong> และราคาชน Stop Loss คุณจะขาดทุนประมาณ <strong class="text-gray-900 font-extrabold">${{ formatCurrency(realRiskAmount) }}</strong> หรือประมาณ <strong class="text-primary font-extrabold">{{ realRiskPercent.toFixed(2) }}%</strong> ของพอร์ต
+                สรุปแผน: หากเปิดสถานะ <strong class="text-gray-900 font-extrabold">{{ recommendedLot.toFixed(2) }} Lot</strong> แล้วราคาเคลื่อนที่ไปแตะ Stop Loss พอร์ตจะเสียประมาณ <strong class="text-gray-900 font-extrabold">${{ formatCurrency(realRiskAmount) }}</strong> คิดเป็น <strong class="text-primary font-extrabold">{{ realRiskPercent.toFixed(2) }}%</strong> ของเงินทุน ซึ่งไม่เกินขอบเขตความเสี่ยงที่ตั้งไว้
               </span>
               <span v-else-if="!isValid && validationError" class="text-rose-600 font-bold">
                 ⚠️ {{ validationError }}
               </span>
               <span v-else class="text-amber-700 font-bold">
-                ⚠️ ขนาด Lot ที่คำนวณได้ต่ำกว่าขนาดขั้นต่ำ ({{ minLot }} Lot) โปรดเพิ่มเงินทุนหรือขยับระยะ Stop Loss
+                ⚠️ ขนาดสัญญาที่คำนวณได้ต่ำกว่าปริมาณขั้นต่ำของโบรกเกอร์ ({{ minLot }} Lot) โปรดเพิ่มเงินทุนหรือขยับระยะ Stop Loss ให้กว้างขึ้น
               </span>
             </div>
           </div>
 
           <!-- Bottom Disclaimer -->
           <p class="text-[11px] text-gray-400 leading-relaxed px-2">
-            เครื่องมือนี้จัดทำเพื่อการศึกษาและช่วยวางแผนเบื้องต้น ผลจริงอาจต่างจาก Spread, Commission, Slippage และเงื่อนไขของโบรกเกอร์ การเทรดมีความเสี่ยง โปรดตรวจสอบข้อมูลก่อนส่งคำสั่งทุกครั้ง
+            หมายเหตุ: เครื่องมือนี้ใช้สำหรับวางแผน Position Sizing เชิงสถิติเพื่อจำกัด Drawdown ผลลัพธ์จริงอาจมีความคลาดเคลื่อนเล็กน้อยจากค่า Spread, Commission และ Slippage ในตลาดจริง โปรดตรวจสอบรายละเอียดคำสั่งก่อนเข้าเทรดจริงเสมอ
           </p>
         </div>
       </div>
