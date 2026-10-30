@@ -27,7 +27,7 @@ const meta = {
         }
       },
       template: `
-        <div style="height: 100vh; width: 100vw; background: #FAF7F5;">
+        <div style="height: 100vh; width: 100vw; background: #f9fafb;">
           <VueFlow :nodes="nodes">
             <template #node-lotCalculatorView="props">
               <story v-bind="props" />
