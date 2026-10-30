@@ -3,7 +3,8 @@
     "argv": [
       "C:\\Program Files\\nodejs\\node.exe",
       "I:\\projects\\trading_journal_v2\\node_modules\\@playwright\\test\\cli.js",
-      "test"
+      "test",
+      "e2e/research.spec.ts"
     ],
     "configFile": "I:\\projects\\trading_journal_v2\\playwright.config.ts",
     "rootDir": "I:/projects/trading_journal_v2/e2e",
@@ -100,154 +101,6 @@
   },
   "suites": [
     {
-      "title": "app.spec.ts",
-      "file": "app.spec.ts",
-      "column": 0,
-      "line": 0,
-      "specs": [
-        {
-          "title": "app opens and shows main window",
-          "ok": true,
-          "tags": [],
-          "tests": [
-            {
-              "timeout": 30000,
-              "annotations": [],
-              "expectedStatus": "passed",
-              "projectId": "",
-              "projectName": "",
-              "results": [
-                {
-                  "workerIndex": 0,
-                  "parallelIndex": 0,
-                  "status": "passed",
-                  "duration": 4511,
-                  "errors": [],
-                  "stdout": [],
-                  "stderr": [],
-                  "retry": 0,
-                  "steps": [
-                    {
-                      "title": "Launch Electron app and get main window",
-                      "duration": 209
-                    },
-                    {
-                      "title": "Wait for application root to mount",
-                      "duration": 189
-                    },
-                    {
-                      "title": "Verify navigation elements are accessible at default width 900px",
-                      "duration": 2110
-                    },
-                    {
-                      "title": "Verify responsive navigation when window is narrowed",
-                      "duration": 965
-                    },
-                    {
-                      "title": "Verify desktop sidebar toggle show/hide functionality",
-                      "duration": 735
-                    },
-                    {
-                      "title": "Capture main window screenshot",
-                      "duration": 295
-                    }
-                  ],
-                  "startTime": "2026-10-28T14:24:12.766Z",
-                  "annotations": [],
-                  "attachments": []
-                }
-              ],
-              "status": "expected"
-            }
-          ],
-          "id": "c31ff144dc4fee3acd0a-e2ceaf9f7e040d029778",
-          "file": "app.spec.ts",
-          "line": 16,
-          "column": 5
-        }
-      ]
-    },
-    {
-      "title": "fill-trade.spec.ts",
-      "file": "fill-trade.spec.ts",
-      "column": 0,
-      "line": 0,
-      "specs": [
-        {
-          "title": "fill trade and save",
-          "ok": true,
-          "tags": [],
-          "tests": [
-            {
-              "timeout": 30000,
-              "annotations": [],
-              "expectedStatus": "passed",
-              "projectId": "",
-              "projectName": "",
-              "results": [
-                {
-                  "workerIndex": 0,
-                  "parallelIndex": 0,
-                  "status": "passed",
-                  "duration": 4406,
-                  "errors": [],
-                  "stdout": [],
-                  "stderr": [],
-                  "retry": 0,
-                  "steps": [
-                    {
-                      "title": "Wait for application ready at 900px default width",
-                      "duration": 177
-                    },
-                    {
-                      "title": "Navigate to Settings via sidebar UI",
-                      "duration": 2323
-                    },
-                    {
-                      "title": "Create a new Trading Setup",
-                      "duration": 462
-                    },
-                    {
-                      "title": "Apply Standard Session Presets in Journal Settings",
-                      "duration": 205
-                    },
-                    {
-                      "title": "Create a new Trading Symbol",
-                      "duration": 177
-                    },
-                    {
-                      "title": "Navigate to New Trade via sidebar UI",
-                      "duration": 98
-                    },
-                    {
-                      "title": "Fill trade details with created Setup, Symbol, Date, and RR values",
-                      "duration": 410
-                    },
-                    {
-                      "title": "Save trade entry and verify success notification",
-                      "duration": 122
-                    },
-                    {
-                      "title": "Verify saved trade data in Dashboard UI",
-                      "duration": 414
-                    }
-                  ],
-                  "startTime": "2026-10-28T14:24:19.988Z",
-                  "annotations": [],
-                  "attachments": []
-                }
-              ],
-              "status": "expected"
-            }
-          ],
-          "id": "ea14aa358746de505fb2-8506a68d7bee7a2f0de7",
-          "file": "fill-trade.spec.ts",
-          "line": 18,
-          "column": 5
-        }
-      ]
-    },
-    {
       "title": "research.spec.ts",
       "file": "research.spec.ts",
       "column": 0,
@@ -269,7 +122,7 @@
                   "workerIndex": 0,
                   "parallelIndex": 0,
                   "status": "passed",
-                  "duration": 5191,
+                  "duration": 6530,
                   "errors": [],
                   "stdout": [],
                   "stderr": [],
@@ -277,46 +130,46 @@
                   "steps": [
                     {
                       "title": "Wait for application ready at 1100px width",
-                      "duration": 166
+                      "duration": 139
                     },
                     {
                       "title": "Navigate to Research Settings via sidebar UI",
-                      "duration": 2497
+                      "duration": 2506
                     },
                     {
                       "title": "Create a new Research Setup with enableExitDate = true",
-                      "duration": 409
+                      "duration": 433
                     },
                     {
                       "title": "Apply Standard Session Presets (Asia, London, New York, London Close)",
-                      "duration": 199
+                      "duration": 195
                     },
                     {
                       "title": "Create Custom Zone Columns in Library and Link to Setup",
-                      "duration": 576
+                      "duration": 1143
                     },
                     {
                       "title": "Navigate to Research Entry Form and verify UX behaviors",
-                      "duration": 442
+                      "duration": 973
                     },
                     {
                       "title": "Save trade research entry and verify success notification",
-                      "duration": 150
+                      "duration": 168
                     },
                     {
                       "title": "Verify saved research entry in Analytics Dashboard",
-                      "duration": 294
+                      "duration": 510
                     },
                     {
                       "title": "Export AI Markdown Prompt and verify toast",
-                      "duration": 209
+                      "duration": 213
                     },
                     {
                       "title": "Edit research entry and verify update flow",
-                      "duration": 245
+                      "duration": 242
                     }
                   ],
-                  "startTime": "2026-10-28T14:24:27.465Z",
+                  "startTime": "2026-10-28T15:32:54.501Z",
                   "annotations": [],
                   "attachments": []
                 }
@@ -334,9 +187,9 @@
   ],
   "errors": [],
   "stats": {
-    "startTime": "2026-10-28T14:24:12.312Z",
-    "duration": 23172.142,
-    "expected": 3,
+    "startTime": "2026-10-28T15:32:53.871Z",
+    "duration": 10113.062,
+    "expected": 1,
     "skipped": 0,
     "unexpected": 0,
     "flaky": 0

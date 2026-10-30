@@ -355,6 +355,7 @@
                   <button
                     type="button"
                     @click="viewDetails(entry)"
+                    data-testid="view-entry-btn"
                     class="p-1.5 text-gray-500 hover:text-primary hover:bg-primary/10 rounded-lg transition-colors cursor-pointer"
                     title="ดูรายละเอียดไม้"
                   >
@@ -466,6 +467,31 @@
             </p>
           </div>
 
+          <!-- Custom Fields Info -->
+          <div
+            v-if="selectedEntry.customData && Object.keys(selectedEntry.customData).length > 0"
+            class="bg-white p-5 rounded-2xl border border-gray-200/80 shadow-2xs"
+          >
+            <h4 class="text-xs font-bold text-gray-800 uppercase mb-3 flex items-center gap-1.5">
+              <i class="ph ph-sliders-horizontal text-primary"></i>
+              ข้อมูลเพิ่มเติม (Custom Fields)
+            </h4>
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              <div
+                v-for="(val, colKey) in selectedEntry.customData"
+                :key="colKey"
+                class="bg-gray-50/70 p-3 rounded-xl border border-gray-100 flex flex-col"
+              >
+                <span class="text-[11px] font-bold text-gray-500 uppercase">
+                  {{ getColumnName(colKey) }}
+                </span>
+                <span class="text-xs font-semibold text-gray-900 mt-1">
+                  {{ formatCustomValue(val) }}
+                </span>
+              </div>
+            </div>
+          </div>
+
           <!-- Zone Breakdown Table -->
           <div class="bg-white rounded-2xl border border-gray-200/80 shadow-2xs overflow-hidden">
             <div class="p-4 border-b border-gray-100">
@@ -516,10 +542,10 @@
                       <span v-else>-</span>
                     </td>
                     <td class="py-3 px-3 text-center font-mono">
-                      {{ z.minSlPoints !== null ? `${z.minSlPoints} pts` : '-' }}
-                      <span v-if="z.maxSlPoints !== null && z.maxSlPoints !== z.minSlPoints" class="text-gray-400 text-[10px]">
-                        (Max: {{ z.maxSlPoints }})
-                      </span>
+                      <div>{{ (z.slPoints ?? z.minSlPoints) !== null ? `${z.slPoints ?? z.minSlPoints} pts` : '-' }}</div>
+                      <div v-if="z.realSlPoints !== null && z.realSlPoints !== undefined" class="text-amber-600 text-[10px] font-sans font-bold">
+                        Real: {{ z.realSlPoints }} pts
+                      </div>
                     </td>
                     <td class="py-3 px-3 text-center">
                       <span
@@ -577,6 +603,7 @@
           <button
             type="button"
             @click="selectedEntry = null"
+            data-testid="close-entry-details-btn"
             class="px-4 py-2 bg-gray-900 text-white rounded-xl hover:bg-gray-800 transition-colors text-xs font-bold cursor-pointer"
           >
             ปิด
@@ -739,17 +766,38 @@ const paginatedEntries = computed(() => {
   return filteredEntries.value.slice(start, start + pageSize.value)
 })
 
+const columnMap = ref<Map<number, string>>(new Map())
+
+const getColumnName = (colKey: string | number) => {
+  const id = Number(colKey)
+  return columnMap.value.get(id) || `Field #${colKey}`
+}
+
+const formatCustomValue = (val: any) => {
+  if (val === true) return 'Yes / ติ๊กถูก'
+  if (val === false) return 'No / ไม่ได้ติ๊ก'
+  if (Array.isArray(val)) return val.length > 0 ? val.join(', ') : '-'
+  if (val === null || val === undefined || val === '') return '-'
+  return String(val)
+}
+
 const loadSetupsAndSymbols = async () => {
   try {
-    const [setupsRes, symbolsRes] = await Promise.all([
+    const [setupsRes, symbolsRes, colsRes] = await Promise.all([
       window.api.research.setups.list(),
-      window.api.symbols.list()
+      window.api.symbols.list(),
+      window.api.research.customColumns.listLibrary()
     ])
     if (setupsRes.success && setupsRes.data) {
       setups.value = setupsRes.data
     }
     if (symbolsRes.success && symbolsRes.data) {
       symbols.value = symbolsRes.data
+    }
+    if (colsRes.success && colsRes.data) {
+      for (const col of colsRes.data) {
+        columnMap.value.set(col.id, col.name)
+      }
     }
   } catch (err) {
     console.error('Failed to load setups/symbols for filter:', err)

@@ -19,7 +19,9 @@ test('trade research: complete research and zone statistics workflow', async () 
   const uniqueId = Date.now().toString().slice(-4)
   const setupName = `SMC Res ${uniqueId}`
   const zoneName1 = `Zone Extreme ${uniqueId}`
-  const zoneName2 = `Zone Decisional ${uniqueId}`
+  const singleSelName = `Trigger ${uniqueId}`
+  const multiSelName = `Confluence ${uniqueId}`
+  const checkName = `HTF Align ${uniqueId}`
 
   await test.step('Wait for application ready at 1100px width', async () => {
     await window.setViewportSize({ width: 1100, height: 750 })
@@ -60,29 +62,47 @@ test('trade research: complete research and zone statistics workflow', async () 
     await window.click('[data-testid="tab-custom_columns"]')
     await expect(window.locator('text=Master Zone Library')).toBeVisible({ timeout: 5000 })
 
-    // Create Zone 1
+    // Create Zone 1 (zone_group by default)
     await window.click('[data-testid="create-zone-def-btn"]')
     await window.fill('[data-testid="zone-def-name-input"]', zoneName1)
     await window.click('[data-testid="save-zone-def-btn"]')
     await expect(window.locator(`h4:has-text("${zoneName1}")`)).toBeVisible({ timeout: 5000 })
 
-    // Create Zone 2
+    // Create Single Selector with options
     await window.click('[data-testid="create-zone-def-btn"]')
-    await window.fill('[data-testid="zone-def-name-input"]', zoneName2)
+    await window.fill('[data-testid="zone-def-name-input"]', singleSelName)
+    await window.selectOption('[data-testid="zone-def-type-select"]', 'single_selector')
+    await window.fill('[data-testid="column-option-input-0"]', 'Sweep')
+    await window.click('[data-testid="add-column-option-btn"]')
+    await window.fill('[data-testid="column-option-input-1"]', 'Choch')
     await window.click('[data-testid="save-zone-def-btn"]')
-    await expect(window.locator(`h4:has-text("${zoneName2}")`)).toBeVisible({ timeout: 5000 })
+    await expect(window.locator(`h4:has-text("${singleSelName}")`)).toBeVisible({ timeout: 5000 })
 
-    // Link Zone 1 to setup
-    await window.click('[data-testid="link-zone-modal-btn"]')
-    await window.waitForSelector('[data-testid^="link-col-btn-"]', { state: 'visible' })
-    await window.locator('[data-testid^="link-col-btn-"]').first().click()
-    await window.waitForSelector('[data-testid="close-link-zone-modal"]', { state: 'detached' })
+    // Create Multiple Selector with options
+    await window.click('[data-testid="create-zone-def-btn"]')
+    await window.fill('[data-testid="zone-def-name-input"]', multiSelName)
+    await window.selectOption('[data-testid="zone-def-type-select"]', 'multiple_selector')
+    await window.fill('[data-testid="column-option-input-0"]', 'Engulfing')
+    await window.click('[data-testid="add-column-option-btn"]')
+    await window.fill('[data-testid="column-option-input-1"]', 'Volume')
+    await window.click('[data-testid="save-zone-def-btn"]')
+    await expect(window.locator(`h4:has-text("${multiSelName}")`)).toBeVisible({ timeout: 5000 })
 
-    // Link Zone 2 to setup
-    await window.click('[data-testid="link-zone-modal-btn"]')
-    await window.waitForSelector('[data-testid^="link-col-btn-"]', { state: 'visible' })
-    await window.locator('[data-testid^="link-col-btn-"]').first().click()
-    await window.waitForSelector('[data-testid="close-link-zone-modal"]', { state: 'detached' })
+    // Create Checkbox
+    await window.click('[data-testid="create-zone-def-btn"]')
+    await window.fill('[data-testid="zone-def-name-input"]', checkName)
+    await window.selectOption('[data-testid="zone-def-type-select"]', 'checkbox')
+    await window.click('[data-testid="save-zone-def-btn"]')
+    await expect(window.locator(`h4:has-text("${checkName}")`)).toBeVisible({ timeout: 5000 })
+
+    // Link the 4 newly created columns specifically by name
+    const colsToLink = [zoneName1, singleSelName, multiSelName, checkName]
+    for (const name of colsToLink) {
+      await window.click('[data-testid="link-zone-modal-btn"]')
+      await window.waitForSelector('[data-testid="close-link-zone-modal"]', { state: 'visible' })
+      await window.locator(`[data-col-name="${name}"]`).click()
+      await window.waitForSelector('[data-testid="close-link-zone-modal"]', { state: 'detached' })
+    }
 
     await window.screenshot({ path: 'e2e/screenshots/research-zones-linked.png' })
   })
@@ -102,45 +122,55 @@ test('trade research: complete research and zone statistics workflow', async () 
     await window.fill('[data-testid="research-entry-datetime"]', '2026-10-28T14:30')
     await expect(window.locator('[data-testid="research-exit-datetime"]')).toHaveValue('2026-10-28T14:30')
 
-    // Verify Zone cards appeared
+    // Verify Zone cards appeared (Only 1 zone_group column)
     await expect(window.locator('[data-testid="zone-card-0"]')).toBeVisible({ timeout: 5000 })
+    await expect(window.locator('[data-testid="zone-card-1"]')).toHaveCount(0)
 
-    // Test Bias Auto-Sync Rule: Clicking Bullish on Zone 0 syncs to all zones
+    // Verify Custom Fields Section appeared (for single_selector, multiple_selector, checkbox)
+    await expect(window.locator('[data-testid="research-custom-fields-section"]')).toBeVisible({ timeout: 5000 })
+    await expect(window.locator(`text=${singleSelName}`).first()).toBeVisible({ timeout: 5000 })
+    await expect(window.locator(`text=${multiSelName}`).first()).toBeVisible({ timeout: 5000 })
+    await expect(window.locator(`text=${checkName}`).first()).toBeVisible({ timeout: 5000 })
+
+    // Test Interacting with Custom Fields:
+    // 1. Single Selector: select "Sweep"
+    const singleField = window.locator(`[data-testid^="custom-field-"]:has-text("${singleSelName}")`)
+    await singleField.locator('.cursor-pointer').first().click()
+    await window.getByText('Sweep', { exact: true }).click()
+
+    // 2. Multiple Selector: select "Engulfing" and "Volume"
+    const multiField = window.locator(`[data-testid^="custom-field-"]:has-text("${multiSelName}")`)
+    await multiField.locator('.cursor-pointer').first().click()
+    await window.getByText('Engulfing', { exact: true }).click()
+    await window.getByText('Volume', { exact: true }).click()
+    // Click outside to close dropdown
+    await window.click('h2:has-text("3. ข้อมูลเพิ่มเติม")')
+
+    // 3. Checkbox: toggle checkbox
+    const checkField = window.locator(`[data-testid^="custom-field-"]:has-text("${checkName}")`)
+    await checkField.locator('input[type="checkbox"]').check()
+
+    // Test Bias Auto-Sync Rule: Clicking Bullish on Zone 0
     await window.click('[data-testid="zone-bullish-btn-0"]')
     await expect(window.locator('[data-testid="zone-bullish-btn-0"]')).toHaveClass(/bg-emerald-600/)
 
-    // If Zone 1 exists, test override: Clicking Bearish on Zone 1 affects only Zone 1
-    if (await window.locator('[data-testid="zone-card-1"]').isVisible()) {
-      await expect(window.locator('[data-testid="zone-bullish-btn-1"]')).toHaveClass(/bg-emerald-600/)
-      await window.click('[data-testid="zone-bearish-btn-1"]')
-      await expect(window.locator('[data-testid="zone-bearish-btn-1"]')).toHaveClass(/bg-red-600/)
-      await expect(window.locator('[data-testid="zone-bullish-btn-0"]')).toHaveClass(/bg-emerald-600/)
-    }
+    // Test Planned SL and Real SL (Optional)
+    await window.fill('[data-testid="zone-sl-0"]', '120')
+    await window.fill('[data-testid="zone-real-sl-0"]', '45')
+    await expect(window.locator('[data-testid="zone-sl-0"]')).toHaveValue('120')
+    await expect(window.locator('[data-testid="zone-real-sl-0"]')).toHaveValue('45')
 
-    // Test SL Points Auto-Copy Rule: editing Min SL points copies to Max SL points
-    await window.fill('[data-testid="zone-min-sl-0"]', '120')
-    await expect(window.locator('[data-testid="zone-max-sl-0"]')).toHaveValue('120')
-
-    // Editing Max SL points does NOT overwrite Min SL points
-    await window.fill('[data-testid="zone-max-sl-0"]', '180')
-    await expect(window.locator('[data-testid="zone-min-sl-0"]')).toHaveValue('120')
-
-    // Test One-Click Action buttons:
     // On Zone 0: give a win RR (Min 2.5, Max 4.0)
     await window.fill('[data-testid="zone-min-rr-0"]', '2.5')
     await window.fill('[data-testid="zone-max-rr-0"]', '4.0')
-
-    // On Zone 1 (if present): click [SL (-1)] quick loss button
-    if (await window.locator('[data-testid="zone-card-1"]').isVisible()) {
-      await window.click('[data-testid="zone-sl-loss-btn-1"]')
-      await expect(window.locator('[data-testid="zone-min-rr-1"]')).toHaveValue('-1')
-      await expect(window.locator('[data-testid="zone-max-rr-1"]')).toHaveValue('-1')
-    }
 
     await window.evaluate(() => {
       document.querySelector('main')?.scrollTo(0, 0)
     })
     await window.screenshot({ path: 'e2e/screenshots/research-entry-filled.png' })
+
+    await window.locator('[data-testid="research-custom-fields-section"]').scrollIntoViewIfNeeded()
+    await window.screenshot({ path: 'e2e/screenshots/research-custom-fields-filled.png' })
   })
 
   await test.step('Save trade research entry and verify success notification', async () => {
@@ -153,11 +183,20 @@ test('trade research: complete research and zone statistics workflow', async () 
     await window.click('text=สรุปผลวิจัย (Analytics)')
     await expect(window.locator('h1:has-text("สรุปผลวิจัยและเปรียบเทียบโซน")')).toBeVisible({ timeout: 5000 })
 
-    // Verify Zone Comparison Matrix table is visible
-    await expect(window.locator('text=Zone Performance Comparison Matrix')).toBeVisible({ timeout: 5000 })
+    // Filter table by setupName using search box
+    await window.fill('input[placeholder*="ค้นหา"]', setupName)
 
-    // Verify recent research entry log table has at least 1 record
-    await expect(window.locator('table').last()).toBeVisible({ timeout: 5000 })
+    // Open details modal for the newly created entry and verify Custom Fields data
+    const row = window.locator(`tr:has-text("${setupName}")`).first()
+    await row.locator('[data-testid="view-entry-btn"]').click()
+    await expect(window.locator('text=ข้อมูลเพิ่มเติม (Custom Fields)')).toBeVisible({ timeout: 5000 })
+    await expect(window.locator('text=Sweep')).toBeVisible({ timeout: 5000 })
+    await expect(window.locator('text=Engulfing, Volume')).toBeVisible({ timeout: 5000 })
+    await expect(window.locator('text=Yes / ติ๊กถูก')).toBeVisible({ timeout: 5000 })
+    await window.screenshot({ path: 'e2e/screenshots/research-entry-details-modal.png' })
+
+    // Close details modal
+    await window.click('[data-testid="close-entry-details-btn"]')
 
     await window.screenshot({ path: 'e2e/screenshots/research-dashboard-verified.png' })
   })
@@ -172,8 +211,9 @@ test('trade research: complete research and zone statistics workflow', async () 
   })
 
   await test.step('Edit research entry and verify update flow', async () => {
-    // Click edit button in table
-    await window.click('[data-testid="edit-entry-btn"]')
+    // Click edit button in table for this specific row
+    const row = window.locator(`tr:has-text("${setupName}")`).first()
+    await row.locator('[data-testid="edit-entry-btn"]').click()
     await expect(window.locator('text=โหมดแก้ไขไม้')).toBeVisible({ timeout: 5000 })
     await expect(window.locator('button[data-testid="research-save-btn"]')).toContainText('บันทึกการแก้ไข')
 

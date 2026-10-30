@@ -304,7 +304,7 @@
           <div>
             <h2 class="text-sm font-bold text-gray-900 uppercase tracking-wider flex items-center gap-2">
               <i class="ph ph-columns text-primary text-base"></i>
-              2. บันทึกผลลัพธ์แต่ละโซน (Custom Columns Zones)
+              2. บันทึกผลลัพธ์แต่ละโซน (Zone Groups)
             </h2>
             <p class="text-xs text-gray-500 mt-0.5">
               กรอก Min/Max RR, SL Points, ติ๊กตกรถ หรือใช้ปุ่มลัด One-Click Actions เพื่อความรวดเร็ว
@@ -316,13 +316,13 @@
           </span>
         </div>
 
-        <div v-if="entryStore.zones.length === 0" class="text-center py-12 border border-dashed border-gray-200 rounded-2xl">
-          <p class="text-gray-500 font-medium">Setup นี้ยังไม่ได้ผูก Custom Column (Zone) ใด ๆ</p>
+        <div v-if="entryStore.zones.length === 0" class="text-center py-8 border border-dashed border-gray-200 rounded-2xl">
+          <p class="text-gray-500 font-medium text-sm">Setup นี้ไม่มีคอลัมน์ประเภท Zone Group</p>
           <router-link
             to="/research/settings"
             class="text-primary hover:underline text-xs font-bold mt-1 inline-block"
           >
-            ไปที่หน้าตั้งค่าสถิติเพื่อผูก Custom Column เข้ากับ Setup &rarr;
+            ไปที่หน้าตั้งค่าสถิติเพื่อจัดการ Custom Columns &rarr;
           </router-link>
         </div>
 
@@ -462,38 +462,39 @@
                 />
               </div>
 
-              <!-- Min SL Points (Auto-copy to Max) -->
+              <!-- SL Points (Planned SL) -->
               <div>
-                <div class="flex items-center justify-between mb-1">
-                  <label class="block text-xs font-semibold text-gray-600">
-                    Min SL Points
-                  </label>
-                  <span class="text-[10px] text-gray-400">Auto-copy</span>
-                </div>
+                <label class="block text-xs font-semibold text-gray-600 mb-1">
+                  SL Points
+                </label>
                 <input
                   type="number"
                   step="0.1"
-                  :value="zone.minSlPoints"
-                  @input="entryStore.onMinSlPointsChange(idx, ($event.target as HTMLInputElement).value ? Number(($event.target as HTMLInputElement).value) : null)"
-                  :data-testid="`zone-min-sl-${idx}`"
+                  :value="zone.slPoints ?? zone.minSlPoints"
+                  @input="entryStore.onSlPointsChange(idx, ($event.target as HTMLInputElement).value ? Number(($event.target as HTMLInputElement).value) : null)"
+                  :data-testid="`zone-sl-${idx}`"
                   placeholder="เช่น 120"
                   class="w-full px-3 py-2 bg-white border border-gray-200 rounded-xl text-sm font-bold text-gray-900 placeholder:font-normal placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/20"
                 />
               </div>
 
-              <!-- Max SL Points -->
+              <!-- Real SL (Optional Drawdown / MAE) -->
               <div>
-                <label class="block text-xs font-semibold text-gray-600 mb-1">
-                  Max SL Points
-                </label>
+                <div class="flex items-center justify-between mb-1">
+                  <label class="block text-xs font-semibold text-gray-600">
+                    Real SL
+                  </label>
+                  <span class="text-[10px] text-gray-400">Optional</span>
+                </div>
                 <input
                   type="number"
                   step="0.1"
-                  :value="zone.maxSlPoints"
-                  @input="entryStore.onMaxSlPointsChange(idx, ($event.target as HTMLInputElement).value ? Number(($event.target as HTMLInputElement).value) : null)"
-                  :data-testid="`zone-max-sl-${idx}`"
-                  placeholder="เช่น 120"
-                  class="w-full px-3 py-2 bg-white border border-gray-200 rounded-xl text-sm font-bold text-gray-900 placeholder:font-normal placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  :value="zone.realSlPoints"
+                  @input="entryStore.onRealSlPointsChange(idx, ($event.target as HTMLInputElement).value ? Number(($event.target as HTMLInputElement).value) : null)"
+                  :data-testid="`zone-real-sl-${idx}`"
+                  :disabled="zone.isMissed"
+                  placeholder="เว้นว่างได้ถ้าหลุด SL"
+                  class="w-full px-3 py-2 bg-white border border-gray-200 rounded-xl text-sm font-bold text-gray-900 placeholder:font-normal placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/20 disabled:bg-gray-100 disabled:text-gray-400"
                 />
               </div>
             </div>
@@ -564,11 +565,115 @@
         </div>
       </div>
 
-      <!-- Section 3: Screenshots & Multiple Images -->
+      <!-- Section 3: Custom Fields (Non-Zone Columns: Checkbox, Selectors, String, Number) -->
+      <div
+        v-if="entryStore.fieldColumns.length > 0"
+        data-testid="research-custom-fields-section"
+        class="bg-white p-6 rounded-2xl border border-gray-200/80 shadow-2xs flex flex-col gap-5"
+      >
+        <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-2 border-b border-gray-100 pb-3">
+          <div>
+            <h2 class="text-sm font-bold text-gray-900 uppercase tracking-wider flex items-center gap-2">
+              <i class="ph ph-sliders-horizontal text-primary text-base"></i>
+              3. ข้อมูลเพิ่มเติม (Custom Fields)
+            </h2>
+            <p class="text-xs text-gray-500 mt-0.5">
+              ตัวแปรและข้อมูลเสริมเฉพาะของ Setup นี้
+            </p>
+          </div>
+          <span class="text-xs font-bold text-gray-500 bg-gray-100 px-2.5 py-1 rounded-lg">
+            {{ entryStore.fieldColumns.length }} ตัวแปร
+          </span>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
+          <div
+            v-for="col in entryStore.fieldColumns"
+            :key="col.id"
+            class="flex flex-col gap-1.5"
+            :data-testid="`custom-field-${col.id}`"
+          >
+            <!-- Checkbox -->
+            <template v-if="col.type === 'checkbox'">
+              <span class="block text-xs font-bold text-gray-700 uppercase">
+                {{ col.name }}
+              </span>
+              <label class="inline-flex items-center gap-2.5 cursor-pointer select-none mt-2">
+                <input
+                  type="checkbox"
+                  v-model="entryStore.customData[col.id]"
+                  :data-testid="`custom-field-input-${col.id}`"
+                  class="w-4 h-4 rounded text-primary focus:ring-primary/20 cursor-pointer"
+                />
+                <span class="text-sm font-semibold text-gray-800">
+                  {{ col.description || col.name }}
+                </span>
+              </label>
+            </template>
+
+            <!-- Single Selector -->
+            <template v-else-if="col.type === 'single_selector'">
+              <label class="block text-xs font-bold text-gray-700 uppercase">
+                {{ col.name }}
+              </label>
+              <BaseSelect
+                v-model="entryStore.customData[col.id]"
+                :options="col.options || []"
+                placeholder="-- เลือกหนึ่งตัวเลือก --"
+                :data-testid="`custom-field-input-${col.id}`"
+              />
+            </template>
+
+            <!-- Multiple Selector -->
+            <template v-else-if="col.type === 'multiple_selector'">
+              <label class="block text-xs font-bold text-gray-700 uppercase">
+                {{ col.name }}
+              </label>
+              <BaseMultiSelect
+                v-model="entryStore.customData[col.id]"
+                :options="col.options || []"
+                placeholder="-- เลือกหลายตัวเลือก --"
+                :data-testid="`custom-field-input-${col.id}`"
+              />
+            </template>
+
+            <!-- Number -->
+            <template v-else-if="col.type === 'number'">
+              <label class="block text-xs font-bold text-gray-700 uppercase">
+                {{ col.name }}
+              </label>
+              <input
+                type="number"
+                step="any"
+                v-model.number="entryStore.customData[col.id]"
+                :placeholder="col.description || 'กรอกตัวเลข'"
+                :data-testid="`custom-field-input-${col.id}`"
+                class="w-full px-3.5 py-2.5 bg-white border border-gray-200 rounded-xl text-sm font-semibold text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary/20"
+              />
+            </template>
+
+            <!-- Text / String (default) -->
+            <template v-else>
+              <label class="block text-xs font-bold text-gray-700 uppercase">
+                {{ col.name }}
+              </label>
+              <input
+                type="text"
+                v-model="entryStore.customData[col.id]"
+                :placeholder="col.description || 'กรอกข้อความ'"
+                :data-testid="`custom-field-input-${col.id}`"
+                class="w-full px-3.5 py-2.5 bg-white border border-gray-200 rounded-xl text-sm font-semibold text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary/20"
+              />
+            </template>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 4: Screenshots & Multiple Images -->
       <div class="bg-white p-6 rounded-2xl border border-gray-200/80 shadow-2xs flex flex-col gap-4">
         <h2 class="text-sm font-bold text-gray-900 uppercase tracking-wider flex items-center gap-2 border-b border-gray-100 pb-3">
           <i class="ph ph-images text-primary text-base"></i>
-          3. ภาพถ่ายกราฟ (Screenshots)
+          {{ entryStore.fieldColumns.length > 0 ? '4. ภาพถ่ายกราฟ (Screenshots)' : '3. ภาพถ่ายกราฟ (Screenshots)' }}
         </h2>
 
         <!-- Dropzone / Paste Area -->
@@ -633,11 +738,11 @@
         </div>
       </div>
 
-      <!-- Section 4: General Notes -->
+      <!-- Section 5: General Notes -->
       <div class="bg-white p-6 rounded-2xl border border-gray-200/80 shadow-2xs flex flex-col gap-3">
         <h2 class="text-sm font-bold text-gray-900 uppercase tracking-wider flex items-center gap-2 border-b border-gray-100 pb-3">
           <i class="ph ph-note-pencil text-primary text-base"></i>
-          4. หมายเหตุและข้อสังเกตทั่วไป (General Notes)
+          {{ entryStore.fieldColumns.length > 0 ? '5. หมายเหตุและข้อสังเกตทั่วไป (General Notes)' : '4. หมายเหตุและข้อสังเกตทั่วไป (General Notes)' }}
         </h2>
         <textarea
           v-model="entryStore.notes"
@@ -697,6 +802,8 @@
 import { ref, onMounted, onUnmounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useResearchEntryStore } from '../../stores/researchEntry'
+import BaseSelect from '../ui/BaseSelect.vue'
+import BaseMultiSelect from '../ui/BaseMultiSelect.vue'
 
 const route = useRoute()
 const router = useRouter()

@@ -72,8 +72,9 @@ export interface ResearchPlaybookFlow {
 export interface ResearchCustomColumn {
   id: number
   name: string
-  type: string // zone_group, checkbox, single_selector, string, number
+  type: string // zone_group, single_selector, multiple_selector, checkbox, string, number
   options?: string[] | null
+  defaultValue?: any
   description?: string | null
   createdAt: string
   updatedAt: string
@@ -94,6 +95,8 @@ export interface ResearchEntryZoneInput {
   bias?: 'Bullish' | 'Bearish' | string
   minRr?: number | null
   maxRr?: number | null
+  slPoints?: number | null
+  realSlPoints?: number | null
   minSlPoints?: number | null
   maxSlPoints?: number | null
   isMissed?: boolean
@@ -120,6 +123,7 @@ export interface ResearchEntryInput {
   quality?: string | null
   images?: string[]
   notes?: string | null
+  customData?: Record<string | number, any> | null
   zones: ResearchEntryZoneInput[]
 }
 
@@ -137,6 +141,7 @@ export interface ResearchEntry {
   quality?: string | null
   images?: string[]
   notes?: string | null
+  customData?: Record<string | number, any> | null
   zones: ResearchEntryZone[]
   createdAt: string
   updatedAt: string
@@ -158,6 +163,7 @@ export interface ZoneComparisonMetric {
   avgMinRr: number
   avgMaxRr: number
   avgSlPoints: number
+  avgRealSlPoints?: number
   expectedValue: number // EV score
 }
 

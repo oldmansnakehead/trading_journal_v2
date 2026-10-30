@@ -112,8 +112,8 @@ export function generateResearchAiMarkdown(payload: ResearchExportPayload): stri
 
   // Detailed Research Trade Logs
   md += `## 📋 Granular Research Trade Logs\n\n`
-  md += `| # | Date & Time | Symbol | Session | TF | News | Quality | Zone Name | Bias | Min RR | Max RR | SL Pts | Outcome | Notes |\n`
-  md += `| :-: | :--- | :--- | :-: | :-: | :-: | :-: | :--- | :-: | :-: | :-: | :-: | :-: | :--- |\n`
+  md += `| # | Date & Time | Symbol | Session | TF | News | Quality | Zone Name | Bias | Min RR | Max RR | SL Pts | Outcome | Custom Data | Notes |\n`
+  md += `| :-: | :--- | :--- | :-: | :-: | :-: | :-: | :--- | :-: | :-: | :-: | :-: | :-: | :--- | :--- |\n`
 
   let rowIdx = 1
   for (const e of entries) {
@@ -123,6 +123,15 @@ export function generateResearchAiMarkdown(payload: ResearchExportPayload): stri
     const tf = e.timeframe || '-'
     const news = e.news ? 'Yes' : 'No'
     const q = e.quality || '-'
+    const customDataStr =
+      e.customData && Object.keys(e.customData).length > 0
+        ? Object.entries(e.customData)
+            .filter(([_, v]) => v !== null && v !== undefined && v !== '' && (!Array.isArray(v) || v.length > 0))
+            .map(([k, v]) => `${k}: ${Array.isArray(v) ? v.join(', ') : v}`)
+            .join('; ')
+            .replace(/[\r\n]+/g, ' ')
+            .replace(/\|/g, '\\|') || '-'
+        : '-'
 
     if (e.zones && e.zones.length > 0) {
       for (const z of e.zones) {
@@ -134,11 +143,11 @@ export function generateResearchAiMarkdown(payload: ResearchExportPayload): stri
         const outcome = (z.outcome || (z.isMissed ? 'missed' : '-')).toUpperCase()
         const note = (z.notes || e.notes || '').replace(/[\r\n]+/g, ' ').replace(/\|/g, '\\|')
 
-        md += `| ${rowIdx++} | ${dt} | ${sym} | ${sess} | ${tf} | ${news} | ${q} | ${zoneName} | ${bias} | ${minRr} | ${maxRr} | ${slPts} | ${outcome} | ${note} |\n`
+        md += `| ${rowIdx++} | ${dt} | ${sym} | ${sess} | ${tf} | ${news} | ${q} | ${zoneName} | ${bias} | ${minRr} | ${maxRr} | ${slPts} | ${outcome} | ${customDataStr} | ${note} |\n`
       }
     } else {
       const note = (e.notes || '').replace(/[\r\n]+/g, ' ').replace(/\|/g, '\\|')
-      md += `| ${rowIdx++} | ${dt} | ${sym} | ${sess} | ${tf} | ${news} | ${q} | - | - | - | - | - | - | ${note} |\n`
+      md += `| ${rowIdx++} | ${dt} | ${sym} | ${sess} | ${tf} | ${news} | ${q} | - | - | - | - | - | - | ${customDataStr} | ${note} |\n`
     }
   }
 
@@ -171,13 +180,14 @@ export function generateResearchAiJson(payload: ResearchExportPayload): string {
       news: Boolean(e.news),
       quality: e.quality,
       notes: e.notes,
+      customData: e.customData || null,
       zones: (e.zones || []).map((z: any) => ({
         customColumnName: z.customColumnName,
         bias: z.bias,
         minRr: z.minRr,
         maxRr: z.maxRr,
-        minSlPoints: z.minSlPoints,
-        maxSlPoints: z.maxSlPoints,
+        slPoints: z.slPoints ?? z.minSlPoints,
+        realSlPoints: z.realSlPoints ?? null,
         isMissed: Boolean(z.isMissed),
         outcome: z.outcome,
         notes: z.notes
@@ -305,8 +315,8 @@ export async function exportResearchTradesToExcel(
       'Bias',
       'Min RR',
       'Max RR',
-      'Min SL Points',
-      'Max SL Points',
+      'SL Points',
+      'Real SL Points',
       'Outcome',
       'Missed',
       'Zone Notes',
@@ -331,8 +341,8 @@ export async function exportResearchTradesToExcel(
             z.bias || '',
             z.isMissed ? '' : z.minRr ?? '',
             z.isMissed ? '' : z.maxRr ?? '',
-            z.minSlPoints ?? '',
-            z.maxSlPoints ?? '',
+            z.slPoints ?? z.minSlPoints ?? '',
+            z.realSlPoints ?? '',
             z.outcome || '',
             z.isMissed ? 'Yes' : 'No',
             z.notes || '',

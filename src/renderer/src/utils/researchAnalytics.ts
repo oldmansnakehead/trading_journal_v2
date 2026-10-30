@@ -108,7 +108,10 @@ export function computeResearchAnalytics(entries: ResearchEntry[]): ResearchAnal
         isMissed?: boolean
         minRr?: number | null
         maxRr?: number | null
+        slPoints?: number | null
+        realSlPoints?: number | null
         minSlPoints?: number | null
+        maxSlPoints?: number | null
         outcome?: string
       }>
     }
@@ -147,16 +150,30 @@ export function computeResearchAnalytics(entries: ResearchEntry[]): ResearchAnal
     let maxRrSum = 0
     let slPointsSum = 0
     let slPointsCount = 0
+    let realSlPointsSum = 0
+    let realSlPointsCount = 0
 
     for (const r of filledRecords) {
       const minRr = r.minRr !== null && r.minRr !== undefined ? Number(r.minRr) : null
       const maxRr = r.maxRr !== null && r.maxRr !== undefined ? Number(r.maxRr) : null
-      const minSl =
-        r.minSlPoints !== null && r.minSlPoints !== undefined ? Number(r.minSlPoints) : null
+      const sl =
+        r.slPoints !== null && r.slPoints !== undefined
+          ? Number(r.slPoints)
+          : r.minSlPoints !== null && r.minSlPoints !== undefined
+          ? Number(r.minSlPoints)
+          : null
 
-      if (minSl !== null && !isNaN(minSl)) {
-        slPointsSum += minSl
+      if (sl !== null && !isNaN(sl)) {
+        slPointsSum += sl
         slPointsCount++
+      }
+
+      const realSl =
+        r.realSlPoints !== null && r.realSlPoints !== undefined ? Number(r.realSlPoints) : null
+
+      if (realSl !== null && !isNaN(realSl)) {
+        realSlPointsSum += realSl
+        realSlPointsCount++
       }
 
       if (minRr !== null && !isNaN(minRr)) {
@@ -189,6 +206,7 @@ export function computeResearchAnalytics(entries: ResearchEntry[]): ResearchAnal
     const avgMinRr = filledCount > 0 ? minRrSum / filledCount : 0
     const avgMaxRr = filledCount > 0 ? maxRrSum / filledCount : 0
     const avgSlPoints = slPointsCount > 0 ? slPointsSum / slPointsCount : 0
+    const avgRealSlPoints = realSlPointsCount > 0 ? realSlPointsSum / realSlPointsCount : 0
     const avgWinMinRr = winCount > 0 ? winMinRrSum / winCount : 0
 
     // EV = (Win Rate % / 100 * Avg Win RR) - (Loss Rate % / 100 * 1)
@@ -210,6 +228,7 @@ export function computeResearchAnalytics(entries: ResearchEntry[]): ResearchAnal
       avgMinRr: Number(avgMinRr.toFixed(2)),
       avgMaxRr: Number(avgMaxRr.toFixed(2)),
       avgSlPoints: Number(avgSlPoints.toFixed(1)),
+      avgRealSlPoints: Number(avgRealSlPoints.toFixed(1)),
       expectedValue: Number(expectedValue.toFixed(2))
     })
   }

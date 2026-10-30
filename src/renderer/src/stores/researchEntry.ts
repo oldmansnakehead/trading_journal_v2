@@ -2,8 +2,7 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import {
   detectSessionFromTime,
-  syncBiasValues,
-  handleSlPointsChange
+  syncBiasValues
 } from '../utils/researchAnalytics'
 import type {
   ResearchSession,
@@ -17,8 +16,10 @@ export interface ZoneFormField {
   bias: 'Bullish' | 'Bearish' | ''
   minRr: number | null
   maxRr: number | null
-  minSlPoints: number | null
-  maxSlPoints: number | null
+  slPoints: number | null
+  realSlPoints: number | null
+  minSlPoints?: number | null
+  maxSlPoints?: number | null
   isMissed: boolean
   outcome: 'win' | 'loss' | 'be' | 'missed' | ''
   notes?: string
@@ -33,6 +34,18 @@ export const useResearchEntryStore = defineStore('researchEntry', () => {
   const activeSetupSessions = ref<ResearchSession[]>([])
   const activeLinkedColumns = ref<ResearchCustomColumn[]>([])
   const enableExitDate = ref(false)
+
+  // Separated zone columns (Zone Group) and regular field columns (checkbox, selectors, text, number)
+  const zoneColumns = computed(() => {
+    return activeLinkedColumns.value.filter((col) => !col.type || col.type === 'zone_group')
+  })
+
+  const fieldColumns = computed(() => {
+    return activeLinkedColumns.value.filter((col) => col.type && col.type !== 'zone_group')
+  })
+
+  // Custom data values for field columns
+  const customData = ref<Record<string | number, any>>({})
 
   // Current Form state
   const editingEntryId = ref<number | null>(null)
@@ -105,19 +118,34 @@ export const useResearchEntryStore = defineStore('researchEntry', () => {
         activeSetupSessions.value = res.data.sessions || []
         activeLinkedColumns.value = res.data.customColumns || []
 
-        // Reset or populate zones array based on linked custom columns
-        zones.value = activeLinkedColumns.value.map((col) => ({
+        // Reset or populate zones array based on linked zone columns only
+        zones.value = zoneColumns.value.map((col) => ({
           customColumnId: col.id,
           customColumnName: col.name,
           bias: 'Bullish',
           minRr: null,
           maxRr: null,
+          slPoints: null,
+          realSlPoints: null,
           minSlPoints: null,
           maxSlPoints: null,
           isMissed: false,
           outcome: '',
           notes: ''
         }))
+
+        // Reset or initialize customData for field columns
+        const newCustomData: Record<string | number, any> = {}
+        for (const col of fieldColumns.value) {
+          if (col.type === 'checkbox') {
+            newCustomData[col.id] = col.defaultValue !== undefined ? Boolean(col.defaultValue) : false
+          } else if (col.type === 'multiple_selector') {
+            newCustomData[col.id] = Array.isArray(col.defaultValue) ? col.defaultValue : []
+          } else {
+            newCustomData[col.id] = col.defaultValue ?? null
+          }
+        }
+        customData.value = newCustomData
 
         // Auto-detect session for current datetime
         recalculateSession()
@@ -149,16 +177,22 @@ export const useResearchEntryStore = defineStore('researchEntry', () => {
     zones.value = syncBiasValues(zones.value, index, newBias)
   }
 
-  // SL Points change handler (Rule 4.3: Min SL copies to Max SL)
-  const onMinSlPointsChange = (index: number, val: number | null) => {
+  // SL Points change handlers (Planned SL & Real Drawdown / MAE)
+  const onSlPointsChange = (index: number, val: number | null) => {
     if (!zones.value[index]) return
-    zones.value[index] = handleSlPointsChange(zones.value[index], 'min', val)
+    zones.value[index].slPoints = val
+    zones.value[index].minSlPoints = val
   }
 
-  const onMaxSlPointsChange = (index: number, val: number | null) => {
+  const onRealSlPointsChange = (index: number, val: number | null) => {
     if (!zones.value[index]) return
-    zones.value[index] = handleSlPointsChange(zones.value[index], 'max', val)
+    zones.value[index].realSlPoints = val
+    zones.value[index].maxSlPoints = val
   }
+
+  // Backward compatibility aliases
+  const onMinSlPointsChange = onSlPointsChange
+  const onMaxSlPointsChange = onRealSlPointsChange
 
   // Quick action: Loss = -1 (Rule 4.7)
   const setZoneLoss = (index: number) => {
@@ -167,6 +201,8 @@ export const useResearchEntryStore = defineStore('researchEntry', () => {
     z.isMissed = false
     z.minRr = -1
     z.maxRr = -1
+    z.realSlPoints = null // Clear real SL on loss (leave blank)
+    z.maxSlPoints = null
     z.outcome = 'loss'
   }
 
@@ -190,6 +226,8 @@ export const useResearchEntryStore = defineStore('researchEntry', () => {
     if (z.isMissed) {
       z.minRr = null
       z.maxRr = null
+      z.realSlPoints = null
+      z.maxSlPoints = null
       z.outcome = 'missed'
     } else {
       z.outcome = ''
@@ -267,7 +305,7 @@ export const useResearchEntryStore = defineStore('researchEntry', () => {
         activeLinkedColumns.value = setupRes.data.customColumns || []
       }
 
-      // Map existing zones
+      // Map existing zones for zone columns only
       const existingZoneMap = new Map<number, any>()
       if (entry.zones) {
         for (const z of entry.zones) {
@@ -275,7 +313,7 @@ export const useResearchEntryStore = defineStore('researchEntry', () => {
         }
       }
 
-      zones.value = activeLinkedColumns.value.map((col) => {
+      zones.value = zoneColumns.value.map((col) => {
         const found = existingZoneMap.get(col.id)
         if (found) {
           return {
@@ -284,8 +322,10 @@ export const useResearchEntryStore = defineStore('researchEntry', () => {
             bias: (found.bias as any) || 'Bullish',
             minRr: found.minRr,
             maxRr: found.maxRr,
-            minSlPoints: found.minSlPoints,
-            maxSlPoints: found.maxSlPoints,
+            slPoints: found.slPoints ?? found.minSlPoints,
+            realSlPoints: found.realSlPoints,
+            minSlPoints: found.slPoints ?? found.minSlPoints,
+            maxSlPoints: found.realSlPoints ?? found.maxSlPoints,
             isMissed: Boolean(found.isMissed),
             outcome: (found.outcome as any) || '',
             notes: found.notes || ''
@@ -297,6 +337,8 @@ export const useResearchEntryStore = defineStore('researchEntry', () => {
           bias: 'Bullish',
           minRr: null,
           maxRr: null,
+          slPoints: null,
+          realSlPoints: null,
           minSlPoints: null,
           maxSlPoints: null,
           isMissed: false,
@@ -304,6 +346,22 @@ export const useResearchEntryStore = defineStore('researchEntry', () => {
           notes: ''
         }
       })
+
+      // Load customData for field columns
+      const loadedCustomData = (entry.customData as Record<string | number, any>) || {}
+      const newCustomData: Record<string | number, any> = { ...loadedCustomData }
+      for (const col of fieldColumns.value) {
+        if (newCustomData[col.id] === undefined) {
+          if (col.type === 'checkbox') {
+            newCustomData[col.id] = false
+          } else if (col.type === 'multiple_selector') {
+            newCustomData[col.id] = []
+          } else {
+            newCustomData[col.id] = null
+          }
+        }
+      }
+      customData.value = newCustomData
 
       return { success: true, data: entry }
     } catch (err: any) {
@@ -331,20 +389,36 @@ export const useResearchEntryStore = defineStore('researchEntry', () => {
     quality.value = 'A'
     images.value = []
 
-    if (activeLinkedColumns.value.length > 0) {
-      zones.value = activeLinkedColumns.value.map((col) => ({
+    if (zoneColumns.value.length > 0) {
+      zones.value = zoneColumns.value.map((col) => ({
         customColumnId: col.id,
         customColumnName: col.name,
         bias: 'Bullish',
         minRr: null,
         maxRr: null,
+        slPoints: null,
+        realSlPoints: null,
         minSlPoints: null,
         maxSlPoints: null,
         isMissed: false,
         outcome: '',
         notes: ''
       }))
+    } else {
+      zones.value = []
     }
+
+    const newCustomData: Record<string | number, any> = {}
+    for (const col of fieldColumns.value) {
+      if (col.type === 'checkbox') {
+        newCustomData[col.id] = false
+      } else if (col.type === 'multiple_selector') {
+        newCustomData[col.id] = []
+      } else {
+        newCustomData[col.id] = null
+      }
+    }
+    customData.value = newCustomData
     recalculateSession()
   }
 
@@ -370,13 +444,16 @@ export const useResearchEntryStore = defineStore('researchEntry', () => {
         quality: quality.value,
         images: images.value,
         notes: notes.value,
+        customData: customData.value,
         zones: zones.value.map((z) => ({
           customColumnId: z.customColumnId,
           bias: z.bias,
           minRr: z.isMissed ? null : z.minRr,
           maxRr: z.isMissed ? null : z.maxRr,
-          minSlPoints: z.minSlPoints,
-          maxSlPoints: z.maxSlPoints,
+          slPoints: z.slPoints,
+          realSlPoints: z.isMissed ? null : z.realSlPoints,
+          minSlPoints: z.slPoints ?? z.minSlPoints,
+          maxSlPoints: z.realSlPoints ?? z.maxSlPoints,
           isMissed: z.isMissed,
           outcome: z.isMissed
             ? 'missed'
@@ -425,6 +502,9 @@ export const useResearchEntryStore = defineStore('researchEntry', () => {
     symbols,
     activeSetupSessions,
     activeLinkedColumns,
+    zoneColumns,
+    fieldColumns,
+    customData,
     enableExitDate,
     editingEntryId,
     isEditMode,
@@ -447,6 +527,8 @@ export const useResearchEntryStore = defineStore('researchEntry', () => {
     recalculateSession,
     onEntryDatetimeChange,
     onBiasChange,
+    onSlPointsChange,
+    onRealSlPointsChange,
     onMinSlPointsChange,
     onMaxSlPointsChange,
     setZoneLoss,

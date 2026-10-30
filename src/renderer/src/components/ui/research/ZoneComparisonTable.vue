@@ -185,7 +185,15 @@
 
               <!-- Avg SL Points -->
               <td class="py-3.5 px-3 text-center text-gray-600 font-mono">
-                {{ m.avgSlPoints > 0 ? `${m.avgSlPoints} pts` : '-' }}
+                <div v-if="m.avgSlPoints > 0">{{ m.avgSlPoints }} pts</div>
+                <div
+                  v-if="m.avgRealSlPoints && m.avgRealSlPoints > 0"
+                  class="text-[10px] text-amber-600 font-sans font-bold"
+                  title="Average Real Drawdown (MAE) ของไม้ที่มีการกรอก"
+                >
+                  Real: {{ m.avgRealSlPoints }} pts
+                </div>
+                <span v-else-if="!m.avgSlPoints">-</span>
               </td>
 
               <!-- Expected Value (EV) -->

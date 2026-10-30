@@ -717,6 +717,7 @@ export const registerResearchHandlers = () => {
           quality: researchEntries.quality,
           images: researchEntries.images,
           notes: researchEntries.notes,
+          customData: researchEntries.customData,
           createdAt: researchEntries.createdAt,
           updatedAt: researchEntries.updatedAt
         })
@@ -772,6 +773,8 @@ export const registerResearchHandlers = () => {
             bias: researchEntryZones.bias,
             minRr: researchEntryZones.minRr,
             maxRr: researchEntryZones.maxRr,
+            slPoints: researchEntryZones.slPoints,
+            realSlPoints: researchEntryZones.realSlPoints,
             minSlPoints: researchEntryZones.minSlPoints,
             maxSlPoints: researchEntryZones.maxSlPoints,
             isMissed: researchEntryZones.isMissed,
@@ -829,6 +832,7 @@ export const registerResearchHandlers = () => {
           quality: researchEntries.quality,
           images: researchEntries.images,
           notes: researchEntries.notes,
+          customData: researchEntries.customData,
           createdAt: researchEntries.createdAt,
           updatedAt: researchEntries.updatedAt
         })
@@ -899,6 +903,7 @@ export const registerResearchHandlers = () => {
           quality: payload.quality || null,
           images: payload.images || [],
           notes: payload.notes || null,
+          customData: payload.customData || null,
           createdAt: now,
           updatedAt: now
         })
@@ -929,8 +934,10 @@ export const registerResearchHandlers = () => {
               bias: zone.bias || null,
               minRr: zone.isMissed ? null : zone.minRr ?? null,
               maxRr: zone.isMissed ? null : zone.maxRr ?? null,
-              minSlPoints: zone.minSlPoints ?? null,
-              maxSlPoints: zone.maxSlPoints ?? null,
+              slPoints: zone.slPoints ?? zone.minSlPoints ?? null,
+              realSlPoints: zone.realSlPoints ?? null,
+              minSlPoints: zone.slPoints ?? zone.minSlPoints ?? null,
+              maxSlPoints: zone.realSlPoints ?? zone.maxSlPoints ?? zone.slPoints ?? null,
               isMissed: Boolean(zone.isMissed),
               outcome: outcome || null,
               notes: zone.notes || null,
@@ -968,6 +975,7 @@ export const registerResearchHandlers = () => {
         if (payload.quality !== undefined) updatePayload.quality = payload.quality
         if (payload.images !== undefined) updatePayload.images = payload.images
         if (payload.notes !== undefined) updatePayload.notes = payload.notes
+        if (payload.customData !== undefined) updatePayload.customData = payload.customData
 
         const updatedEntry = db
           .update(researchEntries)
@@ -1001,8 +1009,10 @@ export const registerResearchHandlers = () => {
                 bias: zone.bias || null,
                 minRr: zone.isMissed ? null : zone.minRr ?? null,
                 maxRr: zone.isMissed ? null : zone.maxRr ?? null,
-                minSlPoints: zone.minSlPoints ?? null,
-                maxSlPoints: zone.maxSlPoints ?? null,
+                slPoints: zone.slPoints ?? zone.minSlPoints ?? null,
+                realSlPoints: zone.realSlPoints ?? null,
+                minSlPoints: zone.slPoints ?? zone.minSlPoints ?? null,
+                maxSlPoints: zone.realSlPoints ?? zone.maxSlPoints ?? zone.slPoints ?? null,
                 isMissed: Boolean(zone.isMissed),
                 outcome: outcome || null,
                 notes: zone.notes || null,
@@ -1107,6 +1117,8 @@ export const registerResearchHandlers = () => {
             bias: researchEntryZones.bias,
             minRr: researchEntryZones.minRr,
             maxRr: researchEntryZones.maxRr,
+            slPoints: researchEntryZones.slPoints,
+            realSlPoints: researchEntryZones.realSlPoints,
             minSlPoints: researchEntryZones.minSlPoints,
             maxSlPoints: researchEntryZones.maxSlPoints,
             isMissed: researchEntryZones.isMissed,
@@ -1159,16 +1171,30 @@ export const registerResearchHandlers = () => {
           let maxRrSum = 0
           let slPointsSum = 0
           let slPointsCount = 0
+          let realSlPointsSum = 0
+          let realSlPointsCount = 0
 
           for (const r of filledRecords) {
             const minRr = r.minRr !== null && r.minRr !== undefined ? Number(r.minRr) : null
             const maxRr = r.maxRr !== null && r.maxRr !== undefined ? Number(r.maxRr) : null
-            const minSl =
-              r.minSlPoints !== null && r.minSlPoints !== undefined ? Number(r.minSlPoints) : null
+            const sl =
+              r.slPoints !== null && r.slPoints !== undefined
+                ? Number(r.slPoints)
+                : r.minSlPoints !== null && r.minSlPoints !== undefined
+                ? Number(r.minSlPoints)
+                : null
 
-            if (minSl !== null && !isNaN(minSl)) {
-              slPointsSum += minSl
+            if (sl !== null && !isNaN(sl)) {
+              slPointsSum += sl
               slPointsCount++
+            }
+
+            const realSl =
+              r.realSlPoints !== null && r.realSlPoints !== undefined ? Number(r.realSlPoints) : null
+
+            if (realSl !== null && !isNaN(realSl)) {
+              realSlPointsSum += realSl
+              realSlPointsCount++
             }
 
             if (minRr !== null && !isNaN(minRr)) {
@@ -1201,6 +1227,7 @@ export const registerResearchHandlers = () => {
           const avgMinRr = filledCount > 0 ? minRrSum / filledCount : 0
           const avgMaxRr = filledCount > 0 ? maxRrSum / filledCount : 0
           const avgSlPoints = slPointsCount > 0 ? slPointsSum / slPointsCount : 0
+          const avgRealSlPoints = realSlPointsCount > 0 ? realSlPointsSum / realSlPointsCount : 0
           const avgWinMinRr = winCount > 0 ? winMinRrSum / winCount : 0
 
           // EV = (WinRate% * AvgWinRR) - (LossRate% * 1)
@@ -1222,6 +1249,7 @@ export const registerResearchHandlers = () => {
             avgMinRr: Number(avgMinRr.toFixed(2)),
             avgMaxRr: Number(avgMaxRr.toFixed(2)),
             avgSlPoints: Number(avgSlPoints.toFixed(1)),
+            avgRealSlPoints: Number(avgRealSlPoints.toFixed(1)),
             expectedValue: Number(expectedValue.toFixed(2))
           })
         }

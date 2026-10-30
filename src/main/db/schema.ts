@@ -278,6 +278,7 @@ export const researchEntries = sqliteTable('research_entries', {
   quality: text('quality'), // e.g., A+, A, B, C or color code
   images: text('images', { mode: 'json' }), // JSON Array of image paths
   notes: text('notes'),
+  customData: text('custom_data', { mode: 'json' }), // JSON map of custom_column_id -> value
   createdAt: text('created_at')
     .notNull()
     .$defaultFn(() => new Date().toISOString()),
@@ -298,6 +299,8 @@ export const researchEntryZones = sqliteTable('research_entry_zones', {
   bias: text('bias'), // Bullish, Bearish
   minRr: real('min_rr'),
   maxRr: real('max_rr'),
+  slPoints: real('sl_points'),
+  realSlPoints: real('real_sl_points'),
   minSlPoints: real('min_sl_points'),
   maxSlPoints: real('max_sl_points'),
   isMissed: integer('is_missed', { mode: 'boolean' }).default(false),

@@ -270,8 +270,8 @@ export const useResearchSettingsStore = defineStore('researchSettings', () => {
   const createMasterColumn = async (data: {
     name: string
     type: string
-    options?: string[]
-    description?: string
+    options?: string[] | null
+    description?: string | null
   }) => {
     try {
       const res = await window.api.research.customColumns.create(toPlain(data))
@@ -290,8 +290,8 @@ export const useResearchSettingsStore = defineStore('researchSettings', () => {
     data: {
       name?: string
       type?: string
-      options?: string[]
-      description?: string
+      options?: string[] | null
+      description?: string | null
     }
   ) => {
     try {

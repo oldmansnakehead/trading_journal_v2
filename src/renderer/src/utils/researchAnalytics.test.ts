@@ -126,6 +126,8 @@ describe('researchAnalytics utils', () => {
             isMissed: false,
             minRr: 2.0,
             maxRr: 3.5,
+            slPoints: 100,
+            realSlPoints: 40,
             minSlPoints: 100,
             outcome: 'win',
             createdAt: '',
@@ -162,6 +164,8 @@ describe('researchAnalytics utils', () => {
             isMissed: false,
             minRr: -1.0, // Loss = -1
             maxRr: -1.0,
+            slPoints: 100,
+            realSlPoints: null, // Deep loss / outlier is left blank
             minSlPoints: 100,
             outcome: 'loss',
             createdAt: '',
@@ -175,6 +179,8 @@ describe('researchAnalytics utils', () => {
             isMissed: false,
             minRr: 3.0,
             maxRr: 5.0,
+            slPoints: 80,
+            realSlPoints: 30,
             minSlPoints: 80,
             outcome: 'win',
             createdAt: '',
@@ -203,6 +209,8 @@ describe('researchAnalytics utils', () => {
       expect(fvg.winRate).toBe(50) // 1 win out of 2 filled
       expect(fvg.avgMinRr).toBe(0.5) // (2 + -1) / 2
       expect(fvg.avgMaxRr).toBe(1.25) // (3.5 + -1) / 2
+      expect(fvg.avgSlPoints).toBe(100)
+      expect(fvg.avgRealSlPoints).toBe(40) // Only the filled 40 is averaged; loss with null is excluded!
 
       const ob = summary.zoneMetrics.find((m) => m.customColumnId === 2)!
       expect(ob.columnName).toBe('Zone OB')

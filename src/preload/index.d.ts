@@ -167,16 +167,16 @@ declare global {
           create: (data: {
             name: string
             type: string
-            options?: string[]
-            description?: string
+            options?: string[] | null
+            description?: string | null
           }) => Promise<{ success: boolean; data?: ResearchCustomColumn; error?: string }>
           update: (
             id: number,
             data: {
               name?: string
               type?: string
-              options?: string[]
-              description?: string
+              options?: string[] | null
+              description?: string | null
             }
           ) => Promise<{ success: boolean; data?: ResearchCustomColumn; error?: string }>
           delete: (id: number) => Promise<{ success: boolean; error?: string }>

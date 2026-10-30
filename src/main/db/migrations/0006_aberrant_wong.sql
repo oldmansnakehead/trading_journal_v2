@@ -1,0 +1,1 @@
+ALTER TABLE `research_entries` ADD `custom_data` text;

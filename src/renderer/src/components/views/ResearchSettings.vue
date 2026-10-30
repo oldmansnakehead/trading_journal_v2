@@ -702,6 +702,7 @@
             <button
               @click="handleLinkColumn(col.id)"
               :data-testid="`link-col-btn-${col.id}`"
+              :data-col-name="col.name"
               class="px-3.5 py-1.5 rounded-lg text-xs font-bold bg-primary/10 text-primary hover:bg-primary hover:text-white transition-colors"
             >
               Link Zone
@@ -730,13 +731,13 @@
           </button>
         </div>
 
-        <div class="p-6 flex flex-col gap-5">
+        <div class="p-6 flex flex-col gap-5 overflow-y-auto max-h-[75vh]">
           <div>
-            <label class="block text-sm font-semibold text-gray-700 mb-1.5">ชื่อโซน (Zone Name) *</label>
+            <label class="block text-sm font-semibold text-gray-700 mb-1.5">ชื่อคอลัมน์ (Column Name) *</label>
             <input
               v-model="masterColumnForm.name"
               data-testid="zone-def-name-input"
-              placeholder="เช่น Zone FVG M15 หรือ Zone Extreme OB"
+              placeholder="เช่น Zone FVG M15 หรือ Confirmation Type"
               class="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary/20"
             />
           </div>
@@ -745,14 +746,62 @@
             <label class="block text-sm font-semibold text-gray-700 mb-1.5">ประเภท (Type)</label>
             <select
               v-model="masterColumnForm.type"
+              data-testid="zone-def-type-select"
               class="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-primary/20"
             >
-              <option value="zone_group">Zone Group (มาตรฐาน: Bias, RR, SL, ตกรถ)</option>
+              <option value="zone_group">Zone Group (โซนเข้า: Bias, RR, SL, ตกรถ)</option>
+              <option value="single_selector">Single Selector (เลือกได้ 1 ค่า)</option>
+              <option value="multiple_selector">Multiple Selector (เลือกได้หลายค่า)</option>
               <option value="checkbox">Checkbox (ใช่/ไม่ใช่)</option>
-              <option value="single_selector">Single Selector</option>
-              <option value="string">Text</option>
-              <option value="number">Number</option>
+              <option value="string">Text (ข้อความสั้น)</option>
+              <option value="number">Number (ตัวเลข)</option>
             </select>
+          </div>
+
+          <!-- Options Manager for Single / Multiple Selectors -->
+          <div
+            v-if="masterColumnForm.type === 'single_selector' || masterColumnForm.type === 'multiple_selector'"
+            class="flex flex-col gap-2.5"
+          >
+            <div class="flex items-center justify-between">
+              <label class="block text-sm font-semibold text-gray-700">
+                ตัวเลือก (Options) *
+              </label>
+              <button
+                type="button"
+                @click="addMasterColumnOption"
+                data-testid="add-column-option-btn"
+                class="text-xs font-bold text-primary hover:underline flex items-center gap-1 cursor-pointer"
+              >
+                <i class="ph ph-plus-circle text-sm"></i>
+                เพิ่มตัวเลือก (Add Option)
+              </button>
+            </div>
+
+            <div
+              v-for="(_, index) in masterColumnForm.options"
+              :key="index"
+              class="flex items-center gap-2"
+            >
+              <input
+                type="text"
+                v-model="masterColumnForm.options[index]"
+                :data-testid="`column-option-input-${index}`"
+                :placeholder="`ตัวเลือกที่ ${index + 1} (เช่น FVG, OB, Breaker)`"
+                class="flex-1 px-3.5 py-2 bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl outline-none focus:border-primary focus:ring-1 focus:ring-primary/20"
+              />
+              <button
+                type="button"
+                @click="removeMasterColumnOption(index)"
+                class="w-9 h-9 flex items-center justify-center text-red-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors cursor-pointer"
+                title="ลบตัวเลือก"
+              >
+                <i class="ph ph-trash text-base"></i>
+              </button>
+            </div>
+            <p v-if="masterColumnForm.options.length === 0" class="text-xs text-amber-600 font-medium">
+              กรุณากดเพิ่มตัวเลือกอย่างน้อย 1 รายการ
+            </p>
           </div>
 
           <div>
@@ -760,7 +809,7 @@
             <textarea
               v-model="masterColumnForm.description"
               rows="3"
-              placeholder="อธิบายลักษณะหรือเงื่อนไขของโซนนี้..."
+              placeholder="อธิบายลักษณะหรือเงื่อนไขของคอลัมน์นี้..."
               class="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary/20"
             ></textarea>
           </div>
@@ -983,37 +1032,74 @@ const handleUnlinkColumn = async (columnId: number) => {
 // Master Column Modal
 const isMasterColumnModalOpen = ref(false)
 const editingMasterColumnId = ref<number | null>(null)
-const masterColumnForm = ref({
+const masterColumnForm = ref<{
+  name: string
+  type: string
+  description: string
+  options: string[]
+}>({
   name: '',
   type: 'zone_group',
-  description: ''
+  description: '',
+  options: ['']
 })
+
+const addMasterColumnOption = () => {
+  masterColumnForm.value.options.push('')
+}
+
+const removeMasterColumnOption = (index: number) => {
+  masterColumnForm.value.options.splice(index, 1)
+  if (masterColumnForm.value.options.length === 0) {
+    masterColumnForm.value.options.push('')
+  }
+}
 
 const openAddMasterColumnModal = () => {
   editingMasterColumnId.value = null
   masterColumnForm.value = {
     name: '',
     type: 'zone_group',
-    description: ''
+    description: '',
+    options: ['']
   }
   isMasterColumnModalOpen.value = true
 }
 
 const openEditMasterColumnModal = (col: ResearchCustomColumn) => {
   editingMasterColumnId.value = col.id
+  let opts: string[] = []
+  if (col.options) {
+    opts = Array.isArray(col.options) ? [...col.options] : JSON.parse(String(col.options))
+  }
+  if (opts.length === 0) opts = ['']
+
   masterColumnForm.value = {
     name: col.name,
-    type: col.type,
-    description: col.description || ''
+    type: col.type || 'zone_group',
+    description: col.description || '',
+    options: opts
   }
   isMasterColumnModalOpen.value = true
 }
 
 const handleSaveMasterColumn = async () => {
+  let cleanOptions: string[] | null = null
+  if (masterColumnForm.value.type === 'single_selector' || masterColumnForm.value.type === 'multiple_selector') {
+    cleanOptions = masterColumnForm.value.options.map((s) => s.trim()).filter(Boolean)
+  }
+
+  const payload = {
+    name: masterColumnForm.value.name.trim(),
+    type: masterColumnForm.value.type,
+    description: masterColumnForm.value.description ? masterColumnForm.value.description.trim() : null,
+    options: cleanOptions && cleanOptions.length > 0 ? cleanOptions : null
+  }
+
   if (editingMasterColumnId.value) {
-    await settingsStore.updateMasterColumn(editingMasterColumnId.value, masterColumnForm.value)
+    await settingsStore.updateMasterColumn(editingMasterColumnId.value, payload)
   } else {
-    await settingsStore.createMasterColumn(masterColumnForm.value)
+    await settingsStore.createMasterColumn(payload)
   }
   isMasterColumnModalOpen.value = false
 }

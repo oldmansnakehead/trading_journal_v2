@@ -128,19 +128,24 @@ describe('useResearchEntryStore', () => {
     expect(store.zones[1].bias).toBe('Bullish')
   })
 
-  it('auto-copies min SL points to max SL points, but editing max SL points does not affect min', async () => {
+  it('handles Planned SL and Real SL (MAE) independently, and clears Real SL on loss', async () => {
     const store = useResearchEntryStore()
     await store.onSelectSetup(1)
 
-    // Edit min SL points
-    store.onMinSlPointsChange(0, 150)
-    expect(store.zones[0].minSlPoints).toBe(150)
-    expect(store.zones[0].maxSlPoints).toBe(150)
+    // Edit Planned SL points
+    store.onSlPointsChange(0, 150)
+    expect(store.zones[0].slPoints).toBe(150)
 
-    // Edit max SL points
-    store.onMaxSlPointsChange(0, 250)
-    expect(store.zones[0].minSlPoints).toBe(150)
-    expect(store.zones[0].maxSlPoints).toBe(250)
+    // Edit Real SL points (drawdown before running to target)
+    store.onRealSlPointsChange(0, 45)
+    expect(store.zones[0].slPoints).toBe(150)
+    expect(store.zones[0].realSlPoints).toBe(45)
+
+    // Quick action: Loss = -1 clears Real SL automatically
+    store.setZoneLoss(0)
+    expect(store.zones[0].minRr).toBe(-1)
+    expect(store.zones[0].maxRr).toBe(-1)
+    expect(store.zones[0].realSlPoints).toBeNull()
   })
 
   it('applies Loss quick action with RR = -1', async () => {
@@ -222,5 +227,87 @@ describe('useResearchEntryStore', () => {
     store.cancelEdit()
     expect(store.isEditMode).toBe(false)
     expect(store.editingEntryId).toBeNull()
+  })
+
+  it('separates zone_group columns from regular custom fields and persists customData', async () => {
+    // Add custom columns of various types to mock
+    const customMockApi = {
+      research: {
+        setups: {
+          list: vi.fn().mockResolvedValue({
+            success: true,
+            data: [{ id: 3, name: 'Setup Mixed', type: 'backtest', enableExitDate: false }]
+          }),
+          getDetails: vi.fn().mockResolvedValue({
+            success: true,
+            data: {
+              id: 3,
+              name: 'Setup Mixed',
+              enableExitDate: false,
+              sessions: [],
+              customColumns: [
+                { id: 201, name: 'Zone M15', type: 'zone_group' },
+                { id: 202, name: 'Confluence Check', type: 'checkbox' },
+                { id: 203, name: 'Market Structure', type: 'single_selector', options: ['BOS', 'CHoCH'] },
+                { id: 204, name: 'Confirmations', type: 'multiple_selector', options: ['Engulfing', 'Pinbar', 'Volume'] }
+              ]
+            }
+          })
+        },
+        entries: {
+          create: vi.fn().mockResolvedValue({ success: true, data: { id: 100 } })
+        }
+      },
+      symbols: {
+        list: vi.fn().mockResolvedValue({
+          success: true,
+          data: [{ id: 50, name: 'XAUUSD' }]
+        })
+      }
+    }
+    ;(globalThis as any).window = { api: customMockApi }
+
+    const store = useResearchEntryStore()
+    await store.initialize()
+
+    // Zones should only have the zone_group column
+    expect(store.zones.length).toBe(1)
+    expect(store.zones[0].customColumnId).toBe(201)
+    expect(store.zones[0].customColumnName).toBe('Zone M15')
+
+    // Field columns should have the remaining 3 columns
+    expect(store.fieldColumns.length).toBe(3)
+    expect(store.fieldColumns.map((c) => c.name)).toEqual([
+      'Confluence Check',
+      'Market Structure',
+      'Confirmations'
+    ])
+
+    // Initialized customData
+    expect(store.customData[202]).toBe(false)
+    expect(store.customData[203]).toBeNull()
+    expect(store.customData[204]).toEqual([])
+
+    // Update field values
+    store.customData[202] = true
+    store.customData[203] = 'BOS'
+    store.customData[204] = ['Engulfing', 'Volume']
+
+    await store.submitEntry()
+
+    expect(customMockApi.research.entries.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        customData: {
+          202: true,
+          203: 'BOS',
+          204: ['Engulfing', 'Volume']
+        },
+        zones: [
+          expect.objectContaining({
+            customColumnId: 201
+          })
+        ]
+      })
+    )
   })
 })
