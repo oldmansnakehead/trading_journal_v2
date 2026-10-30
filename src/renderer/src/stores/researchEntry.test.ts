@@ -135,21 +135,22 @@ describe('useResearchEntryStore', () => {
     expect(store.zones[1].entryDatetime).toBe('2026-10-28T15:15')
   })
 
-  it('auto-syncs exit times and calculates holding durations when first zone exit time changes', async () => {
+  it('recalculates holding duration for the first zone without altering other zones when exit time is specified', async () => {
     const store = useResearchEntryStore()
     await store.onSelectSetup(1)
 
-    store.entryDatetime = '2026-10-28T15:00'
-    store.onEntryDatetimeChange()
+    // Entry of zone 0 syncs all time fields
+    store.zones[0].entryDatetime = '2026-10-28T15:00'
+    store.onZoneEntryDatetimeChange(0)
+    expect(store.zones[1].exitDatetime).toBe('2026-10-28T15:00')
 
-    // First zone exits at 15:45 (45 minutes duration)
+    // First zone exits at 15:45 (45 minutes duration) -> does NOT touch other zones
     store.zones[0].exitDatetime = '2026-10-28T15:45'
     store.onZoneExitDatetimeChange(0)
 
-    expect(store.exitDatetime).toBe('2026-10-28T15:45')
     expect(store.zones[0].holdingDurationMinutes).toBe(45)
-    expect(store.zones[1].exitDatetime).toBe('2026-10-28T15:45')
-    expect(store.zones[1].holdingDurationMinutes).toBe(45)
+    expect(store.zones[1].exitDatetime).toBe('2026-10-28T15:00')
+    expect(store.zones[1].holdingDurationMinutes).toBe(0)
   })
 
   it('auto-syncs bias when first column is changed, and overrides individually for subsequent columns', async () => {

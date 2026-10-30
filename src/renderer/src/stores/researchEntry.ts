@@ -194,22 +194,9 @@ export const useResearchEntryStore = defineStore('researchEntry', () => {
     }
   }
 
-  // Handle main exit datetime change: syncs to all zones and recalculates holding durations
+  // Handle main exit datetime change
   const onExitDatetimeChange = () => {
-    if (exitDatetime.value) {
-      for (const z of zones.value) {
-        z.exitDatetime = exitDatetime.value
-        if (z.entryDatetime) {
-          try {
-            const start = new Date(z.entryDatetime).getTime()
-            const end = new Date(exitDatetime.value).getTime()
-            if (!isNaN(start) && !isNaN(end) && end >= start) {
-              z.holdingDurationMinutes = Math.round((end - start) / (1000 * 60))
-            }
-          } catch {}
-        }
-      }
-    }
+    // Only updates main exit time; does not overwrite individual zone exit times
   }
 
   // Bias change handler (Rule 4.1: First column syncs all, others override)
@@ -348,23 +335,14 @@ export const useResearchEntryStore = defineStore('researchEntry', () => {
     }
   }
 
-  // Handle zone exit datetime change: if zone 0 is changed, auto-sync exit times across all zones
+  // Handle zone exit datetime change: recalculates holding duration for this zone only (does NOT affect other zones)
   const onZoneExitDatetimeChange = (index: number) => {
     const z = zones.value[index]
     if (!z) return
-    const newExit = z.exitDatetime
-
-    if (index === 0 && newExit) {
-      exitDatetime.value = newExit
-      onZoneTimeChange(0)
-
-      for (let i = 1; i < zones.value.length; i++) {
-        zones.value[i].exitDatetime = newExit
-        onZoneTimeChange(i)
-      }
-    } else {
-      onZoneTimeChange(index)
+    if (index === 0 && z.exitDatetime) {
+      exitDatetime.value = z.exitDatetime
     }
+    onZoneTimeChange(index)
   }
 
   // Quick action: Break-Even = 0

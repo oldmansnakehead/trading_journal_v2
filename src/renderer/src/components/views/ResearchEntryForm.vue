@@ -495,9 +495,9 @@
                   <span
                     v-if="idx === 0"
                     class="text-[9px] font-bold text-primary bg-primary/10 px-1.5 py-0.5 rounded"
-                    title="เลือกเวลาในโซนแรกจะคัดลอกไปยังทุกโซนและทุกเวลาให้อัตโนมัติ"
+                    title="ระบุเวลาเข้าโซนแรก จะปรับเวลาทุกช่องของทุกโซนให้อัตโนมัติ"
                   >
-                    Sync ทั้งหมด
+                    Sync ทุกโซน
                   </span>
                 </div>
                 <input
@@ -512,18 +512,9 @@
                 />
               </div>
               <div>
-                <div class="flex items-center justify-between mb-1">
-                  <label class="block text-[11px] font-semibold text-gray-600">
-                    <i class="ph ph-clock mr-1 text-purple-600"></i>เวลาออกโซน (Exit Time)
-                  </label>
-                  <span
-                    v-if="idx === 0"
-                    class="text-[9px] font-bold text-purple-700 bg-purple-100 px-1.5 py-0.5 rounded"
-                    title="เลือกเวลาออกในโซนแรกจะคัดลอกไปยังทุกโซนให้อัตโนมัติ"
-                  >
-                    Sync ทั้งหมด
-                  </span>
-                </div>
+                <label class="block text-[11px] font-semibold text-gray-600 mb-1">
+                  <i class="ph ph-clock mr-1 text-purple-600"></i>เวลาออกโซน (Exit Time)
+                </label>
                 <input
                   type="datetime-local"
                   lang="en-GB"
