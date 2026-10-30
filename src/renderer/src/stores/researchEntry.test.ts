@@ -101,12 +101,55 @@ describe('useResearchEntryStore', () => {
     expect(store.enableExitDate).toBe(true)
   })
 
-  it('auto-copies entryDatetime into exitDatetime when onEntryDatetimeChange is called', () => {
+  it('auto-copies entryDatetime into exitDatetime and all zones when onEntryDatetimeChange is called', async () => {
     const store = useResearchEntryStore()
+    await store.onSelectSetup(1)
     store.entryDatetime = '2026-10-28T14:30'
     store.onEntryDatetimeChange()
 
     expect(store.exitDatetime).toBe('2026-10-28T14:30')
+    expect(store.zones[0].entryDatetime).toBe('2026-10-28T14:30')
+    expect(store.zones[0].exitDatetime).toBe('2026-10-28T14:30')
+    expect(store.zones[1].entryDatetime).toBe('2026-10-28T14:30')
+    expect(store.zones[1].exitDatetime).toBe('2026-10-28T14:30')
+  })
+
+  it('auto-syncs all time fields across all zones when first zone entry date is chosen', async () => {
+    const store = useResearchEntryStore()
+    await store.onSelectSetup(1)
+
+    // User edits the first zone's entry time
+    store.zones[0].entryDatetime = '2026-10-28T15:00'
+    store.onZoneEntryDatetimeChange(0)
+
+    expect(store.entryDatetime).toBe('2026-10-28T15:00')
+    expect(store.exitDatetime).toBe('2026-10-28T15:00')
+    expect(store.zones[0].exitDatetime).toBe('2026-10-28T15:00')
+    expect(store.zones[1].entryDatetime).toBe('2026-10-28T15:00')
+    expect(store.zones[1].exitDatetime).toBe('2026-10-28T15:00')
+
+    // Editing second zone individually does NOT overwrite other zones
+    store.zones[1].entryDatetime = '2026-10-28T15:15'
+    store.onZoneEntryDatetimeChange(1)
+    expect(store.zones[0].entryDatetime).toBe('2026-10-28T15:00')
+    expect(store.zones[1].entryDatetime).toBe('2026-10-28T15:15')
+  })
+
+  it('auto-syncs exit times and calculates holding durations when first zone exit time changes', async () => {
+    const store = useResearchEntryStore()
+    await store.onSelectSetup(1)
+
+    store.entryDatetime = '2026-10-28T15:00'
+    store.onEntryDatetimeChange()
+
+    // First zone exits at 15:45 (45 minutes duration)
+    store.zones[0].exitDatetime = '2026-10-28T15:45'
+    store.onZoneExitDatetimeChange(0)
+
+    expect(store.exitDatetime).toBe('2026-10-28T15:45')
+    expect(store.zones[0].holdingDurationMinutes).toBe(45)
+    expect(store.zones[1].exitDatetime).toBe('2026-10-28T15:45')
+    expect(store.zones[1].holdingDurationMinutes).toBe(45)
   })
 
   it('auto-syncs bias when first column is changed, and overrides individually for subsequent columns', async () => {

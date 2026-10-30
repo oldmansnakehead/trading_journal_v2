@@ -133,8 +133,9 @@ export const useResearchEntryStore = defineStore('researchEntry', () => {
           zoneInstanceName: null,
           bias: 'Bullish',
           entryDatetime: entryDatetime.value || null,
-          exitDatetime: null,
-          holdingDurationMinutes: null,
+          exitDatetime: exitDatetime.value || entryDatetime.value || null,
+          holdingDurationMinutes:
+            entryDatetime.value && exitDatetime.value && entryDatetime.value === exitDatetime.value ? 0 : null,
           holdingBars: null,
           minRr: null,
           maxRr: null,
@@ -179,11 +180,35 @@ export const useResearchEntryStore = defineStore('researchEntry', () => {
     }
   }
 
-  // Handle entry datetime change: auto-detects session and auto-copies value to exit datetime
+  // Handle entry datetime change: auto-detects session and auto-copies value to exit datetime and all zones
   const onEntryDatetimeChange = () => {
     recalculateSession()
     if (entryDatetime.value) {
       exitDatetime.value = entryDatetime.value
+      // Copy to all zones' entry and exit times so user doesn't have to select date & time repeatedly
+      for (const z of zones.value) {
+        z.entryDatetime = entryDatetime.value
+        z.exitDatetime = entryDatetime.value
+        z.holdingDurationMinutes = 0
+      }
+    }
+  }
+
+  // Handle main exit datetime change: syncs to all zones and recalculates holding durations
+  const onExitDatetimeChange = () => {
+    if (exitDatetime.value) {
+      for (const z of zones.value) {
+        z.exitDatetime = exitDatetime.value
+        if (z.entryDatetime) {
+          try {
+            const start = new Date(z.entryDatetime).getTime()
+            const end = new Date(exitDatetime.value).getTime()
+            if (!isNaN(start) && !isNaN(end) && end >= start) {
+              z.holdingDurationMinutes = Math.round((end - start) / (1000 * 60))
+            }
+          } catch {}
+        }
+      }
     }
   }
 
@@ -294,6 +319,51 @@ export const useResearchEntryStore = defineStore('researchEntry', () => {
           z.holdingDurationMinutes = Math.round((end - start) / (1000 * 60))
         }
       } catch {}
+    }
+  }
+
+  // Handle zone entry datetime change: if zone 0 is changed, auto-sync to all time fields across all zones
+  const onZoneEntryDatetimeChange = (index: number) => {
+    const z = zones.value[index]
+    if (!z) return
+    const newTime = z.entryDatetime
+
+    if (index === 0 && newTime) {
+      entryDatetime.value = newTime
+      exitDatetime.value = newTime
+      z.exitDatetime = newTime
+      z.holdingDurationMinutes = 0
+      recalculateSession()
+
+      for (let i = 1; i < zones.value.length; i++) {
+        zones.value[i].entryDatetime = newTime
+        zones.value[i].exitDatetime = newTime
+        zones.value[i].holdingDurationMinutes = 0
+      }
+    } else {
+      if (newTime && !z.exitDatetime) {
+        z.exitDatetime = newTime
+      }
+      onZoneTimeChange(index)
+    }
+  }
+
+  // Handle zone exit datetime change: if zone 0 is changed, auto-sync exit times across all zones
+  const onZoneExitDatetimeChange = (index: number) => {
+    const z = zones.value[index]
+    if (!z) return
+    const newExit = z.exitDatetime
+
+    if (index === 0 && newExit) {
+      exitDatetime.value = newExit
+      onZoneTimeChange(0)
+
+      for (let i = 1; i < zones.value.length; i++) {
+        zones.value[i].exitDatetime = newExit
+        onZoneTimeChange(i)
+      }
+    } else {
+      onZoneTimeChange(index)
     }
   }
 
@@ -496,8 +566,8 @@ export const useResearchEntryStore = defineStore('researchEntry', () => {
         zoneInstanceName: null,
         bias: 'Bullish',
         entryDatetime: now,
-        exitDatetime: null,
-        holdingDurationMinutes: null,
+        exitDatetime: now,
+        holdingDurationMinutes: 0,
         holdingBars: null,
         minRr: null,
         maxRr: null,
@@ -642,6 +712,9 @@ export const useResearchEntryStore = defineStore('researchEntry', () => {
     onSelectSetup,
     recalculateSession,
     onEntryDatetimeChange,
+    onExitDatetimeChange,
+    onZoneEntryDatetimeChange,
+    onZoneExitDatetimeChange,
     onBiasChange,
     onSlPointsChange,
     onRealSlPointsChange,

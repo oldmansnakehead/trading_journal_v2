@@ -176,6 +176,8 @@
               type="datetime-local"
               v-model="entryStore.exitDatetime"
               :min="entryStore.entryDatetime"
+              @input="entryStore.onExitDatetimeChange"
+              @change="entryStore.onExitDatetimeChange"
               data-testid="research-exit-datetime"
               class="w-full px-3.5 py-2 bg-emerald-50/50 border border-emerald-300 rounded-xl text-sm font-semibold text-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
             />
@@ -482,24 +484,46 @@
               class="grid grid-cols-1 sm:grid-cols-3 gap-3 p-3 bg-white/70 rounded-xl mb-3.5 border border-gray-200/70"
             >
               <div>
-                <label class="block text-[11px] font-semibold text-gray-600 mb-1">
-                  <i class="ph ph-clock mr-1 text-primary"></i>เวลาเข้าโซน (Entry Time)
-                </label>
+                <div class="flex items-center justify-between mb-1">
+                  <label class="block text-[11px] font-semibold text-gray-600">
+                    <i class="ph ph-clock mr-1 text-primary"></i>เวลาเข้าโซน (Entry Time)
+                  </label>
+                  <span
+                    v-if="idx === 0"
+                    class="text-[9px] font-bold text-primary bg-primary/10 px-1.5 py-0.5 rounded"
+                    title="เลือกเวลาในโซนแรกจะคัดลอกไปยังทุกโซนและทุกเวลาให้อัตโนมัติ"
+                  >
+                    Sync ทั้งหมด
+                  </span>
+                </div>
                 <input
                   type="datetime-local"
                   v-model="zone.entryDatetime"
-                  @change="entryStore.onZoneTimeChange(idx)"
+                  @input="entryStore.onZoneEntryDatetimeChange(idx)"
+                  @change="entryStore.onZoneEntryDatetimeChange(idx)"
+                  :data-testid="`zone-entry-time-${idx}`"
                   class="w-full px-2.5 py-1.5 bg-white border border-gray-200 rounded-lg text-xs font-medium text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary/20"
                 />
               </div>
               <div>
-                <label class="block text-[11px] font-semibold text-gray-600 mb-1">
-                  <i class="ph ph-clock mr-1 text-purple-600"></i>เวลาออกโซน (Exit Time)
-                </label>
+                <div class="flex items-center justify-between mb-1">
+                  <label class="block text-[11px] font-semibold text-gray-600">
+                    <i class="ph ph-clock mr-1 text-purple-600"></i>เวลาออกโซน (Exit Time)
+                  </label>
+                  <span
+                    v-if="idx === 0"
+                    class="text-[9px] font-bold text-purple-700 bg-purple-100 px-1.5 py-0.5 rounded"
+                    title="เลือกเวลาออกในโซนแรกจะคัดลอกไปยังทุกโซนให้อัตโนมัติ"
+                  >
+                    Sync ทั้งหมด
+                  </span>
+                </div>
                 <input
                   type="datetime-local"
                   v-model="zone.exitDatetime"
-                  @change="entryStore.onZoneTimeChange(idx)"
+                  @input="entryStore.onZoneExitDatetimeChange(idx)"
+                  @change="entryStore.onZoneExitDatetimeChange(idx)"
+                  :data-testid="`zone-exit-time-${idx}`"
                   class="w-full px-2.5 py-1.5 bg-white border border-gray-200 rounded-lg text-xs font-medium text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary/20"
                 />
               </div>
