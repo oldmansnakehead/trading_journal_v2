@@ -304,7 +304,14 @@ export const researchEntryZones = sqliteTable('research_entry_zones', {
   minSlPoints: real('min_sl_points'),
   maxSlPoints: real('max_sl_points'),
   isMissed: integer('is_missed', { mode: 'boolean' }).default(false),
-  outcome: text('outcome'), // win, loss, be, missed
+  isNoZone: integer('is_no_zone', { mode: 'boolean' }).default(false),
+  invalidationReason: text('invalidation_reason'),
+  holdingDurationMinutes: integer('holding_duration_minutes'),
+  holdingBars: integer('holding_bars'),
+  entryDatetime: text('entry_datetime'),
+  exitDatetime: text('exit_datetime'),
+  zoneInstanceName: text('zone_instance_name'),
+  outcome: text('outcome'), // win, loss, be, missed, no_zone
   notes: text('notes'),
   createdAt: text('created_at')
     .notNull()

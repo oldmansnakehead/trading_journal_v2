@@ -96,14 +96,14 @@
           <thead>
             <tr class="bg-gray-50/80 border-b border-gray-200 text-gray-600 font-bold uppercase tracking-wider">
               <th class="py-3.5 px-4">Zone / Parameter</th>
-              <th class="py-3.5 px-3 text-center">Samples</th>
-              <th class="py-3.5 px-4 min-w-[140px]">Fill Rate vs Miss Rate</th>
-              <th class="py-3.5 px-3 text-center">Win Rate (Filled)</th>
+              <th class="py-3.5 px-3 text-center">เกิดโซน (Formation)</th>
+              <th class="py-3.5 px-4 min-w-[130px]">ได้ของ vs ตกรถ</th>
+              <th class="py-3.5 px-3 text-center">Win Rate</th>
               <th class="py-3.5 px-3 text-center">W / L / BE</th>
-              <th class="py-3.5 px-3 text-center">Avg Min RR</th>
-              <th class="py-3.5 px-3 text-center">Avg Max RR</th>
-              <th class="py-3.5 px-3 text-center">Avg SL</th>
-              <th class="py-3.5 px-4 text-right">Expected Value (EV)</th>
+              <th class="py-3.5 px-3 text-center">Avg Min / Max</th>
+              <th class="py-3.5 px-3 text-center">SL & Sweet Spot</th>
+              <th class="py-3.5 px-3 text-center">ถือเฉลี่ย</th>
+              <th class="py-3.5 px-4 text-right">Expected Value</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-100 font-medium text-gray-800">
@@ -131,11 +131,21 @@
                     🎯 High WR
                   </span>
                 </div>
+                <!-- Invalidation breakdown preview -->
+                <div v-if="getTopLossReason(m)" class="text-[10.5px] text-red-600 font-normal mt-0.5 flex items-center gap-1">
+                  <i class="ph ph-warning-circle"></i>
+                  <span>โซนแหกบ่อยสุด: <strong>{{ getTopLossReason(m) }}</strong></span>
+                </div>
               </td>
 
-              <!-- Total Samples -->
-              <td class="py-3.5 px-3 text-center font-bold text-gray-700">
-                {{ m.totalSamples }}
+              <!-- Formation Rate -->
+              <td class="py-3.5 px-3 text-center">
+                <div class="font-bold text-sm" :class="m.formationRate >= 70 ? 'text-gray-900' : 'text-amber-700'">
+                  {{ m.formationRate }}%
+                </div>
+                <div class="text-[10px] text-gray-400 font-mono">
+                  เกิด {{ m.formedCount }}/{{ m.totalSamples }} (ไม่เกิด {{ m.noZoneCount }})
+                </div>
               </td>
 
               <!-- Fill Rate vs Miss Rate Progress Bar -->
@@ -173,27 +183,44 @@
                 <span class="text-gray-500">{{ m.beCount }}</span>
               </td>
 
-              <!-- Avg Min RR -->
-              <td class="py-3.5 px-3 text-center font-bold text-gray-900">
-                {{ m.avgMinRr }}R
+              <!-- Avg Min & Max RR -->
+              <td class="py-3.5 px-3 text-center font-mono text-xs">
+                <div class="font-bold text-gray-900">{{ m.avgMinRr }}R</div>
+                <div class="text-[10px] text-purple-700 font-bold">Max: {{ m.avgMaxRr }}R</div>
               </td>
 
-              <!-- Avg Max RR -->
-              <td class="py-3.5 px-3 text-center font-bold text-purple-700">
-                {{ m.avgMaxRr }}R
-              </td>
-
-              <!-- Avg SL Points -->
-              <td class="py-3.5 px-3 text-center text-gray-600 font-mono">
-                <div v-if="m.avgSlPoints > 0">{{ m.avgSlPoints }} pts</div>
+              <!-- Avg SL & Sweet Spot -->
+              <td class="py-3.5 px-3 text-center font-mono text-xs">
+                <div v-if="m.avgSlPoints > 0" class="text-gray-700 font-bold">
+                  {{ m.avgSlPoints }} pts
+                </div>
                 <div
                   v-if="m.avgRealSlPoints && m.avgRealSlPoints > 0"
                   class="text-[10px] text-amber-600 font-sans font-bold"
-                  title="Average Real Drawdown (MAE) ของไม้ที่มีการกรอก"
+                  title="Average Real Drawdown (MAE) ของไม้ชนะ"
                 >
                   Real: {{ m.avgRealSlPoints }} pts
                 </div>
+                <!-- Optimal SL Sweet Spot Badge -->
+                <div
+                  v-if="m.optimalSlPoints"
+                  class="mt-1 px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800 text-[10px] font-sans font-bold inline-block"
+                  :title="`90% ของไม้ชนะย่อไม่เกิน ${m.optimalSlPoints} จุด ปรับลด SL จาก ${m.avgSlPoints} จุด จะช่วยเพิ่ม EV +${m.optimalSlEvBoost || 0}R`"
+                >
+                  🎯 Sweet Spot: {{ m.optimalSlPoints }} pts
+                </div>
                 <span v-else-if="!m.avgSlPoints">-</span>
+              </td>
+
+              <!-- Avg Holding Duration & Bars -->
+              <td class="py-3.5 px-3 text-center text-xs">
+                <div v-if="m.avgHoldingDurationMinutes" class="font-bold text-gray-800">
+                  {{ m.avgHoldingDurationMinutes }} นาที
+                </div>
+                <div v-if="m.avgHoldingBars" class="text-[10px] text-gray-500 font-mono">
+                  {{ m.avgHoldingBars }} แท่ง
+                </div>
+                <span v-if="!m.avgHoldingDurationMinutes && !m.avgHoldingBars" class="text-gray-400">-</span>
               </td>
 
               <!-- Expected Value (EV) -->
@@ -225,7 +252,7 @@
           </code>
         </div>
         <div>
-          * วินเรทคำนวณจากเฉพาะไม้ที่ได้ของ (Filled Trades เท่านั้น) ไม้ตกรถไม่นำมาหักลบวินเรท
+          * Formation Rate คือความถี่ที่เกิดโซนนี้ให้เล่นจริง / Sweet Spot คือระยะ SL ที่ 90% ของไม้ชนะย่อไม่เกิน
         </div>
       </div>
     </div>
@@ -250,5 +277,13 @@ const getMetricById = (id?: number | null) => {
 
 const getZoneNameById = (id?: number | null) => {
   return getMetricById(id)?.columnName || null
+}
+
+const getTopLossReason = (m: ZoneComparisonMetric) => {
+  if (!m.invalidationBreakdown) return null
+  const entries = Object.entries(m.invalidationBreakdown)
+  if (entries.length === 0) return null
+  entries.sort((a, b) => b[1] - a[1])
+  return `${entries[0][0]} (${entries[0][1]} ครั้ง)`
 }
 </script>

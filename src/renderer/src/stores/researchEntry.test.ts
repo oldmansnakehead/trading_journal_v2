@@ -310,4 +310,50 @@ describe('useResearchEntryStore', () => {
       })
     )
   })
+
+  it('supports duplicating and removing duplicated zones within a setup', async () => {
+    const store = useResearchEntryStore()
+    await store.onSelectSetup(1)
+    expect(store.zones.length).toBe(2)
+
+    // Duplicate Zone 0
+    store.duplicateZone(0)
+    expect(store.zones.length).toBe(3)
+    expect(store.zones[1].customColumnId).toBe(store.zones[0].customColumnId)
+    expect(store.zones[1].zoneInstanceName).toContain('#2')
+
+    // Remove the duplicated zone
+    store.removeDuplicatedZone(1)
+    expect(store.zones.length).toBe(2)
+  })
+
+  it('handles No-Zone state and invalidation reason attribution on loss', async () => {
+    const store = useResearchEntryStore()
+    await store.onSelectSetup(1)
+
+    // Toggle No-Zone
+    store.toggleZoneNoZone(0)
+    expect(store.zones[0].isNoZone).toBe(true)
+    expect(store.zones[0].outcome).toBe('no_zone')
+
+    // Untoggle No-Zone
+    store.toggleZoneNoZone(0)
+    expect(store.zones[0].isNoZone).toBe(false)
+
+    // Loss with Invalidation Reason
+    store.setZoneLoss(0, 'สวน HTF')
+    expect(store.zones[0].outcome).toBe('loss')
+    expect(store.zones[0].invalidationReason).toBe('สวน HTF')
+  })
+
+  it('auto calculates holding duration in minutes from entry and exit times', async () => {
+    const store = useResearchEntryStore()
+    await store.onSelectSetup(1)
+
+    store.zones[0].entryDatetime = '2026-10-30T10:00:00'
+    store.zones[0].exitDatetime = '2026-10-30T10:45:00'
+    store.onZoneTimeChange(0)
+
+    expect(store.zones[0].holdingDurationMinutes).toBe(45)
+  })
 })

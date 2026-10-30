@@ -57,6 +57,13 @@
       "when": 1793344080569,
       "tag": "0007_mixed_celestials",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "6",
+      "when": 1793356645294,
+      "tag": "0008_wakeful_post",
+      "breakpoints": true
     }
   ]
 }

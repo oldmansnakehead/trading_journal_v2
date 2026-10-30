@@ -778,6 +778,13 @@ export const registerResearchHandlers = () => {
             minSlPoints: researchEntryZones.minSlPoints,
             maxSlPoints: researchEntryZones.maxSlPoints,
             isMissed: researchEntryZones.isMissed,
+            isNoZone: researchEntryZones.isNoZone,
+            invalidationReason: researchEntryZones.invalidationReason,
+            holdingDurationMinutes: researchEntryZones.holdingDurationMinutes,
+            holdingBars: researchEntryZones.holdingBars,
+            entryDatetime: researchEntryZones.entryDatetime,
+            exitDatetime: researchEntryZones.exitDatetime,
+            zoneInstanceName: researchEntryZones.zoneInstanceName,
             outcome: researchEntryZones.outcome,
             notes: researchEntryZones.notes,
             createdAt: researchEntryZones.createdAt,
@@ -853,9 +860,18 @@ export const registerResearchHandlers = () => {
           bias: researchEntryZones.bias,
           minRr: researchEntryZones.minRr,
           maxRr: researchEntryZones.maxRr,
+          slPoints: researchEntryZones.slPoints,
+          realSlPoints: researchEntryZones.realSlPoints,
           minSlPoints: researchEntryZones.minSlPoints,
           maxSlPoints: researchEntryZones.maxSlPoints,
           isMissed: researchEntryZones.isMissed,
+          isNoZone: researchEntryZones.isNoZone,
+          invalidationReason: researchEntryZones.invalidationReason,
+          holdingDurationMinutes: researchEntryZones.holdingDurationMinutes,
+          holdingBars: researchEntryZones.holdingBars,
+          entryDatetime: researchEntryZones.entryDatetime,
+          exitDatetime: researchEntryZones.exitDatetime,
+          zoneInstanceName: researchEntryZones.zoneInstanceName,
           outcome: researchEntryZones.outcome,
           notes: researchEntryZones.notes,
           createdAt: researchEntryZones.createdAt,
@@ -916,7 +932,9 @@ export const registerResearchHandlers = () => {
           // Derive outcome
           let outcome = zone.outcome
           if (!outcome) {
-            if (zone.isMissed) {
+            if (zone.isNoZone) {
+              outcome = 'no_zone'
+            } else if (zone.isMissed) {
               outcome = 'missed'
             } else if (zone.minRr === -1 || zone.maxRr === -1) {
               outcome = 'loss'
@@ -932,13 +950,20 @@ export const registerResearchHandlers = () => {
               researchEntryId: newEntry.id,
               customColumnId: zone.customColumnId,
               bias: zone.bias || null,
-              minRr: zone.isMissed ? null : zone.minRr ?? null,
-              maxRr: zone.isMissed ? null : zone.maxRr ?? null,
+              minRr: zone.isMissed || zone.isNoZone ? null : zone.minRr ?? null,
+              maxRr: zone.isMissed || zone.isNoZone ? null : zone.maxRr ?? null,
               slPoints: zone.slPoints ?? zone.minSlPoints ?? null,
               realSlPoints: zone.realSlPoints ?? null,
               minSlPoints: zone.slPoints ?? zone.minSlPoints ?? null,
               maxSlPoints: zone.realSlPoints ?? zone.maxSlPoints ?? zone.slPoints ?? null,
               isMissed: Boolean(zone.isMissed),
+              isNoZone: Boolean(zone.isNoZone),
+              invalidationReason: zone.invalidationReason || null,
+              holdingDurationMinutes: zone.holdingDurationMinutes ?? null,
+              holdingBars: zone.holdingBars ?? null,
+              entryDatetime: zone.entryDatetime || null,
+              exitDatetime: zone.exitDatetime || null,
+              zoneInstanceName: zone.zoneInstanceName || null,
               outcome: outcome || null,
               notes: zone.notes || null,
               createdAt: now,
@@ -991,7 +1016,9 @@ export const registerResearchHandlers = () => {
           for (const zone of payload.zones) {
             let outcome = zone.outcome
             if (!outcome) {
-              if (zone.isMissed) {
+              if (zone.isNoZone) {
+                outcome = 'no_zone'
+              } else if (zone.isMissed) {
                 outcome = 'missed'
               } else if (zone.minRr === -1 || zone.maxRr === -1) {
                 outcome = 'loss'
@@ -1007,13 +1034,20 @@ export const registerResearchHandlers = () => {
                 researchEntryId: id,
                 customColumnId: zone.customColumnId,
                 bias: zone.bias || null,
-                minRr: zone.isMissed ? null : zone.minRr ?? null,
-                maxRr: zone.isMissed ? null : zone.maxRr ?? null,
+                minRr: zone.isMissed || zone.isNoZone ? null : zone.minRr ?? null,
+                maxRr: zone.isMissed || zone.isNoZone ? null : zone.maxRr ?? null,
                 slPoints: zone.slPoints ?? zone.minSlPoints ?? null,
                 realSlPoints: zone.realSlPoints ?? null,
                 minSlPoints: zone.slPoints ?? zone.minSlPoints ?? null,
                 maxSlPoints: zone.realSlPoints ?? zone.maxSlPoints ?? zone.slPoints ?? null,
                 isMissed: Boolean(zone.isMissed),
+                isNoZone: Boolean(zone.isNoZone),
+                invalidationReason: zone.invalidationReason || null,
+                holdingDurationMinutes: zone.holdingDurationMinutes ?? null,
+                holdingBars: zone.holdingBars ?? null,
+                entryDatetime: zone.entryDatetime || null,
+                exitDatetime: zone.exitDatetime || null,
+                zoneInstanceName: zone.zoneInstanceName || null,
                 outcome: outcome || null,
                 notes: zone.notes || null,
                 createdAt: now,
@@ -1122,6 +1156,13 @@ export const registerResearchHandlers = () => {
             minSlPoints: researchEntryZones.minSlPoints,
             maxSlPoints: researchEntryZones.maxSlPoints,
             isMissed: researchEntryZones.isMissed,
+            isNoZone: researchEntryZones.isNoZone,
+            invalidationReason: researchEntryZones.invalidationReason,
+            holdingDurationMinutes: researchEntryZones.holdingDurationMinutes,
+            holdingBars: researchEntryZones.holdingBars,
+            entryDatetime: researchEntryZones.entryDatetime,
+            exitDatetime: researchEntryZones.exitDatetime,
+            zoneInstanceName: researchEntryZones.zoneInstanceName,
             outcome: researchEntryZones.outcome
           })
           .from(researchEntryZones)
@@ -1156,12 +1197,17 @@ export const registerResearchHandlers = () => {
 
         for (const [colId, colData] of columnMap.entries()) {
           const totalSamples = colData.records.length
-          const missedCount = colData.records.filter((r) => r.isMissed).length
-          const filledRecords = colData.records.filter((r) => !r.isMissed)
+          const noZoneCount = colData.records.filter((r) => r.isNoZone || r.outcome === 'no_zone').length
+          const formedRecords = colData.records.filter((r) => !r.isNoZone && r.outcome !== 'no_zone')
+          const formedCount = formedRecords.length
+          const formationRate = totalSamples > 0 ? (formedCount / totalSamples) * 100 : 0
+
+          const missedCount = formedRecords.filter((r) => r.isMissed || r.outcome === 'missed').length
+          const filledRecords = formedRecords.filter((r) => !r.isMissed && r.outcome !== 'missed')
           const filledCount = filledRecords.length
 
-          const fillRate = totalSamples > 0 ? (filledCount / totalSamples) * 100 : 0
-          const missRate = totalSamples > 0 ? (missedCount / totalSamples) * 100 : 0
+          const fillRate = formedCount > 0 ? (filledCount / formedCount) * 100 : 0
+          const missRate = formedCount > 0 ? (missedCount / formedCount) * 100 : 0
 
           let winCount = 0
           let lossCount = 0
@@ -1173,6 +1219,12 @@ export const registerResearchHandlers = () => {
           let slPointsCount = 0
           let realSlPointsSum = 0
           let realSlPointsCount = 0
+          const winningRealSls: number[] = []
+          const invalidationBreakdown: Record<string, number> = {}
+          let totalDurationMinutes = 0
+          let durationCount = 0
+          let totalBars = 0
+          let barsCount = 0
 
           for (const r of filledRecords) {
             const minRr = r.minRr !== null && r.minRr !== undefined ? Number(r.minRr) : null
@@ -1197,22 +1249,46 @@ export const registerResearchHandlers = () => {
               realSlPointsCount++
             }
 
+            if (r.holdingDurationMinutes !== null && r.holdingDurationMinutes !== undefined && !isNaN(r.holdingDurationMinutes)) {
+              totalDurationMinutes += Number(r.holdingDurationMinutes)
+              durationCount++
+            }
+            if (r.holdingBars !== null && r.holdingBars !== undefined && !isNaN(r.holdingBars)) {
+              totalBars += Number(r.holdingBars)
+              barsCount++
+            }
+
             if (minRr !== null && !isNaN(minRr)) {
               minRrSum += minRr
               if (minRr > 0) {
                 winCount++
                 winMinRrSum += minRr
+                if (realSl !== null && !isNaN(realSl) && realSl > 0) {
+                  winningRealSls.push(realSl)
+                }
               } else if (minRr === -1) {
                 lossCount++
+                if (r.invalidationReason) {
+                  invalidationBreakdown[r.invalidationReason] = (invalidationBreakdown[r.invalidationReason] || 0) + 1
+                }
               } else if (minRr === 0) {
                 beCount++
               } else if (minRr < 0) {
                 lossCount++
+                if (r.invalidationReason) {
+                  invalidationBreakdown[r.invalidationReason] = (invalidationBreakdown[r.invalidationReason] || 0) + 1
+                }
               }
             } else if (r.outcome === 'loss') {
               lossCount++
+              if (r.invalidationReason) {
+                invalidationBreakdown[r.invalidationReason] = (invalidationBreakdown[r.invalidationReason] || 0) + 1
+              }
             } else if (r.outcome === 'win') {
               winCount++
+              if (realSl !== null && !isNaN(realSl) && realSl > 0) {
+                winningRealSls.push(realSl)
+              }
             } else if (r.outcome === 'be') {
               beCount++
             }
@@ -1230,6 +1306,29 @@ export const registerResearchHandlers = () => {
           const avgRealSlPoints = realSlPointsCount > 0 ? realSlPointsSum / realSlPointsCount : 0
           const avgWinMinRr = winCount > 0 ? winMinRrSum / winCount : 0
 
+          // Optimal SL calculation (90th percentile of winning trades MAE + 10% safety buffer)
+          let optimalSlPoints: number | undefined
+          let optimalSlEvBoost: number | undefined
+          if (winningRealSls.length >= 2) {
+            winningRealSls.sort((a, b) => a - b)
+            const pIndex = Math.min(
+              winningRealSls.length - 1,
+              Math.floor(winningRealSls.length * 0.9)
+            )
+            const rawP = winningRealSls[pIndex]
+            optimalSlPoints = Math.round(rawP * 1.1)
+            if (avgSlPoints > 0 && optimalSlPoints < avgSlPoints) {
+              const rrMultiplier = avgSlPoints / optimalSlPoints
+              optimalSlEvBoost = Number(
+                (
+                  (winRate / 100) * (avgWinMinRr * rrMultiplier) -
+                  (lossRate / 100) -
+                  ((winRate / 100) * avgWinMinRr - (lossRate / 100))
+                ).toFixed(2)
+              )
+            }
+          }
+
           // EV = (WinRate% * AvgWinRR) - (LossRate% * 1)
           const expectedValue = (winRate / 100) * avgWinMinRr - (lossRate / 100) * 1
 
@@ -1237,6 +1336,9 @@ export const registerResearchHandlers = () => {
             customColumnId: colId,
             columnName: colData.columnName,
             totalSamples,
+            formedCount,
+            noZoneCount,
+            formationRate: Number(formationRate.toFixed(1)),
             filledCount,
             missedCount,
             fillRate: Number(fillRate.toFixed(1)),
@@ -1250,6 +1352,13 @@ export const registerResearchHandlers = () => {
             avgMaxRr: Number(avgMaxRr.toFixed(2)),
             avgSlPoints: Number(avgSlPoints.toFixed(1)),
             avgRealSlPoints: Number(avgRealSlPoints.toFixed(1)),
+            optimalSlPoints,
+            optimalSlEvBoost,
+            avgHoldingDurationMinutes:
+              durationCount > 0 ? Math.round(totalDurationMinutes / durationCount) : undefined,
+            avgHoldingBars: barsCount > 0 ? Math.round(totalBars / barsCount) : undefined,
+            invalidationBreakdown:
+              Object.keys(invalidationBreakdown).length > 0 ? invalidationBreakdown : undefined,
             expectedValue: Number(expectedValue.toFixed(2))
           })
         }

@@ -517,7 +517,12 @@
                 <tbody class="divide-y divide-gray-100 font-medium text-gray-800">
                   <tr v-for="z in selectedEntry.zones" :key="z.id" class="hover:bg-gray-50/50">
                     <td class="py-3 px-4 font-bold text-gray-900">
-                      {{ z.customColumnName || `Custom Column #${z.customColumnId}` }}
+                      <div>{{ z.zoneInstanceName || z.customColumnName || `Custom Column #${z.customColumnId}` }}</div>
+                      <div v-if="z.holdingDurationMinutes || z.holdingBars" class="text-[10px] text-gray-400 font-normal mt-0.5">
+                        <span v-if="z.holdingDurationMinutes">{{ z.holdingDurationMinutes }} นาที</span>
+                        <span v-if="z.holdingDurationMinutes && z.holdingBars"> · </span>
+                        <span v-if="z.holdingBars">{{ z.holdingBars }} แท่ง</span>
+                      </div>
                     </td>
                     <td class="py-3 px-3">
                       <span
@@ -1068,6 +1073,9 @@ const getQualityClass = (quality?: string) => {
 }
 
 const getZoneOutcomeClass = (zone: any) => {
+  if (zone.isNoZone || zone.outcome === 'no_zone') {
+    return 'bg-gray-100 text-gray-500 border border-gray-200'
+  }
   if (zone.isMissed || zone.outcome === 'missed') {
     return 'bg-amber-100 text-amber-800 border border-amber-200'
   }
@@ -1084,9 +1092,12 @@ const getZoneOutcomeClass = (zone: any) => {
 }
 
 const formatZoneOutcomeText = (zone: any) => {
+  if (zone.isNoZone || zone.outcome === 'no_zone') return 'ไม่เกิดโซน'
   if (zone.isMissed || zone.outcome === 'missed') return 'ตกรถ'
   if (zone.minRr !== null && zone.minRr > 0) return `+${zone.minRr}R`
-  if (zone.minRr === -1 || zone.outcome === 'loss') return '-1R'
+  if (zone.minRr === -1 || zone.outcome === 'loss') {
+    return zone.invalidationReason ? `-1R (${zone.invalidationReason})` : '-1R'
+  }
   if (zone.minRr === 0 || zone.outcome === 'be') return '0R (BE)'
   return '-'
 }

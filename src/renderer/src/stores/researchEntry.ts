@@ -11,9 +11,15 @@ import type {
 } from '../../../shared/types'
 
 export interface ZoneFormField {
+  id?: number
   customColumnId: number
   customColumnName: string
+  zoneInstanceName?: string | null
   bias: 'Bullish' | 'Bearish' | ''
+  entryDatetime?: string | null
+  exitDatetime?: string | null
+  holdingDurationMinutes?: number | null
+  holdingBars?: number | null
   minRr: number | null
   maxRr: number | null
   slPoints: number | null
@@ -21,7 +27,9 @@ export interface ZoneFormField {
   minSlPoints?: number | null
   maxSlPoints?: number | null
   isMissed: boolean
-  outcome: 'win' | 'loss' | 'be' | 'missed' | ''
+  isNoZone: boolean
+  invalidationReason?: string | null
+  outcome: 'win' | 'loss' | 'be' | 'missed' | 'no_zone' | ''
   notes?: string
 }
 
@@ -122,7 +130,12 @@ export const useResearchEntryStore = defineStore('researchEntry', () => {
         zones.value = zoneColumns.value.map((col) => ({
           customColumnId: col.id,
           customColumnName: col.name,
+          zoneInstanceName: null,
           bias: 'Bullish',
+          entryDatetime: entryDatetime.value || null,
+          exitDatetime: null,
+          holdingDurationMinutes: null,
+          holdingBars: null,
           minRr: null,
           maxRr: null,
           slPoints: null,
@@ -130,6 +143,8 @@ export const useResearchEntryStore = defineStore('researchEntry', () => {
           minSlPoints: null,
           maxSlPoints: null,
           isMissed: false,
+          isNoZone: false,
+          invalidationReason: null,
           outcome: '',
           notes: ''
         }))
@@ -194,16 +209,92 @@ export const useResearchEntryStore = defineStore('researchEntry', () => {
   const onMinSlPointsChange = onSlPointsChange
   const onMaxSlPointsChange = onRealSlPointsChange
 
+  // Duplicate zone (allows multiple instances of the same zone type, e.g. Breaker Block #2)
+  const duplicateZone = (index: number) => {
+    const source = zones.value[index]
+    if (!source) return
+    const countSameType = zones.value.filter((z) => z.customColumnId === source.customColumnId).length
+    const newZone: ZoneFormField = {
+      ...source,
+      id: undefined,
+      zoneInstanceName: `${source.customColumnName} #${countSameType + 1}`,
+      entryDatetime: source.entryDatetime || entryDatetime.value || null,
+      exitDatetime: null,
+      holdingDurationMinutes: null,
+      holdingBars: null,
+      minRr: null,
+      maxRr: null,
+      realSlPoints: null,
+      isMissed: false,
+      isNoZone: false,
+      invalidationReason: null,
+      outcome: '',
+      notes: ''
+    }
+    zones.value.splice(index + 1, 0, newZone)
+  }
+
+  // Remove duplicated zone
+  const removeDuplicatedZone = (index: number) => {
+    const target = zones.value[index]
+    if (!target) return
+    const countSameType = zones.value.filter((z) => z.customColumnId === target.customColumnId).length
+    if (countSameType <= 1) return // Do not remove original primary zone
+    zones.value.splice(index, 1)
+  }
+
+  // Toggle "No Zone" (ไม่เกิดโซน)
+  const toggleZoneNoZone = (index: number) => {
+    const z = zones.value[index]
+    if (!z) return
+    z.isNoZone = !z.isNoZone
+    if (z.isNoZone) {
+      z.isMissed = false
+      z.minRr = null
+      z.maxRr = null
+      z.realSlPoints = null
+      z.invalidationReason = null
+      z.outcome = 'no_zone'
+    } else {
+      z.outcome = ''
+    }
+  }
+
   // Quick action: Loss = -1 (Rule 4.7)
-  const setZoneLoss = (index: number) => {
+  const setZoneLoss = (index: number, reason?: string) => {
     const z = zones.value[index]
     if (!z) return
     z.isMissed = false
+    z.isNoZone = false
     z.minRr = -1
     z.maxRr = -1
     z.realSlPoints = null // Clear real SL on loss (leave blank)
     z.maxSlPoints = null
     z.outcome = 'loss'
+    if (reason !== undefined) {
+      z.invalidationReason = reason
+    }
+  }
+
+  const setZoneInvalidationReason = (index: number, reason: string) => {
+    const z = zones.value[index]
+    if (!z) return
+    z.invalidationReason = z.invalidationReason === reason ? null : reason
+  }
+
+  // Auto calculate holding duration from zone entry and exit times
+  const onZoneTimeChange = (index: number) => {
+    const z = zones.value[index]
+    if (!z) return
+    if (z.entryDatetime && z.exitDatetime) {
+      try {
+        const start = new Date(z.entryDatetime).getTime()
+        const end = new Date(z.exitDatetime).getTime()
+        if (!isNaN(start) && !isNaN(end) && end >= start) {
+          z.holdingDurationMinutes = Math.round((end - start) / (1000 * 60))
+        }
+      } catch {}
+    }
   }
 
   // Quick action: Break-Even = 0
@@ -211,6 +302,7 @@ export const useResearchEntryStore = defineStore('researchEntry', () => {
     const z = zones.value[index]
     if (!z) return
     z.isMissed = false
+    z.isNoZone = false
     z.minRr = 0
     if (z.maxRr === null || z.maxRr < 0) {
       z.maxRr = 1
@@ -224,10 +316,12 @@ export const useResearchEntryStore = defineStore('researchEntry', () => {
     if (!z) return
     z.isMissed = !z.isMissed
     if (z.isMissed) {
+      z.isNoZone = false
       z.minRr = null
       z.maxRr = null
       z.realSlPoints = null
       z.maxSlPoints = null
+      z.invalidationReason = null
       z.outcome = 'missed'
     } else {
       z.outcome = ''
@@ -305,36 +399,40 @@ export const useResearchEntryStore = defineStore('researchEntry', () => {
         activeLinkedColumns.value = setupRes.data.customColumns || []
       }
 
-      // Map existing zones for zone columns only
-      const existingZoneMap = new Map<number, any>()
-      if (entry.zones) {
-        for (const z of entry.zones) {
-          existingZoneMap.set(z.customColumnId, z)
-        }
-      }
-
-      zones.value = zoneColumns.value.map((col) => {
-        const found = existingZoneMap.get(col.id)
-        if (found) {
-          return {
-            customColumnId: col.id,
-            customColumnName: col.name,
-            bias: (found.bias as any) || 'Bullish',
-            minRr: found.minRr,
-            maxRr: found.maxRr,
-            slPoints: found.slPoints ?? found.minSlPoints,
-            realSlPoints: found.realSlPoints,
-            minSlPoints: found.slPoints ?? found.minSlPoints,
-            maxSlPoints: found.realSlPoints ?? found.maxSlPoints,
-            isMissed: Boolean(found.isMissed),
-            outcome: (found.outcome as any) || '',
-            notes: found.notes || ''
-          }
-        }
-        return {
+      // Load zones: map all saved instances directly so duplicated zones are restored
+      if (entry.zones && entry.zones.length > 0) {
+        zones.value = entry.zones.map((z: any) => ({
+          id: z.id,
+          customColumnId: z.customColumnId,
+          customColumnName: z.customColumnName || `Zone #${z.customColumnId}`,
+          zoneInstanceName: z.zoneInstanceName || null,
+          bias: (z.bias as any) || 'Bullish',
+          entryDatetime: z.entryDatetime || entry.entryDatetime || null,
+          exitDatetime: z.exitDatetime || entry.exitDatetime || null,
+          holdingDurationMinutes: z.holdingDurationMinutes ?? null,
+          holdingBars: z.holdingBars ?? null,
+          minRr: z.minRr,
+          maxRr: z.maxRr,
+          slPoints: z.slPoints ?? z.minSlPoints,
+          realSlPoints: z.realSlPoints,
+          minSlPoints: z.slPoints ?? z.minSlPoints,
+          maxSlPoints: z.realSlPoints ?? z.maxSlPoints,
+          isMissed: Boolean(z.isMissed),
+          isNoZone: Boolean(z.isNoZone),
+          invalidationReason: z.invalidationReason || null,
+          outcome: (z.outcome as any) || '',
+          notes: z.notes || ''
+        }))
+      } else {
+        zones.value = zoneColumns.value.map((col) => ({
           customColumnId: col.id,
           customColumnName: col.name,
+          zoneInstanceName: null,
           bias: 'Bullish',
+          entryDatetime: entry.entryDatetime || null,
+          exitDatetime: null,
+          holdingDurationMinutes: null,
+          holdingBars: null,
           minRr: null,
           maxRr: null,
           slPoints: null,
@@ -342,10 +440,12 @@ export const useResearchEntryStore = defineStore('researchEntry', () => {
           minSlPoints: null,
           maxSlPoints: null,
           isMissed: false,
+          isNoZone: false,
+          invalidationReason: null,
           outcome: '',
           notes: ''
-        }
-      })
+        }))
+      }
 
       // Load customData for field columns
       const loadedCustomData = (entry.customData as Record<string | number, any>) || {}
@@ -393,7 +493,12 @@ export const useResearchEntryStore = defineStore('researchEntry', () => {
       zones.value = zoneColumns.value.map((col) => ({
         customColumnId: col.id,
         customColumnName: col.name,
+        zoneInstanceName: null,
         bias: 'Bullish',
+        entryDatetime: now,
+        exitDatetime: null,
+        holdingDurationMinutes: null,
+        holdingBars: null,
         minRr: null,
         maxRr: null,
         slPoints: null,
@@ -401,6 +506,8 @@ export const useResearchEntryStore = defineStore('researchEntry', () => {
         minSlPoints: null,
         maxSlPoints: null,
         isMissed: false,
+        isNoZone: false,
+        invalidationReason: null,
         outcome: '',
         notes: ''
       }))
@@ -447,15 +554,24 @@ export const useResearchEntryStore = defineStore('researchEntry', () => {
         customData: customData.value,
         zones: zones.value.map((z) => ({
           customColumnId: z.customColumnId,
+          zoneInstanceName: z.zoneInstanceName || null,
           bias: z.bias,
-          minRr: z.isMissed ? null : z.minRr,
-          maxRr: z.isMissed ? null : z.maxRr,
+          entryDatetime: z.entryDatetime || null,
+          exitDatetime: z.exitDatetime || null,
+          holdingDurationMinutes: z.holdingDurationMinutes ?? null,
+          holdingBars: z.holdingBars ?? null,
+          minRr: z.isMissed || z.isNoZone ? null : z.minRr,
+          maxRr: z.isMissed || z.isNoZone ? null : z.maxRr,
           slPoints: z.slPoints,
-          realSlPoints: z.isMissed ? null : z.realSlPoints,
+          realSlPoints: z.isMissed || z.isNoZone ? null : z.realSlPoints,
           minSlPoints: z.slPoints ?? z.minSlPoints,
           maxSlPoints: z.realSlPoints ?? z.maxSlPoints,
-          isMissed: z.isMissed,
-          outcome: z.isMissed
+          isMissed: Boolean(z.isMissed),
+          isNoZone: Boolean(z.isNoZone),
+          invalidationReason: z.invalidationReason || null,
+          outcome: z.isNoZone
+            ? 'no_zone'
+            : z.isMissed
             ? 'missed'
             : z.minRr === -1 || z.maxRr === -1
             ? 'loss'
@@ -531,6 +647,11 @@ export const useResearchEntryStore = defineStore('researchEntry', () => {
     onRealSlPointsChange,
     onMinSlPointsChange,
     onMaxSlPointsChange,
+    duplicateZone,
+    removeDuplicatedZone,
+    toggleZoneNoZone,
+    setZoneInvalidationReason,
+    onZoneTimeChange,
     setZoneLoss,
     setZoneBe,
     setZoneMissed,

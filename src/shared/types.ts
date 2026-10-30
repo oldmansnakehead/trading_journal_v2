@@ -91,8 +91,15 @@ export interface ResearchSetupCustomColumn {
 }
 
 export interface ResearchEntryZoneInput {
+  id?: number
   customColumnId: number
+  customColumnName?: string
+  zoneInstanceName?: string | null
   bias?: 'Bullish' | 'Bearish' | string
+  entryDatetime?: string | null
+  exitDatetime?: string | null
+  holdingDurationMinutes?: number | null
+  holdingBars?: number | null
   minRr?: number | null
   maxRr?: number | null
   slPoints?: number | null
@@ -100,7 +107,9 @@ export interface ResearchEntryZoneInput {
   minSlPoints?: number | null
   maxSlPoints?: number | null
   isMissed?: boolean
-  outcome?: 'win' | 'loss' | 'be' | 'missed'
+  isNoZone?: boolean
+  invalidationReason?: string | null
+  outcome?: 'win' | 'loss' | 'be' | 'missed' | 'no_zone' | string
   notes?: string | null
 }
 
@@ -151,10 +160,13 @@ export interface ZoneComparisonMetric {
   customColumnId: number
   columnName: string
   totalSamples: number
+  formedCount: number
+  noZoneCount: number
+  formationRate: number // % (formedCount / totalSamples * 100)
   filledCount: number
   missedCount: number
-  fillRate: number // % (0-100)
-  missRate: number // % (0-100)
+  fillRate: number // % (filledCount / formedCount * 100)
+  missRate: number // % (missedCount / formedCount * 100)
   winCount: number
   lossCount: number
   beCount: number
@@ -164,6 +176,11 @@ export interface ZoneComparisonMetric {
   avgMaxRr: number
   avgSlPoints: number
   avgRealSlPoints?: number
+  optimalSlPoints?: number // 90th percentile sweet spot
+  optimalSlEvBoost?: number // Estimated EV boost if optimal SL used
+  avgHoldingDurationMinutes?: number
+  avgHoldingBars?: number
+  invalidationBreakdown?: Record<string, number>
   expectedValue: number // EV score
 }
 

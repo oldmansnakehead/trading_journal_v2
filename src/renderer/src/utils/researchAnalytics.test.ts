@@ -200,6 +200,9 @@ describe('researchAnalytics utils', () => {
       const fvg = summary.zoneMetrics.find((m) => m.customColumnId === 1)!
       expect(fvg.columnName).toBe('Zone FVG')
       expect(fvg.totalSamples).toBe(2)
+      expect(fvg.formedCount).toBe(2)
+      expect(fvg.noZoneCount).toBe(0)
+      expect(fvg.formationRate).toBe(100)
       expect(fvg.filledCount).toBe(2)
       expect(fvg.missedCount).toBe(0)
       expect(fvg.fillRate).toBe(100)

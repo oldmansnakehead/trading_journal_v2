@@ -106,6 +106,13 @@ export function computeResearchAnalytics(entries: ResearchEntry[]): ResearchAnal
       columnName: string
       records: Array<{
         isMissed?: boolean
+        isNoZone?: boolean
+        invalidationReason?: string | null
+        holdingDurationMinutes?: number | null
+        holdingBars?: number | null
+        entryDatetime?: string | null
+        exitDatetime?: string | null
+        zoneInstanceName?: string | null
         minRr?: number | null
         maxRr?: number | null
         slPoints?: number | null
@@ -135,12 +142,17 @@ export function computeResearchAnalytics(entries: ResearchEntry[]): ResearchAnal
 
   for (const [colId, data] of columnMap.entries()) {
     const totalSamples = data.records.length
-    const missedCount = data.records.filter((r) => r.isMissed).length
-    const filledRecords = data.records.filter((r) => !r.isMissed)
+    const noZoneCount = data.records.filter((r) => r.isNoZone || r.outcome === 'no_zone').length
+    const formedRecords = data.records.filter((r) => !r.isNoZone && r.outcome !== 'no_zone')
+    const formedCount = formedRecords.length
+    const formationRate = totalSamples > 0 ? (formedCount / totalSamples) * 100 : 0
+
+    const missedCount = formedRecords.filter((r) => r.isMissed || r.outcome === 'missed').length
+    const filledRecords = formedRecords.filter((r) => !r.isMissed && r.outcome !== 'missed')
     const filledCount = filledRecords.length
 
-    const fillRate = totalSamples > 0 ? (filledCount / totalSamples) * 100 : 0
-    const missRate = totalSamples > 0 ? (missedCount / totalSamples) * 100 : 0
+    const fillRate = formedCount > 0 ? (filledCount / formedCount) * 100 : 0
+    const missRate = formedCount > 0 ? (missedCount / formedCount) * 100 : 0
 
     let winCount = 0
     let lossCount = 0
@@ -152,6 +164,12 @@ export function computeResearchAnalytics(entries: ResearchEntry[]): ResearchAnal
     let slPointsCount = 0
     let realSlPointsSum = 0
     let realSlPointsCount = 0
+    const winningRealSls: number[] = []
+    const invalidationBreakdown: Record<string, number> = {}
+    let totalDurationMinutes = 0
+    let durationCount = 0
+    let totalBars = 0
+    let barsCount = 0
 
     for (const r of filledRecords) {
       const minRr = r.minRr !== null && r.minRr !== undefined ? Number(r.minRr) : null
@@ -176,22 +194,53 @@ export function computeResearchAnalytics(entries: ResearchEntry[]): ResearchAnal
         realSlPointsCount++
       }
 
+      if (
+        r.holdingDurationMinutes !== null &&
+        r.holdingDurationMinutes !== undefined &&
+        !isNaN(r.holdingDurationMinutes)
+      ) {
+        totalDurationMinutes += Number(r.holdingDurationMinutes)
+        durationCount++
+      }
+      if (r.holdingBars !== null && r.holdingBars !== undefined && !isNaN(r.holdingBars)) {
+        totalBars += Number(r.holdingBars)
+        barsCount++
+      }
+
       if (minRr !== null && !isNaN(minRr)) {
         minRrSum += minRr
         if (minRr > 0) {
           winCount++
           winMinRrSum += minRr
+          if (realSl !== null && !isNaN(realSl) && realSl > 0) {
+            winningRealSls.push(realSl)
+          }
         } else if (minRr === -1) {
           lossCount++
+          if (r.invalidationReason) {
+            invalidationBreakdown[r.invalidationReason] =
+              (invalidationBreakdown[r.invalidationReason] || 0) + 1
+          }
         } else if (minRr === 0) {
           beCount++
         } else if (minRr < 0) {
           lossCount++
+          if (r.invalidationReason) {
+            invalidationBreakdown[r.invalidationReason] =
+              (invalidationBreakdown[r.invalidationReason] || 0) + 1
+          }
         }
       } else if (r.outcome === 'loss') {
         lossCount++
+        if (r.invalidationReason) {
+          invalidationBreakdown[r.invalidationReason] =
+            (invalidationBreakdown[r.invalidationReason] || 0) + 1
+        }
       } else if (r.outcome === 'win') {
         winCount++
+        if (realSl !== null && !isNaN(realSl) && realSl > 0) {
+          winningRealSls.push(realSl)
+        }
       } else if (r.outcome === 'be') {
         beCount++
       }
@@ -209,6 +258,29 @@ export function computeResearchAnalytics(entries: ResearchEntry[]): ResearchAnal
     const avgRealSlPoints = realSlPointsCount > 0 ? realSlPointsSum / realSlPointsCount : 0
     const avgWinMinRr = winCount > 0 ? winMinRrSum / winCount : 0
 
+    // Optimal SL calculation (90th percentile of winning trades MAE + 10% buffer)
+    let optimalSlPoints: number | undefined
+    let optimalSlEvBoost: number | undefined
+    if (winningRealSls.length >= 2) {
+      winningRealSls.sort((a, b) => a - b)
+      const pIndex = Math.min(
+        winningRealSls.length - 1,
+        Math.floor(winningRealSls.length * 0.9)
+      )
+      const rawP = winningRealSls[pIndex]
+      optimalSlPoints = Math.round(rawP * 1.1)
+      if (avgSlPoints > 0 && optimalSlPoints < avgSlPoints) {
+        const rrMultiplier = avgSlPoints / optimalSlPoints
+        optimalSlEvBoost = Number(
+          (
+            (winRate / 100) * (avgWinMinRr * rrMultiplier) -
+            (lossRate / 100) -
+            ((winRate / 100) * avgWinMinRr - (lossRate / 100))
+          ).toFixed(2)
+        )
+      }
+    }
+
     // EV = (Win Rate % / 100 * Avg Win RR) - (Loss Rate % / 100 * 1)
     const expectedValue = (winRate / 100) * avgWinMinRr - (lossRate / 100) * 1
 
@@ -216,6 +288,9 @@ export function computeResearchAnalytics(entries: ResearchEntry[]): ResearchAnal
       customColumnId: colId,
       columnName: data.columnName,
       totalSamples,
+      formedCount,
+      noZoneCount,
+      formationRate: Number(formationRate.toFixed(1)),
       filledCount,
       missedCount,
       fillRate: Number(fillRate.toFixed(1)),
@@ -229,6 +304,13 @@ export function computeResearchAnalytics(entries: ResearchEntry[]): ResearchAnal
       avgMaxRr: Number(avgMaxRr.toFixed(2)),
       avgSlPoints: Number(avgSlPoints.toFixed(1)),
       avgRealSlPoints: Number(avgRealSlPoints.toFixed(1)),
+      optimalSlPoints,
+      optimalSlEvBoost,
+      avgHoldingDurationMinutes:
+        durationCount > 0 ? Math.round(totalDurationMinutes / durationCount) : undefined,
+      avgHoldingBars: barsCount > 0 ? Math.round(totalBars / barsCount) : undefined,
+      invalidationBreakdown:
+        Object.keys(invalidationBreakdown).length > 0 ? invalidationBreakdown : undefined,
       expectedValue: Number(expectedValue.toFixed(2))
     })
   }

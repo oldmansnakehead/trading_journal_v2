@@ -330,11 +330,13 @@
         <div v-else class="flex flex-col gap-4">
           <div
             v-for="(zone, idx) in entryStore.zones"
-            :key="zone.customColumnId"
+            :key="`${zone.customColumnId}-${idx}`"
             :data-testid="`zone-card-${idx}`"
             class="p-5 rounded-2xl border transition-all"
             :class="
-              zone.isMissed
+              zone.isNoZone
+                ? 'bg-gray-100/60 border-gray-300 opacity-80'
+                : zone.isMissed
                 ? 'bg-amber-50/30 border-amber-200'
                 : zone.minRr === -1
                 ? 'bg-red-50/30 border-red-200'
@@ -345,17 +347,46 @@
           >
             <!-- Card Header -->
             <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-3 pb-3 border-b border-gray-200/60 mb-4">
-              <div class="flex items-center gap-3">
+              <div class="flex flex-wrap items-center gap-2 sm:gap-3">
                 <span class="w-6 h-6 rounded-lg bg-gray-900 text-white text-xs font-bold flex items-center justify-center">
                   {{ idx + 1 }}
                 </span>
                 <span class="font-bold text-gray-900 text-base">
-                  {{ zone.customColumnName }}
+                  {{ zone.zoneInstanceName || zone.customColumnName }}
                 </span>
+
+                <!-- Duplicate Zone Button -->
+                <button
+                  type="button"
+                  @click="entryStore.duplicateZone(idx)"
+                  class="text-[11px] font-bold text-primary hover:text-primary-focus bg-primary/10 hover:bg-primary/20 px-2 py-0.5 rounded-lg transition-colors flex items-center gap-1 cursor-pointer"
+                  title="ทำซ้ำโซนนี้ (เช่น มี Breaker Block มากกว่า 1 จุด)"
+                >
+                  <i class="ph ph-copy"></i>
+                  + Duplicate
+                </button>
+
+                <!-- Delete Duplicated Zone Button -->
+                <button
+                  v-if="entryStore.zones.filter((z) => z.customColumnId === zone.customColumnId).length > 1"
+                  type="button"
+                  @click="entryStore.removeDuplicatedZone(idx)"
+                  class="text-[11px] font-bold text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 px-2 py-0.5 rounded-lg transition-colors flex items-center gap-1 cursor-pointer"
+                  title="ลบโซนย่อยนี้"
+                >
+                  <i class="ph ph-trash"></i>
+                  ลบ
+                </button>
 
                 <!-- Status Badge -->
                 <span
-                  v-if="zone.isMissed"
+                  v-if="zone.isNoZone"
+                  class="px-2.5 py-0.5 rounded-md text-xs font-bold bg-gray-200 text-gray-700"
+                >
+                  ไม่เกิดโซน (No Zone)
+                </span>
+                <span
+                  v-else-if="zone.isMissed"
                   class="px-2.5 py-0.5 rounded-md text-xs font-bold bg-amber-100 text-amber-800"
                 >
                   ตกรถ (Missed)
@@ -380,19 +411,21 @@
                 </span>
               </div>
 
-              <!-- Top Row: Bias & Missed Checkbox -->
-              <div class="flex items-center gap-4">
+              <!-- Top Row: Bias & State Checkboxes (Missed / No Zone) -->
+              <div class="flex flex-wrap items-center gap-3">
                 <!-- Bias Toggle: Bullish / Bearish with Auto-sync on idx 0 -->
                 <div class="inline-flex rounded-xl bg-white p-1 border border-gray-200 shadow-2xs">
                   <button
                     type="button"
                     @click="entryStore.onBiasChange(idx, 'Bullish')"
                     :data-testid="`zone-bullish-btn-${idx}`"
+                    :disabled="zone.isNoZone"
                     :class="[
                       'px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1',
                       zone.bias === 'Bullish'
                         ? 'bg-emerald-600 text-white shadow-2xs'
-                        : 'text-gray-500 hover:text-gray-900'
+                        : 'text-gray-500 hover:text-gray-900',
+                      zone.isNoZone ? 'opacity-50 cursor-not-allowed' : ''
                     ]"
                   >
                     <i class="ph ph-trend-up"></i>
@@ -402,11 +435,13 @@
                     type="button"
                     @click="entryStore.onBiasChange(idx, 'Bearish')"
                     :data-testid="`zone-bearish-btn-${idx}`"
+                    :disabled="zone.isNoZone"
                     :class="[
                       'px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1',
                       zone.bias === 'Bearish'
                         ? 'bg-red-600 text-white shadow-2xs'
-                        : 'text-gray-500 hover:text-gray-900'
+                        : 'text-gray-500 hover:text-gray-900',
+                      zone.isNoZone ? 'opacity-50 cursor-not-allowed' : ''
                     ]"
                   >
                     <i class="ph ph-trend-down"></i>
@@ -415,21 +450,96 @@
                 </div>
 
                 <!-- Checkbox ตกรถ -->
-                <label class="inline-flex items-center gap-2 cursor-pointer select-none">
+                <label class="inline-flex items-center gap-1.5 cursor-pointer select-none">
                   <input
                     type="checkbox"
                     :checked="zone.isMissed"
+                    :disabled="zone.isNoZone"
                     @change="entryStore.setZoneMissed(idx)"
                     :data-testid="`zone-missed-check-${idx}`"
-                    class="w-4 h-4 rounded text-amber-600 focus:ring-amber-500/20 cursor-pointer"
+                    class="w-4 h-4 rounded text-amber-600 focus:ring-amber-500/20 cursor-pointer disabled:opacity-40"
                   />
-                  <span class="text-xs font-bold text-gray-700">ตกรถ (Missed)</span>
+                  <span class="text-xs font-bold text-gray-700">ตกรถ</span>
+                </label>
+
+                <!-- Checkbox ไม่เกิดโซน (No Zone) -->
+                <label class="inline-flex items-center gap-1.5 cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    :checked="zone.isNoZone"
+                    @change="entryStore.toggleZoneNoZone(idx)"
+                    :data-testid="`zone-no-zone-check-${idx}`"
+                    class="w-4 h-4 rounded text-gray-600 focus:ring-gray-500/20 cursor-pointer"
+                  />
+                  <span class="text-xs font-bold text-gray-700">ไม่เกิดโซน</span>
                 </label>
               </div>
             </div>
 
-            <!-- Inputs Grid: Min RR, Max RR, Min SL, Max SL -->
-            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3.5 mb-3.5">
+            <!-- Zone Specific Timing & Holding Duration Row -->
+            <div
+              v-if="!zone.isNoZone"
+              class="grid grid-cols-1 sm:grid-cols-3 gap-3 p-3 bg-white/70 rounded-xl mb-3.5 border border-gray-200/70"
+            >
+              <div>
+                <label class="block text-[11px] font-semibold text-gray-600 mb-1">
+                  <i class="ph ph-clock mr-1 text-primary"></i>เวลาเข้าโซน (Entry Time)
+                </label>
+                <input
+                  type="datetime-local"
+                  v-model="zone.entryDatetime"
+                  @change="entryStore.onZoneTimeChange(idx)"
+                  class="w-full px-2.5 py-1.5 bg-white border border-gray-200 rounded-lg text-xs font-medium text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary/20"
+                />
+              </div>
+              <div>
+                <label class="block text-[11px] font-semibold text-gray-600 mb-1">
+                  <i class="ph ph-clock mr-1 text-purple-600"></i>เวลาออกโซน (Exit Time)
+                </label>
+                <input
+                  type="datetime-local"
+                  v-model="zone.exitDatetime"
+                  @change="entryStore.onZoneTimeChange(idx)"
+                  class="w-full px-2.5 py-1.5 bg-white border border-gray-200 rounded-lg text-xs font-medium text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary/20"
+                />
+              </div>
+              <div class="flex items-center gap-2">
+                <div class="flex-1">
+                  <label class="block text-[11px] font-semibold text-gray-600 mb-1">
+                    ระยะเวลาถือ (นาที)
+                  </label>
+                  <input
+                    type="number"
+                    v-model.number="zone.holdingDurationMinutes"
+                    placeholder="Auto จากเวลา"
+                    class="w-full px-2.5 py-1.5 bg-white border border-gray-200 rounded-lg text-xs font-bold text-gray-800 focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  />
+                </div>
+                <div class="w-24">
+                  <label class="block text-[11px] font-semibold text-gray-600 mb-1">
+                    จำนวนแท่ง
+                  </label>
+                  <input
+                    type="number"
+                    v-model.number="zone.holdingBars"
+                    placeholder="เช่น 5"
+                    class="w-full px-2.5 py-1.5 bg-white border border-gray-200 rounded-lg text-xs font-bold text-gray-800 focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <!-- Notice if No Zone -->
+            <div
+              v-if="zone.isNoZone"
+              class="py-4 text-center bg-gray-100 rounded-xl mb-3.5 text-xs font-bold text-gray-500 border border-gray-200"
+            >
+              <i class="ph ph-prohibit mr-1 text-sm"></i>
+              รอบนี้ไม่เกิดโซนนี้ให้เล่น (No Zone Formed) - ข้อมูลนี้จะถูกเก็บสถิติ Formation Rate
+            </div>
+
+            <!-- Inputs Grid: Min RR, Max RR, SL Points, Real SL -->
+            <div v-if="!zone.isNoZone" class="grid grid-cols-2 sm:grid-cols-4 gap-3.5 mb-3.5">
               <!-- Min RR -->
               <div>
                 <label class="block text-xs font-semibold text-gray-600 mb-1">
@@ -439,7 +549,7 @@
                   type="number"
                   step="0.01"
                   v-model.number="zone.minRr"
-                  :disabled="zone.isMissed"
+                  :disabled="zone.isMissed || zone.isNoZone"
                   :data-testid="`zone-min-rr-${idx}`"
                   placeholder="เช่น 1.5 หรือ -1"
                   class="w-full px-3 py-2 bg-white border border-gray-200 rounded-xl text-sm font-bold text-gray-900 placeholder:font-normal placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/20 disabled:bg-gray-100 disabled:text-gray-400"
@@ -455,7 +565,7 @@
                   type="number"
                   step="0.01"
                   v-model.number="zone.maxRr"
-                  :disabled="zone.isMissed"
+                  :disabled="zone.isMissed || zone.isNoZone"
                   :data-testid="`zone-max-rr-${idx}`"
                   placeholder="เช่น 3.0"
                   class="w-full px-3 py-2 bg-white border border-gray-200 rounded-xl text-sm font-bold text-gray-900 placeholder:font-normal placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/20 disabled:bg-gray-100 disabled:text-gray-400"
@@ -492,15 +602,59 @@
                   :value="zone.realSlPoints"
                   @input="entryStore.onRealSlPointsChange(idx, ($event.target as HTMLInputElement).value ? Number(($event.target as HTMLInputElement).value) : null)"
                   :data-testid="`zone-real-sl-${idx}`"
-                  :disabled="zone.isMissed"
+                  :disabled="zone.isMissed || zone.isNoZone"
                   placeholder="เว้นว่างได้ถ้าหลุด SL"
                   class="w-full px-3 py-2 bg-white border border-gray-200 rounded-xl text-sm font-bold text-gray-900 placeholder:font-normal placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/20 disabled:bg-gray-100 disabled:text-gray-400"
                 />
               </div>
             </div>
 
+            <!-- Invalidation Reason Selector (When Loss -1R) -->
+            <div
+              v-if="!zone.isNoZone && (zone.minRr === -1 || zone.outcome === 'loss')"
+              class="mb-3.5 p-3 bg-red-50/70 border border-red-200 rounded-xl"
+            >
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-xs font-bold text-red-900 flex items-center gap-1.5">
+                  <i class="ph ph-warning-circle text-red-600"></i>
+                  สาเหตุที่โซนแหก (Invalidation Reason) - คลิกเลือกด่วน:
+                </span>
+                <span v-if="zone.invalidationReason" class="text-[11px] font-bold text-red-700">
+                  ระบุ: {{ zone.invalidationReason }}
+                </span>
+              </div>
+              <div class="flex flex-wrap items-center gap-1.5 mb-2">
+                <button
+                  v-for="reason in [
+                    'สวน HTF',
+                    'ข่าวชน',
+                    'สภาพคล่องล่อ (Inducement)',
+                    'ตลาดวาย (Late Session)',
+                    'โดนกวาดไส้ (Spread/Hunt)'
+                  ]"
+                  :key="reason"
+                  type="button"
+                  @click="entryStore.setZoneInvalidationReason(idx, reason)"
+                  :class="[
+                    'px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer',
+                    zone.invalidationReason === reason
+                      ? 'bg-red-600 text-white shadow-2xs'
+                      : 'bg-white text-gray-700 border border-red-200 hover:bg-red-100/60'
+                  ]"
+                >
+                  {{ reason }}
+                </button>
+              </div>
+              <input
+                type="text"
+                v-model="zone.invalidationReason"
+                placeholder="หรือพิมพ์ระบุเหตุผลเอง เช่น SMT Divergence หลุด..."
+                class="w-full px-3 py-1.5 bg-white border border-red-200 rounded-lg text-xs text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-red-400/20"
+              />
+            </div>
+
             <!-- Quick Action Buttons Row -->
-            <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-gray-200/50">
+            <div v-if="!zone.isNoZone" class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-gray-200/50">
               <div class="flex flex-wrap items-center gap-1.5">
                 <span class="text-xs font-bold text-gray-400 mr-1">ปุ่มลัด:</span>
                 <!-- Loss -1 -->
