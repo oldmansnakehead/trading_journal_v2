@@ -36,6 +36,7 @@ const overviewNav: NavItem[] = [
   { name: 'Monte Carlo', to: '/monte-carlo', icon: 'ph ph-dice-five' },
   { name: 'Edge Analysis', to: '/edge', icon: 'ph ph-crosshair' },
   { name: 'Calendar', to: '/calendar', icon: 'ph ph-calendar' },
+  { name: 'คำนวณ Lot', to: '/calculator', icon: 'ph ph-calculator' },
   { name: 'New Trade', to: '/journal', icon: 'ph ph-plus-circle' }
 ]
 

@@ -34,6 +34,11 @@ const router = createRouter({
       component: () => import('../components/ui/CalendarView.vue')
     },
     {
+      path: '/calculator',
+      name: 'lot-calculator',
+      component: () => import('../components/views/LotCalculatorView.vue')
+    },
+    {
       path: '/settings',
       name: 'settings',
       component: () => import('../components/views/SetupSettings.vue')
