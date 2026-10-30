@@ -76,11 +76,11 @@ export function calculateTradeDuration(
 
   // Format subtext showing exit time
   const isSameDay = entryDate.toDateString() === exitDate.toDateString()
-  const exitTimeStr = exitDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+  const exitTimeStr = exitDate.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false })
   const exitDateStr = exitDate.toLocaleDateString([], { month: 'numeric', day: 'numeric' })
   const subText = isSameDay ? `Exit ${exitTimeStr}` : `Exit ${exitDateStr} ${exitTimeStr}`
 
-  const title = `Entry: ${entryDate.toLocaleString()}\nExit: ${exitDate.toLocaleString()}\nDuration: ${formatted}`
+  const title = `Entry: ${entryDate.toLocaleString('en-GB', { hour12: false })}\nExit: ${exitDate.toLocaleString('en-GB', { hour12: false })}\nDuration: ${formatted}`
 
   return {
     text: formatted,

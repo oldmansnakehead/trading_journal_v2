@@ -153,6 +153,8 @@
             </label>
             <input
               type="datetime-local"
+              lang="en-GB"
+              step="60"
               v-model="entryStore.entryDatetime"
               @input="entryStore.onEntryDatetimeChange"
               @change="entryStore.onEntryDatetimeChange"
@@ -174,6 +176,8 @@
             </div>
             <input
               type="datetime-local"
+              lang="en-GB"
+              step="60"
               v-model="entryStore.exitDatetime"
               :min="entryStore.entryDatetime"
               @input="entryStore.onExitDatetimeChange"
@@ -498,6 +502,8 @@
                 </div>
                 <input
                   type="datetime-local"
+                  lang="en-GB"
+                  step="60"
                   v-model="zone.entryDatetime"
                   @input="entryStore.onZoneEntryDatetimeChange(idx)"
                   @change="entryStore.onZoneEntryDatetimeChange(idx)"
@@ -520,6 +526,8 @@
                 </div>
                 <input
                   type="datetime-local"
+                  lang="en-GB"
+                  step="60"
                   v-model="zone.exitDatetime"
                   @input="entryStore.onZoneExitDatetimeChange(idx)"
                   @change="entryStore.onZoneExitDatetimeChange(idx)"

@@ -641,6 +641,8 @@
               <input
                 v-model="sessionForm.startTime"
                 type="time"
+                lang="en-GB"
+                step="60"
                 class="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-primary/20"
               />
             </div>
@@ -649,6 +651,8 @@
               <input
                 v-model="sessionForm.endTime"
                 type="time"
+                lang="en-GB"
+                step="60"
                 class="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-primary/20"
               />
             </div>

@@ -53,6 +53,9 @@ function createWindow(): BrowserWindow {
   return win
 }
 
+// Ensure Chromium uses 24-hour time format (en-GB locale) for HTML date/time inputs
+app.commandLine.appendSwitch('lang', 'en-GB')
+
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.

@@ -6,7 +6,7 @@
         <div>
           <h2 class="text-xl font-bold text-gray-900">Trade Details</h2>
           <p class="text-sm text-gray-500">
-            {{ trade ? new Date(trade.entryDatetime).toLocaleString() : 'Loading...' }}
+            {{ trade ? formatDatetime24(trade.entryDatetime) : 'Loading...' }}
           </p>
         </div>
         <button @click="close" class="text-gray-400 hover:text-gray-600 transition-colors">
@@ -69,11 +69,11 @@
               </div>
               <div>
                 <p class="text-xs text-gray-500">Entry Time</p>
-                <p class="font-semibold text-xs">{{ trade.entryDatetime ? new Date(trade.entryDatetime).toLocaleString() : '-' }}</p>
+                <p class="font-semibold text-xs">{{ formatDatetime24(trade.entryDatetime) }}</p>
               </div>
               <div>
                 <p class="text-xs text-gray-500">Exit Time</p>
-                <p class="font-semibold text-xs">{{ trade.exitDatetime ? new Date(trade.exitDatetime).toLocaleString() : '-' }}</p>
+                <p class="font-semibold text-xs">{{ formatDatetime24(trade.exitDatetime) }}</p>
               </div>
               <div class="col-span-2 bg-gray-50 p-2.5 rounded-lg border border-gray-100 flex items-center justify-between">
                 <span class="text-xs text-gray-500 font-medium">Holding Duration</span>
@@ -214,6 +214,18 @@ const loading = ref(false)
 const showScreenshotsModal = ref(false)
 const customFieldNames = ref<Record<string, string>>({})
 const customFieldTypes = ref<Record<string, string>>({})
+
+const formatDatetime24 = (isoString?: string) => {
+  if (!isoString) return '-'
+  return new Date(isoString).toLocaleString('en-GB', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false
+  })
+}
 
 const close = () => {
   emit('update:show', false)

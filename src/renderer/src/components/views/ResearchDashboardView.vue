@@ -1042,18 +1042,23 @@ const formatDate = (isoString?: string) => {
 const formatTime = (isoString?: string) => {
   if (!isoString) return '-'
   const d = new Date(isoString)
-  return d.toLocaleTimeString('th-TH', {
+  return d.toLocaleTimeString('en-GB', {
     hour: '2-digit',
-    minute: '2-digit'
+    minute: '2-digit',
+    hour12: false
   })
 }
 
 const formatFullDatetime = (isoString?: string) => {
   if (!isoString) return '-'
   const d = new Date(isoString)
-  return d.toLocaleString('th-TH', {
-    dateStyle: 'medium',
-    timeStyle: 'short'
+  return d.toLocaleString('en-GB', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false
   })
 }
 
