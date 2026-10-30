@@ -151,15 +151,10 @@
             <label class="block text-xs font-bold text-gray-700 mb-1.5 uppercase">
               เวลาเข้า (Entry Datetime) *
             </label>
-            <input
-              type="datetime-local"
-              lang="en-GB"
-              step="60"
+            <BaseDateTime24Input
               v-model="entryStore.entryDatetime"
-              @input="entryStore.onEntryDatetimeChange"
               @change="entryStore.onEntryDatetimeChange"
-              data-testid="research-entry-datetime"
-              class="w-full px-3.5 py-2 bg-white border border-gray-200 rounded-xl text-sm font-semibold text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary/20"
+              dataTestid="research-entry-datetime"
             />
           </div>
 
@@ -174,16 +169,11 @@
                 Auto-copied
               </span>
             </div>
-            <input
-              type="datetime-local"
-              lang="en-GB"
-              step="60"
+            <BaseDateTime24Input
               v-model="entryStore.exitDatetime"
               :min="entryStore.entryDatetime"
-              @input="entryStore.onExitDatetimeChange"
               @change="entryStore.onExitDatetimeChange"
-              data-testid="research-exit-datetime"
-              class="w-full px-3.5 py-2 bg-emerald-50/50 border border-emerald-300 rounded-xl text-sm font-semibold text-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+              dataTestid="research-exit-datetime"
             />
           </div>
 
@@ -500,30 +490,22 @@
                     Sync ทุกโซน
                   </span>
                 </div>
-                <input
-                  type="datetime-local"
-                  lang="en-GB"
-                  step="60"
+                <BaseDateTime24Input
                   v-model="zone.entryDatetime"
-                  @input="entryStore.onZoneEntryDatetimeChange(idx)"
+                  compact
                   @change="entryStore.onZoneEntryDatetimeChange(idx)"
-                  :data-testid="`zone-entry-time-${idx}`"
-                  class="w-full px-2.5 py-1.5 bg-white border border-gray-200 rounded-lg text-xs font-medium text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  :dataTestid="`zone-entry-time-${idx}`"
                 />
               </div>
               <div>
                 <label class="block text-[11px] font-semibold text-gray-600 mb-1">
                   <i class="ph ph-clock mr-1 text-purple-600"></i>เวลาออกโซน (Exit Time)
                 </label>
-                <input
-                  type="datetime-local"
-                  lang="en-GB"
-                  step="60"
+                <BaseDateTime24Input
                   v-model="zone.exitDatetime"
-                  @input="entryStore.onZoneExitDatetimeChange(idx)"
+                  compact
                   @change="entryStore.onZoneExitDatetimeChange(idx)"
-                  :data-testid="`zone-exit-time-${idx}`"
-                  class="w-full px-2.5 py-1.5 bg-white border border-gray-200 rounded-lg text-xs font-medium text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  :dataTestid="`zone-exit-time-${idx}`"
                 />
               </div>
               <div class="flex items-center gap-2">
@@ -981,6 +963,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useResearchEntryStore } from '../../stores/researchEntry'
 import BaseSelect from '../ui/BaseSelect.vue'
 import BaseMultiSelect from '../ui/BaseMultiSelect.vue'
+import BaseDateTime24Input from '../ui/BaseDateTime24Input.vue'
 
 const route = useRoute()
 const router = useRouter()
